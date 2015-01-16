@@ -12,9 +12,14 @@
  *   
  */
 
+// TODO package this
+
 public class Regex {
 
     public static enum Type {
+        // TODO Consider adding support for character equivalence classes.
+        // Idea: change the m_symbol field in this class to a predicate that returns true iff it is fed
+        // a character in the class.
         EMPTY_SET,
         EMPTY_STRING,
         CHARACTER,
@@ -102,12 +107,10 @@ public class Regex {
     }
     
     public static Regex derivative(Regex r, String s) {
-        // TODO Rewriting this as a loop may be necessary to handle long strings.
-        return s.isEmpty()
-               ? r
-               : derivative(derivative(r,
-                                       s.substring(0, s.length() - 1)),
-                            s.charAt(s.length() - 1));
+        for (int i = 0; i < s.length(); i++) {
+            r = derivative(r, s.charAt(i));
+        }
+        return r;
     }
     
     public static Regex simplify(Regex r) {
@@ -128,6 +131,7 @@ public class Regex {
                         r = new Regex(Regex.Type.EMPTY_STRING);
                         continue loop;
                     }
+                    // TODO Maybe add the simplification (complement(empty set))^* ~ complement(empty set)
                     break;
                 case CONCATENATION:
                     if (r.getInner1().getType() == Regex.Type.EMPTY_SET
@@ -255,10 +259,10 @@ public class Regex {
         
         switch(m_type) {
             case EMPTY_SET:
-                toReturn = "<EMPTY_SET>";
+                //toReturn = "<EMPTY_SET>";
                 break;
             case EMPTY_STRING:
-                toReturn = "<EMPTY_STRING>";
+                //toReturn = "<EMPTY_STRING>";
                 break;
             case CHARACTER:
                 toReturn = "" + m_symbol;
@@ -283,6 +287,33 @@ public class Regex {
         return toReturn;
     }
     
+    public boolean isEmptySet() {
+        boolean toReturn = false;
+        
+        switch(m_type) {
+            case EMPTY_SET:
+                toReturn = true;
+                break;
+            case KLEENE_CLOSURE:
+                toReturn = m_inner1.isEmptySet();
+                break;
+            case CONCATENATION:
+            case CONJUNCTION:
+                toReturn = m_inner1.isEmptySet() || m_inner2.isEmptySet();
+                break;
+            case DISJUNCTION:
+                toReturn = m_inner1.isEmptySet() && m_inner2.isEmptySet();
+                break;
+            case COMPLEMENT:
+                toReturn = !m_inner1.isEmptySet();
+                break;
+        }
+        
+        return toReturn;
+    }
+    
+    // TODO Write convenience functions to create deeply-nested disjunctions of string regexes.
+    
     @Override
     public boolean equals(Object o) {
         if (o == this) {
@@ -299,22 +330,10 @@ public class Regex {
              && this.getInner2() == r.getInner2());
     }
     
-    /*public static void main(String[] args) {
-        Regex r1 = new Regex(Regex.Type.KLEENE_CLOSURE,
-                            new Regex(Regex.Type.DISJUNCTION,
-                                      new Regex("foo"),
-                                      new Regex("frak")));
+    public static void main(String[] args) {
+        Regex r1 = new Regex(Regex.Type.COMPLEMENT,
+                             new Regex(Regex.Type.EMPTY_SET));
                                       
-        System.out.println(derivative(r1, 'f'));
-        System.out.println(derivative(r1, "f"));
-        
-        Regex r2 = new Regex(Regex.Type.CONCATENATION,
-                             new Regex(Regex.Type.KLEENE_CLOSURE,
-                                       new Regex('b')),
-                             new Regex('a'));
-        System.out.println(derivative(r2, "ba"));
-        System.out.println(simplify(derivative(r2, "baa")));
-        System.out.println(isNullable(derivative(r2, "baa")));
-        System.out.println(isNullable(simplify(derivative(r2, "baa"))));
-    }*/
+        System.out.println(isNullable(derivative(r1, "herpderp")));
+    }
 }
