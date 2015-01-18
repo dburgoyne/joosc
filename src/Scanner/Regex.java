@@ -23,7 +23,8 @@ public class Regex {
         EMPTY_SET,
         EMPTY_STRING,
         CHARACTER,
-        STRING,  // Pseudo-type, expanded to concatenation of characters on intantiation.
+        CHARACTER_CLASS,
+        STRING,  // Pseudo-type, expanded to concatenation of characters on instantiation.
         CONCATENATION,
         KLEENE_CLOSURE,
         DISJUNCTION,
@@ -36,6 +37,7 @@ public class Regex {
         
         switch(r.getType()) {
             case CHARACTER:
+            case CHARACTER_CLASS:
             case EMPTY_SET:
                 break;
             case EMPTY_STRING:
@@ -64,6 +66,11 @@ public class Regex {
         switch(r.getType()) {
             case CHARACTER:
                 toReturn = (a == r.getSymbol())
+                           ? new Regex(Regex.Type.EMPTY_STRING)
+                           : new Regex(Regex.Type.EMPTY_SET);
+                break;
+            case CHARACTER_CLASS:
+                toReturn = (r.getCharacterClass().matches(a))
                            ? new Regex(Regex.Type.EMPTY_STRING)
                            : new Regex(Regex.Type.EMPTY_SET);
                 break;
@@ -105,8 +112,8 @@ public class Regex {
         
         return toReturn;
     }
-    
-    public static Regex derivative(Regex r, String s) {
+
+	public static Regex derivative(Regex r, String s) {
         for (int i = 0; i < s.length(); i++) {
             r = derivative(r, s.charAt(i));
         }
@@ -208,6 +215,7 @@ public class Regex {
     // These fields should be immutable once the Regex object is instantiated.
     private Regex.Type m_type;
     private char m_symbol;
+    private CharacterClass m_characterClass;
     private Regex m_inner1, m_inner2;
     
     public Regex.Type getType() {
@@ -216,6 +224,9 @@ public class Regex {
     public char getSymbol() {
         return m_symbol;
     }
+    public CharacterClass getCharacterClass() {
+		return m_characterClass;
+	}
     public Regex getInner1() {
         return m_inner1;
     }
@@ -244,6 +255,10 @@ public class Regex {
         this(Regex.Type.CHARACTER, null, null);
         m_symbol = symbol;
     }
+    public Regex(CharacterClass characterClass) {
+        this(Regex.Type.CHARACTER_CLASS, null, null);
+        m_characterClass = characterClass;
+    }
     public Regex(Regex.Type type, Regex inner1) {
         this(type, inner1, null);
     }
@@ -266,6 +281,9 @@ public class Regex {
                 break;
             case CHARACTER:
                 toReturn = "" + m_symbol;
+                break;
+            case CHARACTER_CLASS:
+                //toReturn = "<CHARACTER_CLASS>";
                 break;
             case KLEENE_CLOSURE:
                 toReturn = "(" + m_inner1.toString() + ")*";
@@ -312,7 +330,26 @@ public class Regex {
         return toReturn;
     }
     
-    // TODO Write convenience functions to create deeply-nested disjunctions of string regexes.
+    // Convenience method for building large disjunctions/concatenations.
+    public static Regex Build(Regex.Type type, Regex... args) {
+        if (args.length == 0) {
+            return new Regex(Regex.Type.EMPTY_SET);
+        }
+        Regex toReturn = args[args.length - 1];
+        for (int i = args.length - 2; i >= 0; i--) {
+            toReturn = new Regex(type,
+                                 args[i],
+                                 toReturn);
+        }
+        return toReturn;
+    }
+    
+    // Convenience method for handling optional RHS symbols in JLS lexical productions.
+    public static Regex Optional(Regex r) {
+        return new Regex(Regex.Type.DISJUNCTION,
+        		new Regex(Regex.Type.EMPTY_STRING),
+        		r);
+    }
     
     @Override
     public boolean equals(Object o) {
@@ -324,6 +361,7 @@ public class Regex {
         }
         Regex r = (Regex)o;
         // TODO This needs to account for commutativity and associativity of conjunction, discunction.
+        // TODO This may need to account for character class equivalence.
         return (this.getType() == r.getType()
              && this.getSymbol() == r.getSymbol()
              && this.getInner1() == r.getInner1()
