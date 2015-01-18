@@ -13,7 +13,7 @@
  *   
  */
  
-// TODO package this
+package Scanner;
 
 import java.util.function.Predicate;
 

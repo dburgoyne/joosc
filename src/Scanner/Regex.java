@@ -12,7 +12,7 @@
  *   
  */
 
-// TODO package this
+package Scanner;
 
 public class Regex {
 

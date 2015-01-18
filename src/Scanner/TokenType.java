@@ -12,7 +12,7 @@
  *   
  */
 
-// TODO package this
+package Scanner;
 
 public enum TokenType {
     // TODO Not sure if we need to match Unicode escapes.
