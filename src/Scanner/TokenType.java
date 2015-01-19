@@ -61,7 +61,22 @@ public enum TokenType {
                             NotStarNotSlash.getRegex()))), new Regex(
                     Regex.Type.CONCATENATION, new Regex('*'), new Regex(
                             Regex.Type.KLEENE_CLOSURE, new Regex('*'))),
-            new Regex("/"))), Comment(Regex.Build(Regex.Type.DISJUNCTION,
+            new Regex("/"))),
+            
+    JavadocComment(Regex.Build(
+			Regex.Type.CONCATENATION,
+			new Regex("/**"),
+			NotStar.getRegex(),
+			new Regex(Regex.Type.KLEENE_CLOSURE, Regex.Build(
+					Regex.Type.DISJUNCTION, new Regex('/'), new Regex(
+							Regex.Type.CONCATENATION, new Regex(
+									Regex.Type.KLEENE_CLOSURE, new Regex('*')),
+							NotStarNotSlash.getRegex()))), new Regex(
+					Regex.Type.CONCATENATION, new Regex('*'), new Regex(
+							Regex.Type.KLEENE_CLOSURE, new Regex('*'))),
+			new Regex("/"))),
+            
+    Comment(Regex.Build(Regex.Type.DISJUNCTION,
             TraditionalComment.getRegex(), EndOfLineComment.getRegex())),
 
     IdentifierChars(Regex.Build(Regex.Type.CONCATENATION, new Regex(
