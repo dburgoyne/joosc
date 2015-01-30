@@ -1,0 +1,225 @@
+// This is a human-readable version of a .cfg file for Joos 1W.
+// To generate the actual .cfg file, discard all blank lines and
+// lines beginning with "//".
+
+// Number of terminals
+TODO
+
+// Terminals
+TODO
+
+// Number of non-terminals
+TODO
+
+// Non-terminals
+TODO
+
+// Start symbol
+TODO
+
+//Number of productions
+TODO
+
+// Productions
+// 4.1
+Type PrimitiveType
+Type ReferenceType
+
+// 4.2
+PrimitiveType NumericType
+PrimitiveType boolean
+
+NumericType IntegralType
+NumericType FloatingPointType
+
+IntegralType byte
+IntegralType short
+IntegralType int
+IntegralType long
+IntegralType char
+
+FloatingPointType float
+FloatingPointType double
+
+// 4.3
+ReferenceType ClassOrInterfaceType
+ReferenceType ArrayType
+
+ClassOrInterfaceType ClassType
+ClassOrInterfaceType InferfaceType
+
+ClassType TypeName
+
+InterfaceType TypeName
+
+ArrayType Type [ ]
+
+// 6.5
+PackageName Identifier
+PackaneName PackageName . Identifier
+
+TypeName Identifier
+TypeName PackageOrTypeName . Identifier
+
+ExpressionName Identifier
+ExpressionName AmbiguousName . Identifier
+
+MethodName Identifier
+MrthodName AmbiguousName . Identifier
+
+PackageOrTypeName Identifier
+PackageOrTypeName PackageOrTypeName . Identifier
+
+AmbiguousName Identifier
+AmbiguousName AmbiguousName . Identifier
+
+// 7.3
+CompilationUnit PackageDeclarations ImportDeclarations TypeDeclarations
+
+ImportDeclarations
+ImportDeclarations ImportDeclarations ImportDeclaration
+
+TypeDeclarations
+TypeDeclarations TypeDeclarations TypeDeclaration
+
+// 7.4
+PackageDeclaration package PackageName ;
+
+// 7.5
+ImportDeclaration SingleTypeImportDeclaration
+ImportDeclaration TypeImportOnDemandDeclaration
+
+SingleTypeImportDeclaration import TypeName ;
+
+TypeImportOnDemandDeclaration import PackageOrTypeName . * ;
+
+// 7.6
+TypeDeclaration ClassDeclaration
+TypeDeclaration InterfaceDeclaration
+TypeDeclaration ;
+
+// 8.1
+ClassDeclaration ClassModifiers class Identifier ClassBody
+ClassDeclaration ClassModifiers class Identifier Super ClassBody
+ClassDeclaration ClassModifiers class Identifier Interfaces ClassBody
+ClassDeclaration ClassModifiers class Identifier Super Interfaces ClassBody
+
+ClassModifiers
+ClassModifiers ClassModifiers ClassModifier
+
+ClassModifier public
+ClassModifier protected
+ClassModifier private
+ClassModifier abstract
+ClassModifier static
+ClassModifier final
+ClassModifier strictfp
+
+Super extends ClassType
+
+ClassType TypeName
+
+Interfaces implements InterfaceTypeList
+
+InterfaceTypeList InterfaceType
+InterfaceTypeList InterfaceTypeList , InterfaceType
+    
+InterfaceType TypeName
+    
+ClassBody:
+    { ClassBodyDeclarations }
+
+ClassBodyDeclarations
+ClassBodyDeclarations ClassBodyDeclarations ClassBodyDeclaration
+
+ClassBodyDeclaration ClassMemberDeclaration
+ClassBodyDeclaration InstanceInitializer
+ClassBodyDeclaration StaticInitializer
+ClassBodyDeclaration ConstructorDeclaration
+
+ClassMemberDeclaration FieldDeclaration
+ClassMemberDeclaration MethodDeclaration
+ClassMemberDeclaration ClassDeclaration                        
+ClassMemberDeclaration InterfaceDeclaration
+ClassMemberDeclaration ;
+
+// 8.3
+
+FieldDeclaration FieldModifiers Type VariableDeclarators ;
+
+VariableDeclarators VariableDeclarator
+VariableDeclarators VariableDeclarators , VariableDeclarator
+
+VariableDeclarator VariableDeclaratorId
+VariableDeclarator VariableDeclaratorId = VariableInitializer
+
+VariableDeclaratorId Identifier
+VariableDeclaratorId VariableDeclaratorId [ ]
+
+VariableInitializer Expression
+VariableInitializer ArrayInitializer
+    
+FieldModifiers
+FieldModifiers FieldModifiers FieldModifier
+
+FieldModifier public
+FieldModifier protected
+FieldModifier private
+FieldModifier static
+FieldModifier final
+FieldModifier transient
+FieldModifier volatile
+
+// 8.4
+MethodDeclaration MethodHeader MethodBody
+
+MethodHeader MethodModifiers ResultType MethodDeclarator
+MethodHeader MethodModifiers ResultType MethodDeclarator Throws
+
+ResultType Type
+ResultType void
+
+MethodDeclarator Identifer ( )
+MethodDeclarator Identifer ( FormalParameterList )
+
+// TODO This is obsolescent and probably should not be in Joos
+MethodDeclarator MethodDeclarator [ ]
+
+FormalParameterList FormalParameter
+FormalParameterList FormalParameterList , FormalParameter
+
+FormalParameter Type VariableDeclaratorId
+FormalParameter final Type VariableDeclaratorId
+
+VariableDeclaratorId Identifier
+VariableDeclaratorId VariableDeclaratorId [ ]
+
+MethodModifiers
+MethodModifiers MethodModifiers MethodModifier
+
+MethodModifier public
+MethodModifier protected
+MethodModifier private
+MethodModifier abstract
+MethodModifier static
+MethodModifier final
+MethodModifier synchronized
+MethodModifier native
+MethodModifier strictfp
+
+Throws throws ClassTypeList
+
+ClassTypeList ClassType
+ClassTypeList ClassTypeList , ClassType
+
+MethodBody Block 
+MethodBody ;
+
+// 8.6
+InstanceInitializer Block
+
+// 8.7
+StaticInitializer static Block
+
+// 8.8
+
