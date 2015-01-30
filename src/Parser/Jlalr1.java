@@ -1,7 +1,6 @@
 package Parser;
 
 import java.util.*;
-import java.io.*;
 
 /*
    Copyright 2006,2008,2009 Ondrej Lhotak. All rights reserved.
@@ -154,7 +153,7 @@ class Pair<A,B> {
     }
     public boolean equals( Object other ) {
         if( other instanceof Pair ) {
-            Pair p = (Pair) other;
+            Pair<?,?> p = (Pair<?,?>) other;
             return o1.equals( p.o1 ) && o2.equals( p.o2 );
         } else return false;
     }
@@ -190,7 +189,6 @@ class Generator {
     /** Compute the closure of a set of items using the algorithm of
      * Appel, p. 60 */
     public Set<Item> closure(Set<Item> i) {
-        boolean change;
         while(true) {
             Set<Item> oldI = new HashSet<Item>(i);
             for( Item item : oldI ) {
@@ -240,7 +238,6 @@ class Generator {
     /** Compute the closure of a set of LR(1) items using the algorithm of
      * Appel, p. 63 */
     public Set<Item> lr1_closure(Set<Item> i) {
-        boolean change;
         Set<Item> ret = closureCache.get(i);
         if(ret == null) {
             Set<Item> origI = new HashSet<Item>(i);
@@ -551,7 +548,7 @@ class Generator {
         }
     }
     /** Print the elements of a list separated by spaces. */
-    public static String listToString(List l) {
+    public static String listToString(List<?> l) {
         StringBuffer ret = new StringBuffer();
         boolean first = true;
         for( Object o : l ) {
@@ -742,6 +739,7 @@ class Grammar {
     }
 }
 class Error extends RuntimeException {
+	static final long serialVersionUID = 0;
     public Error(String s) { super(s); }
 }
 class Util {
@@ -795,19 +793,23 @@ class Util {
     }
     public static Production readProduction(String line, Grammar grammar) {
         Scanner s = new Scanner(line);
-        if(!s.hasNext()) throw new Error("Empty line instead of a production");
-        String lhs = s.next().intern();
-        if(!grammar.isNonTerminal(lhs)) throw new Error("Symbol "+lhs+" was not declared as a non-terminal, but appears on the LHS of production "+line);
-        List<String> rhs = new ArrayList<String>();
-        while(s.hasNext()) {
-            String sym = s.next().intern();
-            if(!grammar.isNonTerminal(sym) && !grammar.isTerminal(sym)) {
-                throw new Error("Symbol "+sym+" is not a part of the grammar");
-            }
-            rhs.add(sym);
+        try {
+	        if(!s.hasNext()) throw new Error("Empty line instead of a production");
+	        String lhs = s.next().intern();
+	        if(!grammar.isNonTerminal(lhs)) throw new Error("Symbol "+lhs+" was not declared as a non-terminal, but appears on the LHS of production "+line);
+	        List<String> rhs = new ArrayList<String>();
+	        while(s.hasNext()) {
+	            String sym = s.next().intern();
+	            if(!grammar.isNonTerminal(sym) && !grammar.isTerminal(sym)) {
+	                throw new Error("Symbol "+sym+" is not a part of the grammar");
+	            }
+	            rhs.add(sym);
+	        }
+	        return Production.v(lhs, 
+	                (String[]) rhs.toArray(new String[rhs.size()]));
+        } finally {
+        	s.close();
         }
-        return Production.v(lhs, 
-                (String[]) rhs.toArray(new String[rhs.size()]));
     }
     static String checkIndent(String line, int indent) {
         for(int i = 0; i < indent; i++) {

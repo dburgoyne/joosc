@@ -54,6 +54,7 @@ public class Regex {
             case COMPLEMENT:
                 toReturn = !isNullable(r.getInner1());
                 break;
+            default: break;
         }
         
         return toReturn;
@@ -108,6 +109,7 @@ public class Regex {
                 toReturn = new Regex(Regex.Type.COMPLEMENT,
                                         derivative(r.getInner1(), a));
                 break;
+            default: break;
         }
         
         return toReturn;
@@ -206,6 +208,7 @@ public class Regex {
                         continue loop;
                     }
                     break;
+                default: break;
             }
             break;
         }
@@ -300,6 +303,7 @@ public class Regex {
             case COMPLEMENT:
                 toReturn = "!(" + m_inner1.toString() + ")";
                 break;
+            default: break;
         }
         
         return toReturn;
@@ -325,6 +329,7 @@ public class Regex {
             case COMPLEMENT:
                 toReturn = !m_inner1.isEmptySet();
                 break;
+            default: break;
         }
         
         return toReturn;

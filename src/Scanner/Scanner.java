@@ -15,10 +15,6 @@
 package Scanner;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -158,12 +154,10 @@ public class Scanner {
 
 		if (args.length > 0) {
 			String filename = args[0];
-			Path path = Paths.get(filename);
 			String joosSource = "";
 			try {
 				// Read the entire source file into a string.
-				joosSource = new String(Files.readAllBytes(path),
-						StandardCharsets.UTF_8);
+				joosSource = StringUtils.readFile(filename);
 			} catch (IOException e) {
 				System.err.println("Could not open the file " + filename);
 				e.printStackTrace();

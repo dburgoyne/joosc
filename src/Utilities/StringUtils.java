@@ -14,6 +14,10 @@
 
 package Utilities;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+
 public class StringUtils {
 
     // Counts the number of newlines in a string.
@@ -39,5 +43,15 @@ public class StringUtils {
             }
         }
         return tabs;
+    }
+    
+    public static String readFile(String path) throws FileNotFoundException {
+    	Scanner s = null;
+    	try {
+    		s = new Scanner(new File(path), "UTF8");
+    		return s.useDelimiter("\\Z").next();
+    	} finally {
+    		if (s != null) s.close();
+    	}
     }
 }

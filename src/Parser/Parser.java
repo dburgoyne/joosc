@@ -1,12 +1,11 @@
 package Parser;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+
+import Utilities.StringUtils;
 
 //Argument 1: .lr1 file input
 //Argument 2: test file input
@@ -20,7 +19,7 @@ public class Parser{
 		String lrSource;
 		String[] lrLines;
 		try{
-			lrSource=new String(Files.readAllBytes(Paths.get(args[0])),StandardCharsets.UTF_8);
+			lrSource=StringUtils.readFile(args[0]);
 		}catch (IOException e){
 			e.printStackTrace();
 			return;
@@ -52,7 +51,7 @@ public class Parser{
 		String inputSource;
 		String[] tokens;
 		try{
-			inputSource=new String(Files.readAllBytes(Paths.get(args[1])),StandardCharsets.UTF_8);
+			inputSource=StringUtils.readFile(args[1]);
 		}catch (IOException e){
 			e.printStackTrace();
 			return;

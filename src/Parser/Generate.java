@@ -27,7 +27,7 @@ public class Generate{
         Generator jlalr=new Generator(grammar);
         try{
             jlalr.computeFirstFollowNullable();
-            jlalr.generateLALR1Table();
+            jlalr.generateLR1Table();
             jlalr.generateOutput();
         }catch(Error e){
         	e.printStackTrace();
