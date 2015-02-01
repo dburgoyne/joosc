@@ -46,7 +46,7 @@ ReferenceType ClassOrInterfaceType
 ReferenceType ArrayType
 
 ClassOrInterfaceType ClassType
-ClassOrInterfaceType InferfaceType
+ClassOrInterfaceType InterfaceType
 
 ClassType TypeName
 
@@ -65,7 +65,7 @@ ExpressionName Identifier
 ExpressionName AmbiguousName . Identifier
 
 MethodName Identifier
-MrthodName AmbiguousName . Identifier
+MethodName AmbiguousName . Identifier
 
 PackageOrTypeName Identifier
 PackageOrTypeName PackageOrTypeName . Identifier
@@ -74,7 +74,7 @@ AmbiguousName Identifier
 AmbiguousName AmbiguousName . Identifier
 
 // 7.3
-CompilationUnit PackageDeclarations ImportDeclarations TypeDeclarations
+CompilationUnit PackageDeclaration ImportDeclarations TypeDeclarations
 
 ImportDeclarations
 ImportDeclarations ImportDeclarations ImportDeclaration
@@ -117,15 +117,11 @@ ClassModifier strictfp
 
 Super extends ClassType
 
-ClassType TypeName
-
 Interfaces implements InterfaceTypeList
 
 InterfaceTypeList InterfaceType
 InterfaceTypeList InterfaceTypeList , InterfaceType
-    
-InterfaceType TypeName
-    
+
 ClassBody { ClassBodyDeclarations }
 
 ClassBodyDeclarations
@@ -143,6 +139,7 @@ ClassMemberDeclaration InterfaceDeclaration
 ClassMemberDeclaration ;
 
 // 8.3
+// Joos disallows array initializers
 
 FieldDeclaration FieldModifiers Type VariableDeclarators ;
 
@@ -156,7 +153,6 @@ VariableDeclaratorId Identifier
 VariableDeclaratorId VariableDeclaratorId [ ]
 
 VariableInitializer Expression
-VariableInitializer ArrayInitializer
     
 FieldModifiers
 FieldModifiers FieldModifiers FieldModifier
@@ -173,7 +169,6 @@ FieldModifier volatile
 MethodDeclaration MethodHeader MethodBody
 
 MethodHeader MethodModifiers ResultType MethodDeclarator
-MethodHeader MethodModifiers ResultType MethodDeclarator Throws
 
 ResultType Type
 ResultType void
@@ -206,8 +201,6 @@ MethodModifier synchronized
 MethodModifier native
 MethodModifier strictfp
 
-Throws throws ClassTypeList
-
 ClassTypeList ClassType
 ClassTypeList ClassTypeList , ClassType
 
@@ -222,10 +215,10 @@ StaticInitializer static Block
 
 // 8.8
 ConstructorDeclaration ConstructorModifiers ConstructorDeclarator ConstructorBody
-ConstructorDeclaration ConstructorModifiers ConstructorDeclarator Throws ConstructorBody
 
-ConstructorDeclarator SimpleTypeName ( )
-ConstructorDeclarator SimpleTypeName ( FormalParameterList )
+// The Identifier in the next 2 productions must match the simple name of the class.
+ConstructorDeclarator Identifier ( )
+ConstructorDeclarator Identifier ( FormalParameterList )
 	
 ConstructorModifiers
 ConstructorModifiers ConstructorModifiers ConstructorModifier
@@ -272,7 +265,7 @@ InterfaceMemberDeclaration ;
 ConstantDeclaration ConstantModifiers Type VariableDeclarators
 
 ConstantModifiers
-ConstantModifiers ConstantModifiers ConstantModifer 
+ConstantModifiers ConstantModifiers ConstantModifier 
 
 ConstantModifier public
 ConstantModifier static
@@ -309,7 +302,6 @@ LocalVariableDeclaration final Type VariableDeclarators
 // 14.5
 // The provided language standard fixes the dangling-if problem.
 Statement StatementWithoutTrailingSubstatement
-Statement LabeledStatement
 Statement IfThenStatement
 Statement IfThenElseStatement
 Statement WhileStatement
@@ -321,7 +313,6 @@ StatementWithoutTrailingSubstatement ExpressionStatement
 StatementWithoutTrailingSubstatement ReturnStatement
 
 StatementNoShortIf StatementWithoutTrailingSubstatement
-StatementNoShortIf LabeledStatementNoShortIf
 StatementNoShortIf IfThenElseStatementNoShortIf
 StatementNoShortIf WhileStatementNoShortIf
 StatementNoShortIf ForStatementNoShortIf
@@ -408,7 +399,8 @@ PrimaryNoNewArray Literal
 PrimaryNoNewArray Type . class 
 PrimaryNoNewArray void . class 
 PrimaryNoNewArray this
-PrimaryNoNewArray ClassName.this
+// ClassName replaced by ClassType
+PrimaryNoNewArray ClassType . this
 PrimaryNoNewArray ( Expression )
 PrimaryNoNewArray ClassInstanceCreationExpression
 PrimaryNoNewArray FieldAccess
@@ -447,19 +439,15 @@ DimExpr [ Expression ]
 Dims [ ]
 
 // 15.11
+// Joos disallows super field access
 FieldAccess Primary . Identifier
-FieldAccess super . Identifier
-FieldAccess ClassName .super . Identifier
 
 // 15.12
+// Joos disallows super() calls
 MethodInvocation MethodName ( )
 MethodInvocation MethodName ( ArgumentList )
 MethodInvocation Primary . Identifier ( )
 MethodInvocation Primary . Identifier ( ArgumentList )
-MethodInvocation super . Identifier ( )
-MethodInvocation super . Identifier ( ArgumentList )
-MethodInvocation ClassName . super . Identifier ( )
-MethodInvocation ClassName . super . Identifier ( ArgumentList )
 	
 // 15.13
 ArrayAccess ExpressionName [ Expression ]
