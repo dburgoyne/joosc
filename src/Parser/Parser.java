@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
 
 import Utilities.StringUtils;
+import Scanner.Token;
 
 //Argument 1: .lr1 file input
 //Argument 2: test file input
@@ -49,17 +51,43 @@ public class Parser{
 		
 		// Read tokens input
 		String inputSource;
-		String[] tokens;
 		try{
 			inputSource=StringUtils.readFile(args[1]);
 		}catch (IOException e){
 			e.printStackTrace();
 			return;
 		}
-		tokens=inputSource.split(" ");
+		
+		// Scanning
+        List<Token> tokens = Scanner.Scanner.scan(args[1], inputSource);
 		
 		// Parsing
-		parseTable.parse(tokens);
+		ParseTree pt = parseTable.parse(tokens);
+		
+		// Print parse tree
+		class PrintPT implements ParseTree.Visitor {
+		    String linePrefix;
+		    public PrintPT(String lp) { linePrefix = lp; }
+            @Override public void visit(Token t) {
+                System.out.print(linePrefix);
+                System.out.println(t);
+            }
+            @Override public void visit(String rule, ParseTree... children) {
+                System.out.print(linePrefix);
+                System.out.println(rule);
+              if (children.length == 0) return;
+              
+                String modifiedPrefix = linePrefix.replace('-', ' ')
+                                                  .replace('+', ' ');
+                PrintPT butLast = new PrintPT(modifiedPrefix + " |- ");
+                PrintPT last    = new PrintPT(modifiedPrefix + " +- ");
+                for (int i = 0; i < children.length - 1; i++) {
+                    children[i].visit(butLast);
+                }
+                children[children.length - 1].visit(last);
+            }
+		}
+		pt.visit(new PrintPT(""));
 	}
 }
 
@@ -135,6 +163,7 @@ class ParseTable{
 		}
 	}
 	
+	// Prints rightmost derivation.
 	public void parse(String[] tokenList){
 		Deque<Integer> tokens=new ArrayDeque<Integer>();
 		Deque<Integer> stack=new ArrayDeque<Integer>();
@@ -166,7 +195,72 @@ class ParseTable{
 		}
 	}
 	
-	private Transition searchTransition(int state,int token){
+	// Idea: replace index-shuffling above with trees with said indices embedded.
+	private static interface IxTree extends ParseTree { int getIndex(); }
+	private static class IxTerminal extends Terminal implements IxTree {
+	    private final int number;
+        public int getIndex() { return number; }
+	    public IxTerminal(int tokenNum, Token token) { 
+	        super(token);
+	        number = tokenNum; 
+	    }
+    }   
+	private static class IxNonTerminal extends NonTerminal implements IxTree {
+        public int getIndex() { return this.ruleNum; }
+        private final int ruleNum;
+	    public IxNonTerminal(ParseTable pt, int rule, ParseTree... children) {
+            super(pt.ruleToString(rule), children);
+            ruleNum = rule;
+        }
+        @Override public void visit(Visitor v) {
+            v.visit(rule, children);
+        }
+	}
+	
+	public ParseTree parse(List<Token> tokenList){
+        Deque<IxTree> tokens = new ArrayDeque<IxTree>();
+        Deque<IxTree> stack  = new ArrayDeque<IxTree>();
+        Deque<IxTree> roots  = new ArrayDeque<IxTree>();
+        
+        for(Token tok : tokenList){
+            tokens.push(new IxTerminal(symbols.indexOf(tok.getCfgName()), tok));
+        }
+        stack.push(new IxNonTerminal(this, 0));
+        
+        while (!tokens.isEmpty()) {
+            Transition transition = searchTransition(stack.peek().getIndex(),
+                                                     tokens.peek().getIndex());
+            if(transition.m_shift){
+                stack.push(tokens.pop());
+                stack.push(new IxNonTerminal(this, transition.m_to));
+            }else{
+                ArrayList<Integer> rule=rules.get(transition.m_to);
+                tokens.push(new IxNonTerminal(this, rule.get(0)));
+                for(int i=0;i<rule.size()-1;i++){
+                    stack.pop();
+                    roots.push(stack.pop());
+                }
+                IxTree newRoot = new IxNonTerminal(this, transition.m_to,
+                                                   roots.toArray(new IxTree[0]));
+                roots.clear();
+                roots.push(newRoot);
+            }
+        }
+        
+        assert roots.size() == 1;
+        return roots.peek();
+	}
+	
+	private String ruleToString(int ruleNum) {
+	    ArrayList<Integer> rule = rules.get(ruleNum);
+        StringBuilder sb = new StringBuilder(symbols.get(rule.get(0))).append(" ->");
+        for(int i=1;i<rule.size();i++){
+            sb.append(' ').append(symbols.get(rule.get(i)));
+        }
+        return sb.toString();
+    }
+
+    private Transition searchTransition(int state,int token){
 		for(Transition transition:transitions.get(state)){
 			if(transition.m_symbol==token){
 				return transition;

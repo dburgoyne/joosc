@@ -15,7 +15,7 @@
 package Scanner;
 
 public class Token {
-    private String lexeme;
+    private String lexeme, fileName;
     private TokenType tokenType;
     private int line, column;
 
@@ -34,16 +34,36 @@ public class Token {
     public int getColumn() {
         return column;
     }
+    
+    public String getFileName() {
+        return fileName;
+    }
 
-    public Token(String lexeme, TokenType tokenType, int line, int column) {
+    public Token(String lexeme, TokenType tokenType, String fileName, int line, int column) {
         this.lexeme = lexeme;
         this.tokenType = tokenType;
+        this.fileName = fileName;
         this.line = line;
         this.column = column;
     }
 
     public String toString() {
-        return tokenType.name() + " (" + lexeme + ") line " + line + " column "
-                + column;
+        return tokenType.name() + " (" + lexeme + ") at "
+                + fileName + " line " + line + " column " + column;
     }
+    
+    /// Returns the .cfg file non-terminal symbol matching this token.
+    ///  e.g. identifiers appear as Identifier, but keywords and separators
+    ///       appear as their lexeme.
+    public String getCfgName() {
+        switch (tokenType) {
+        case Keyword:
+        case Operator:
+        case Separator:
+            return lexeme.trim();            
+        default:
+            return tokenType.name();
+        }
+    }
+    
 }

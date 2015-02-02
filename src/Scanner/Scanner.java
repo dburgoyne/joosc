@@ -84,8 +84,12 @@ public class Scanner {
 		}
 		return length;
 	}
-
+	
 	public static List<Token> scan(String joosSource) {
+	    return scan("<unspecified file>", joosSource);
+	}
+
+	public static List<Token> scan(String joosSourceFileName, String joosSource) {
 
 		List<Token> tokens = new ArrayList<Token>();
 		int line = 1, column = 1;
@@ -132,7 +136,7 @@ public class Scanner {
 					+ tokenType.name());
 			// TODO Store the lexeme and token type in a Token object, and
 			// add it to a list.
-			tokens.add(new Token(lexeme, tokenType, line, column));
+			tokens.add(new Token(lexeme, tokenType, joosSourceFileName, line, column));
 
 			// Calculate the new line and column number.
 			int numberOfNewlines = StringUtils.countNewlines(lexeme);
@@ -164,7 +168,7 @@ public class Scanner {
 				return;
 			}
 
-			List<Token> tokens = scan(joosSource);
+			List<Token> tokens = scan(filename, joosSource);
 
 			for (Token token : tokens) {
 				System.out.println(token);
