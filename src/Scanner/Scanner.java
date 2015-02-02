@@ -47,8 +47,7 @@ public class Scanner {
 
 	public final static String[] OPERATORS = { "=", ">", "<", "!", "~", "?",
 			":", "==", "<=", ">=", "!=", "&&", "||", "++", "--", "+", "-", "*",
-			"/", "&", "|", "^", "%", "<<", ">>", ">>>", "+=", "-=", "*=", "/=",
-			"&=", "|=", "^=", "%=", "<<=", ">>=", ">>>=" };
+			"/", "&", "|", "^", "%" };
 
 	public final static Regex[] OPERATOR_REGEXES;
 	static {
@@ -59,11 +58,11 @@ public class Scanner {
 	}
 
 	public final static TokenType[] tokensToScanFor = {
-			TokenType.IntegerLiteral, TokenType.FloatingPointLiteral,
-			TokenType.BooleanLiteral, TokenType.CharacterLiteral,
-			TokenType.StringLiteral, TokenType.NullLiteral,
-			TokenType.Separator, TokenType.Identifier, TokenType.Keyword,
-			TokenType.Operator, TokenType.WhiteSpace, TokenType.Comment, };
+			TokenType.IntegerLiteral, TokenType.BooleanLiteral,
+			TokenType.CharacterLiteral, TokenType.StringLiteral,
+			TokenType.NullLiteral, TokenType.Separator, TokenType.Identifier,
+			TokenType.Keyword, TokenType.Operator, TokenType.WhiteSpace,
+			TokenType.Comment, };
 
 	// Returns the length of the longest prefix of s that matches r. Examples:
 	// longestPrefix("ab*", "abbbbderp") = 5
