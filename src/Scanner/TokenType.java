@@ -15,16 +15,6 @@
 package Scanner;
 
 public enum TokenType {
-	// TODO Not sure if we need to match Unicode escapes.
-	UnicodeMarker(Regex.Build(Regex.Type.CONCATENATION, new Regex('u'),
-			new Regex(Regex.Type.KLEENE_CLOSURE, new Regex('u')))),
-
-	UnicodeEscape(Regex.Build(Regex.Type.CONCATENATION, new Regex('\\'),
-			UnicodeMarker.getRegex(), new Regex(CharacterClass.HexDigit),
-			new Regex(CharacterClass.HexDigit), new Regex(
-					CharacterClass.HexDigit),
-			new Regex(CharacterClass.HexDigit))),
-
 	LineTerminator(Regex.Build(Regex.Type.DISJUNCTION, new Regex('\r'),
 			new Regex('\n'), new Regex("\r\n"))),
 
@@ -53,7 +43,9 @@ public enum TokenType {
 	// http://www.cs.dartmouth.edu/~mckeeman/cs118/assignments/comment.html
 	// TODO This regex should be thoroughly tested.
 
-	TraditionalComment(Regex.Build(
+	TraditionalComment(
+
+	Regex.Build(Regex.Type.DISJUNCTION, new Regex("/**/"), Regex.Build(
 			Regex.Type.CONCATENATION,
 			new Regex("/*"),
 			NotStar.getRegex(),
@@ -64,20 +56,24 @@ public enum TokenType {
 							NotStarNotSlash.getRegex()))), new Regex(
 					Regex.Type.CONCATENATION, new Regex('*'), new Regex(
 							Regex.Type.KLEENE_CLOSURE, new Regex('*'))),
-			new Regex("/"))),
+			new Regex("/")))),
 
-	JavadocComment(Regex.Build(
-			Regex.Type.CONCATENATION,
-			new Regex("/**"),
-			NotStar.getRegex(),
-			new Regex(Regex.Type.KLEENE_CLOSURE, Regex.Build(
-					Regex.Type.DISJUNCTION, new Regex('/'), new Regex(
-							Regex.Type.CONCATENATION, new Regex(
-									Regex.Type.KLEENE_CLOSURE, new Regex('*')),
-							NotStarNotSlash.getRegex()))), new Regex(
-					Regex.Type.CONCATENATION, new Regex('*'), new Regex(
-							Regex.Type.KLEENE_CLOSURE, new Regex('*'))),
-			new Regex("/"))),
+	JavadocComment(Regex
+			.Build(Regex.Type.DISJUNCTION, new Regex("/**/"),
+					Regex.Build(
+							Regex.Type.CONCATENATION,
+							new Regex("/**"),
+							NotStar.getRegex(),
+							new Regex(Regex.Type.KLEENE_CLOSURE, Regex.Build(
+									Regex.Type.DISJUNCTION, new Regex('/'),
+									new Regex(Regex.Type.CONCATENATION,
+											new Regex(
+													Regex.Type.KLEENE_CLOSURE,
+													new Regex('*')),
+											NotStarNotSlash.getRegex()))),
+							new Regex(Regex.Type.CONCATENATION, new Regex('*'),
+									new Regex(Regex.Type.KLEENE_CLOSURE,
+											new Regex('*'))), new Regex("/")))),
 
 	Comment(Regex.Build(Regex.Type.DISJUNCTION, TraditionalComment.getRegex(),
 			EndOfLineComment.getRegex())),
@@ -88,7 +84,7 @@ public enum TokenType {
 	// TODO It will be necessary to identify keywords explicitly in the scanner
 	// and invalidate illegitimate matches of this regex.
 	Identifier(IdentifierChars.getRegex()),
-	// I really wish Java had a less verbose functional map.
+
 	Keyword(Regex.Build(Regex.Type.DISJUNCTION, Scanner.KEYWORD_REGEXES)),
 
 	Digits(Regex
@@ -101,39 +97,9 @@ public enum TokenType {
 					CharacterClass.NonZeroDigit), Regex.Optional(Digits
 					.getRegex())))),
 
-	HexDigits(Regex.Build(Regex.Type.CONCATENATION, new Regex(
-			CharacterClass.HexDigit), new Regex(Regex.Type.KLEENE_CLOSURE,
-			new Regex(CharacterClass.HexDigit)))),
+	DecimalIntegerLiteral(DecimalNumeral.getRegex()),
 
-	HexNumeral(Regex.Build(Regex.Type.DISJUNCTION, Regex.Build(
-			Regex.Type.CONCATENATION,
-			new Regex("0x"),
-			HexDigits.getRegex(),
-			Regex.Build(Regex.Type.CONCATENATION, new Regex("0X"),
-					HexDigits.getRegex())))),
-
-	OctalDigits(Regex.Build(Regex.Type.CONCATENATION, new Regex(
-			CharacterClass.OctalDigit), new Regex(Regex.Type.KLEENE_CLOSURE,
-			new Regex(CharacterClass.OctalDigit)))),
-
-	OctalNumeral(Regex.Build(Regex.Type.CONCATENATION, new Regex('0'),
-			OctalDigits.getRegex())),
-
-	DecimalIntegerLiteral(Regex.Build(Regex.Type.CONCATENATION,
-			DecimalNumeral.getRegex(),
-			Regex.Optional(new Regex(CharacterClass.IntegerTypeSuffix)))),
-
-	HexIntegerLiteral(Regex.Build(Regex.Type.CONCATENATION,
-			HexNumeral.getRegex(),
-			Regex.Optional(new Regex(CharacterClass.IntegerTypeSuffix)))),
-
-	OctalIntegerLiteral(Regex.Build(Regex.Type.CONCATENATION,
-			OctalNumeral.getRegex(),
-			Regex.Optional(new Regex(CharacterClass.IntegerTypeSuffix)))),
-
-	IntegerLiteral(Regex.Build(Regex.Type.DISJUNCTION,
-			DecimalIntegerLiteral.getRegex(), HexIntegerLiteral.getRegex(),
-			OctalIntegerLiteral.getRegex())),
+	IntegerLiteral(DecimalIntegerLiteral.getRegex()),
 
 	SignedInteger(Regex.Build(Regex.Type.CONCATENATION, new Regex(
 			CharacterClass.Sign), Digits.getRegex())),
@@ -144,21 +110,7 @@ public enum TokenType {
 	BooleanLiteral(Regex.Build(Regex.Type.DISJUNCTION, new Regex("true"),
 			new Regex("false"))),
 
-	FloatingPointLiteral(Regex.Build(Regex.Type.DISJUNCTION, Regex.Build(
-			Regex.Type.CONCATENATION, Digits.getRegex(), new Regex('.'),
-			Regex.Optional(Digits.getRegex()),
-			Regex.Optional(ExponentPart.getRegex()),
-			Regex.Optional(new Regex(CharacterClass.FloatTypeSuffix))), Regex
-			.Build(Regex.Type.CONCATENATION, new Regex('.'), Digits.getRegex(),
-					Regex.Optional(ExponentPart.getRegex()),
-					Regex.Optional(new Regex(CharacterClass.FloatTypeSuffix))),
-			Regex.Build(Regex.Type.CONCATENATION, Digits.getRegex(),
-					ExponentPart.getRegex(),
-					Regex.Optional(new Regex(CharacterClass.FloatTypeSuffix))),
-			Regex.Build(Regex.Type.CONCATENATION, Digits.getRegex(), Regex
-					.Optional(ExponentPart.getRegex()), new Regex(
-					CharacterClass.FloatTypeSuffix)))),
-
+	// TODO We may not need these.
 	OctalEscape(Regex.Build(Regex.Type.DISJUNCTION, Regex.Build(
 			Regex.Type.CONCATENATION, new Regex('\\'), new Regex(
 					CharacterClass.OctalDigit)), Regex.Build(
@@ -196,9 +148,8 @@ public enum TokenType {
 	NullLiteral(new Regex("null")),
 
 	Literal(Regex.Build(Regex.Type.DISJUNCTION, IntegerLiteral.getRegex(),
-			FloatingPointLiteral.getRegex(), BooleanLiteral.getRegex(),
-			CharacterLiteral.getRegex(), StringLiteral.getRegex(),
-			NullLiteral.getRegex())),
+			BooleanLiteral.getRegex(), CharacterLiteral.getRegex(),
+			StringLiteral.getRegex(), NullLiteral.getRegex())),
 
 	Operator(Regex.Build(Regex.Type.DISJUNCTION, Scanner.OPERATOR_REGEXES)),
 

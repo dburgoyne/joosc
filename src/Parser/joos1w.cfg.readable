@@ -30,27 +30,17 @@ PrimitiveType NumericType
 PrimitiveType boolean
 
 NumericType IntegralType
-NumericType FloatingPointType
 
 IntegralType byte
 IntegralType short
 IntegralType int
-IntegralType long
 IntegralType char
-
-FloatingPointType float
-FloatingPointType double
 
 // 4.3
 ReferenceType ClassOrInterfaceType
 ReferenceType ArrayType
 
-ClassOrInterfaceType ClassType
-ClassOrInterfaceType InterfaceType
-
-ClassType TypeName
-
-InterfaceType TypeName
+ClassOrInterfaceType TypeName
 
 ArrayType Type [ ]
 
@@ -99,6 +89,8 @@ TypeDeclaration InterfaceDeclaration
 TypeDeclaration ;
 
 // 8.1
+// Joos disallows private
+// Joos disallows nested types
 ClassDeclaration ClassModifiers class Identifier ClassBody
 ClassDeclaration ClassModifiers class Identifier Super ClassBody
 ClassDeclaration ClassModifiers class Identifier Interfaces ClassBody
@@ -109,18 +101,18 @@ ClassModifiers ClassModifiers ClassModifier
 
 ClassModifier public
 ClassModifier protected
-ClassModifier private
 ClassModifier abstract
 ClassModifier static
 ClassModifier final
-ClassModifier strictfp
 
-Super extends ClassType
+// TODO in weeder: ClassOrInterfaceType must be a ClassType
+Super extends ClassOrInterfaceType
 
 Interfaces implements InterfaceTypeList
 
-InterfaceTypeList InterfaceType
-InterfaceTypeList InterfaceTypeList , InterfaceType
+// TODO in weeder: All ClassOrInterfaceTypes must be InterfaceTypes
+InterfaceTypeList ClassOrInterfaceType
+InterfaceTypeList InterfaceTypeList , ClassOrInterfaceType
 
 ClassBody { ClassBodyDeclarations }
 
@@ -128,29 +120,27 @@ ClassBodyDeclarations
 ClassBodyDeclarations ClassBodyDeclarations ClassBodyDeclaration
 
 ClassBodyDeclaration ClassMemberDeclaration
-ClassBodyDeclaration InstanceInitializer
-ClassBodyDeclaration StaticInitializer
 ClassBodyDeclaration ConstructorDeclaration
 
 ClassMemberDeclaration FieldDeclaration
 ClassMemberDeclaration MethodDeclaration
-ClassMemberDeclaration ClassDeclaration                        
-ClassMemberDeclaration InterfaceDeclaration
 ClassMemberDeclaration ;
 
 // 8.3
 // Joos disallows array initializers
+// Joos disallows array declaration after variable name
+// Joos disallows multiple variable declarations in same statement
+// Joos disallows transient fields
+// Joos disallows final fields
 
-FieldDeclaration FieldModifiers Type VariableDeclarators ;
-
-VariableDeclarators VariableDeclarator
-VariableDeclarators VariableDeclarators , VariableDeclarator
+FieldDeclaration FieldModifiers Type VariableDeclarator ;
 
 VariableDeclarator VariableDeclaratorId
 VariableDeclarator VariableDeclaratorId = VariableInitializer
 
+LocalVariableDeclarator VariableDeclaratorId
+
 VariableDeclaratorId Identifier
-VariableDeclaratorId VariableDeclaratorId [ ]
 
 VariableInitializer Expression
     
@@ -159,13 +149,12 @@ FieldModifiers FieldModifiers FieldModifier
 
 FieldModifier public
 FieldModifier protected
-FieldModifier private
 FieldModifier static
-FieldModifier final
-FieldModifier transient
-FieldModifier volatile
 
 // 8.4
+// Joos disallows array return type after method signature
+// Joos disallows final formal parameters
+// Joos disallows native methods
 MethodDeclaration MethodHeader MethodBody
 
 MethodHeader MethodModifiers ResultType MethodDeclarator
@@ -173,45 +162,33 @@ MethodHeader MethodModifiers ResultType MethodDeclarator
 ResultType Type
 ResultType void
 
-MethodDeclarator Identifer ( )
-MethodDeclarator Identifer ( FormalParameterList )
-
-// TODO This is obsolescent and probably should not be in Joos
-MethodDeclarator MethodDeclarator [ ]
+MethodDeclarator Identifier ( )
+MethodDeclarator Identifier ( FormalParameterList )
 
 FormalParameterList FormalParameter
 FormalParameterList FormalParameterList , FormalParameter
 
 FormalParameter Type VariableDeclaratorId
-FormalParameter final Type VariableDeclaratorId
 
 VariableDeclaratorId Identifier
-VariableDeclaratorId VariableDeclaratorId [ ]
 
 MethodModifiers
 MethodModifiers MethodModifiers MethodModifier
 
 MethodModifier public
 MethodModifier protected
-MethodModifier private
 MethodModifier abstract
 MethodModifier static
 MethodModifier final
-MethodModifier synchronized
-MethodModifier native
-MethodModifier strictfp
-
-ClassTypeList ClassType
-ClassTypeList ClassTypeList , ClassType
 
 MethodBody Block 
 MethodBody ;
 
 // 8.6
-InstanceInitializer Block
+// Joos disallows instance initializers
 
 // 8.7
-StaticInitializer static Block
+// Joos disallows static initializers
 
 // 8.8
 ConstructorDeclaration ConstructorModifiers ConstructorDeclarator ConstructorBody
@@ -225,7 +202,6 @@ ConstructorModifiers ConstructorModifiers ConstructorModifier
 
 ConstructorModifier public
 ConstructorModifier protected
-ConstructorModifier private
 
 // Joos disallows explicit this() and super() calls
 ConstructorBody { BlockStatements }
@@ -239,15 +215,12 @@ InterfaceModifiers InterfaceModifiers InterfaceModifier
 
 InterfaceModifier public
 InterfaceModifier protected
-InterfaceModifier private
 InterfaceModifier abstract
 InterfaceModifier static
-InterfaceModifier strictfp
-	
-ExtendsInterfaces extends InterfaceType
-ExtendsInterfaces ExtendsInterfaces , InterfaceType
-	
-InterfaceType TypeName
+
+// TODO in weeder: All ClassOrInterfaceTypes must be InterfaceTypes
+ExtendsInterfaces extends ClassOrInterfaceType
+ExtendsInterfaces ExtendsInterfaces , ClassOrInterfaceType
 	
 InterfaceBody { InterfaceMemberDeclarations }
 
@@ -262,7 +235,7 @@ InterfaceMemberDeclaration ;
 
 // 9.3
 
-ConstantDeclaration ConstantModifiers Type VariableDeclarators
+ConstantDeclaration ConstantModifiers Type VariableDeclarator
 
 ConstantModifiers
 ConstantModifiers ConstantModifiers ConstantModifier 
@@ -294,10 +267,10 @@ BlockStatement ClassDeclaration
 BlockStatement Statement
 	
 // 14.4
+// Joos disallows final local variables
 LocalVariableDeclarationStatement LocalVariableDeclaration ;
 
-LocalVariableDeclaration Type VariableDeclarators
-LocalVariableDeclaration final Type VariableDeclarators
+LocalVariableDeclaration Type LocalVariableDeclarator
 	
 // 14.5
 // The provided language standard fixes the dangling-if problem.
@@ -324,13 +297,10 @@ EmptyStatement ;
 // Joos disallows labeled statements
 
 // 14.8
+// Joos disallows prefix/postfix increment/decrement
 ExpressionStatement StatementExpression ;
 
 StatementExpression Assignment
-StatementExpression PreIncrementExpression
-StatementExpression PreDecrementExpression
-StatementExpression PostIncrementExpression
-StatementExpression PostDecrementExpression
 StatementExpression MethodInvocation
 StatementExpression ClassInstanceCreationExpression
 	
@@ -392,15 +362,14 @@ ReturnStatement return Expression ;
 // Joos disallows try statements
 
 // 15.8
+// Joos disallows class literals
 Primary PrimaryNoNewArray
 Primary ArrayCreationExpression
 
 PrimaryNoNewArray Literal
-PrimaryNoNewArray Type . class 
-PrimaryNoNewArray void . class 
 PrimaryNoNewArray this
-// ClassName replaced by ClassType
-PrimaryNoNewArray ClassType . this
+// TODO in weeder: ClassOrInterfaceType must be a ClassType
+PrimaryNoNewArray ClassOrInterfaceType . this
 PrimaryNoNewArray ( Expression )
 PrimaryNoNewArray ClassInstanceCreationExpression
 PrimaryNoNewArray FieldAccess
@@ -408,7 +377,6 @@ PrimaryNoNewArray MethodInvocation
 PrimaryNoNewArray ArrayAccess
 
 Literal IntegerLiteral
-Literal FloatingPointLiteral
 Literal BooleanLiteral
 Literal CharacterLiteral
 Literal StringLiteral
@@ -456,23 +424,11 @@ ArrayAccess PrimaryNoNewArray [ Expression ]
 // 15.14
 PostfixExpression Primary
 PostfixExpression ExpressionName
-PostfixExpression PostIncrementExpression
-PostfixExpression PostDecrementExpression
-	
-PostIncrementExpression PostfixExpression ++
-	
-PostDecrementExpression PostfixExpression --
 	
 // 15.15
-UnaryExpression PreIncrementExpression
-UnaryExpression PreDecrementExpression
-UnaryExpression + UnaryExpression
+// Joos disallows unary plus
 UnaryExpression - UnaryExpression
 UnaryExpression UnaryExpressionNotPlusMinus
-
-PreIncrementExpression ++ UnaryExpression
-
-PreDecrementExpression -- UnaryExpression
 
 UnaryExpressionNotPlusMinus PostfixExpression
 UnaryExpressionNotPlusMinus ~ UnaryExpression
@@ -529,11 +485,11 @@ ConditionalOrExpression ConditionalAndExpression
 ConditionalOrExpression ConditionalOrExpression || ConditionalAndExpression
 
 // 15.25
-ConditionalExpression ConditionalOrExpression
-ConditionalExpression ConditionalOrExpression ? Expression : ConditionalExpression
+// Joos disallows the ternary operator
 
 // 15.26
-AssignmentExpression ConditionalExpression
+// Joos disallows compound assignment operators
+AssignmentExpression ConditionalOrExpression
 AssignmentExpression Assignment
 
 Assignment LeftHandSide AssignmentOperator AssignmentExpression
@@ -543,17 +499,6 @@ LeftHandSide FieldAccess
 LeftHandSide ArrayAccess
 
 AssignmentOperator =
-AssignmentOperator *=
-AssignmentOperator /=
-AssignmentOperator %=
-AssignmentOperator +=
-AssignmentOperator -=
-AssignmentOperator <<=
-AssignmentOperator >>=
-AssignmentOperator >>>=
-AssignmentOperator &=
-AssignmentOperator ^=
-AssignmentOperator |=
 	
 // 15.27
 Expression AssignmentExpression
