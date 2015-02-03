@@ -1,4 +1,5 @@
-59
+60
+EOF
 boolean
 byte
 short
@@ -13,11 +14,6 @@ package
 import
 *
 class
-public
-protected
-abstract
-static
-final
 extends
 implements
 ,
@@ -27,6 +23,11 @@ implements
 void
 (
 )
+public
+protected
+abstract
+static
+final
 interface
 if
 else
@@ -58,20 +59,14 @@ instanceof
 |
 &&
 ||
-114
+90
+S
 Type
 PrimitiveType
 NumericType
 IntegralType
 ReferenceType
-ClassOrInterfaceType
-ArrayType
-PackageName
-TypeName
-ExpressionName
-MethodName
-PackageOrTypeName
-AmbiguousName
+Name
 CompilationUnit
 ImportDeclarations
 TypeDeclarations
@@ -81,8 +76,6 @@ SingleTypeImportDeclaration
 TypeImportOnDemandDeclaration
 TypeDeclaration
 ClassDeclaration
-ClassModifiers
-ClassModifier
 Super
 Interfaces
 InterfaceTypeList
@@ -91,39 +84,24 @@ ClassBodyDeclarations
 ClassBodyDeclaration
 ClassMemberDeclaration
 FieldDeclaration
-VariableDeclarator
-LocalVariableDeclarator
-VariableDeclaratorId
-VariableInitializer
-FieldModifiers
-FieldModifier
 MethodDeclaration
 MethodHeader
-ResultType
 MethodDeclarator
 FormalParameterList
 FormalParameter
-MethodModifiers
-MethodModifier
+Modifiers
+Modifier
 MethodBody
 ConstructorDeclaration
 ConstructorDeclarator
-ConstructorModifiers
-ConstructorModifier
 ConstructorBody
 InterfaceDeclaration
-InterfaceModifiers
-InterfaceModifier
 ExtendsInterfaces
 InterfaceBody
 InterfaceMemberDeclarations
 InterfaceMemberDeclaration
 ConstantDeclaration
-ConstantModifiers
-ConstantModifier
 AbstractMethodDeclaration
-AbstractMethodModifiers
-AbstractMethodModifier
 Block
 BlockStatements
 BlockStatement
@@ -150,7 +128,6 @@ ClassInstanceCreationExpression
 ArgumentList
 ArrayCreationExpression
 DimExpr
-Dims
 FieldAccess
 MethodInvocation
 ArrayAccess
@@ -173,8 +150,9 @@ LeftHandSide
 AssignmentOperator
 Expression
 ConstantExpression
-Type
-260
+S
+211
+S CompilationUnit EOF
 Type PrimitiveType
 Type ReferenceType
 PrimitiveType NumericType
@@ -184,50 +162,31 @@ IntegralType byte
 IntegralType short
 IntegralType int
 IntegralType char
-ReferenceType ClassOrInterfaceType
-ReferenceType ArrayType
-ClassOrInterfaceType TypeName
-ArrayType Type [ ]
-PackageName Identifier
-PackageName PackageName . Identifier
-TypeName Identifier
-TypeName PackageOrTypeName . Identifier
-ExpressionName Identifier
-ExpressionName AmbiguousName . Identifier
-MethodName Identifier
-MethodName AmbiguousName . Identifier
-PackageOrTypeName Identifier
-PackageOrTypeName PackageOrTypeName . Identifier
-AmbiguousName Identifier
-AmbiguousName AmbiguousName . Identifier
+ReferenceType Name
+ReferenceType Type [ ]
+Name Identifier
+Name Name . Identifier
 CompilationUnit PackageDeclaration ImportDeclarations TypeDeclarations
 ImportDeclarations
 ImportDeclarations ImportDeclarations ImportDeclaration
 TypeDeclarations
 TypeDeclarations TypeDeclarations TypeDeclaration
-PackageDeclaration package PackageName ;
+PackageDeclaration package Name ;
 ImportDeclaration SingleTypeImportDeclaration
 ImportDeclaration TypeImportOnDemandDeclaration
-SingleTypeImportDeclaration import TypeName ;
-TypeImportOnDemandDeclaration import PackageOrTypeName . * ;
+SingleTypeImportDeclaration import Name ;
+TypeImportOnDemandDeclaration import Name . * ;
 TypeDeclaration ClassDeclaration
 TypeDeclaration InterfaceDeclaration
 TypeDeclaration ;
-ClassDeclaration ClassModifiers class Identifier ClassBody
-ClassDeclaration ClassModifiers class Identifier Super ClassBody
-ClassDeclaration ClassModifiers class Identifier Interfaces ClassBody
-ClassDeclaration ClassModifiers class Identifier Super Interfaces ClassBody
-ClassModifiers
-ClassModifiers ClassModifiers ClassModifier
-ClassModifier public
-ClassModifier protected
-ClassModifier abstract
-ClassModifier static
-ClassModifier final
-Super extends ClassOrInterfaceType
+ClassDeclaration Modifiers class Identifier ClassBody
+ClassDeclaration Modifiers class Identifier Super ClassBody
+ClassDeclaration Modifiers class Identifier Interfaces ClassBody
+ClassDeclaration Modifiers class Identifier Super Interfaces ClassBody
+Super extends Name
 Interfaces implements InterfaceTypeList
-InterfaceTypeList ClassOrInterfaceType
-InterfaceTypeList InterfaceTypeList , ClassOrInterfaceType
+InterfaceTypeList Name
+InterfaceTypeList InterfaceTypeList , Name
 ClassBody { ClassBodyDeclarations }
 ClassBodyDeclarations
 ClassBodyDeclarations ClassBodyDeclarations ClassBodyDeclaration
@@ -236,54 +195,33 @@ ClassBodyDeclaration ConstructorDeclaration
 ClassMemberDeclaration FieldDeclaration
 ClassMemberDeclaration MethodDeclaration
 ClassMemberDeclaration ;
-FieldDeclaration FieldModifiers Type VariableDeclarator ;
-VariableDeclarator VariableDeclaratorId
-VariableDeclarator VariableDeclaratorId = VariableInitializer
-LocalVariableDeclarator VariableDeclaratorId
-VariableDeclaratorId Identifier
-VariableInitializer Expression
-FieldModifiers
-FieldModifiers FieldModifiers FieldModifier
-FieldModifier public
-FieldModifier protected
-FieldModifier static
+FieldDeclaration Modifiers Type Identifier ;
+FieldDeclaration Modifiers Type Identifier = Expression ;
 MethodDeclaration MethodHeader MethodBody
-MethodHeader MethodModifiers ResultType MethodDeclarator
-ResultType Type
-ResultType void
-MethodDeclarator Identifier ( )
-MethodDeclarator Identifier ( FormalParameterList )
+MethodHeader Modifiers Type Identifier MethodDeclarator
+MethodHeader Modifiers void Identifier MethodDeclarator
+MethodDeclarator ( )
+MethodDeclarator ( FormalParameterList )
 FormalParameterList FormalParameter
 FormalParameterList FormalParameterList , FormalParameter
-FormalParameter Type VariableDeclaratorId
-VariableDeclaratorId Identifier
-MethodModifiers
-MethodModifiers MethodModifiers MethodModifier
-MethodModifier public
-MethodModifier protected
-MethodModifier abstract
-MethodModifier static
-MethodModifier final
+FormalParameter Type Identifier
+Modifiers
+Modifiers Modifiers Modifier
+Modifier public
+Modifier protected
+Modifier abstract
+Modifier static
+Modifier final
 MethodBody Block
 MethodBody ;
-ConstructorDeclaration ConstructorModifiers ConstructorDeclarator ConstructorBody
+ConstructorDeclaration Modifiers ConstructorDeclarator ConstructorBody
 ConstructorDeclarator Identifier ( )
 ConstructorDeclarator Identifier ( FormalParameterList )
-ConstructorModifiers
-ConstructorModifiers ConstructorModifiers ConstructorModifier
-ConstructorModifier public
-ConstructorModifier protected
 ConstructorBody { BlockStatements }
-InterfaceDeclaration InterfaceModifiers interface Identifier InterfaceBody
-InterfaceDeclaration InterfaceModifiers interface Identifier ExtendsInterfaces InterfaceBody
-InterfaceModifiers
-InterfaceModifiers InterfaceModifiers InterfaceModifier
-InterfaceModifier public
-InterfaceModifier protected
-InterfaceModifier abstract
-InterfaceModifier static
-ExtendsInterfaces extends ClassOrInterfaceType
-ExtendsInterfaces ExtendsInterfaces , ClassOrInterfaceType
+InterfaceDeclaration Modifiers interface Identifier InterfaceBody
+InterfaceDeclaration Modifiers interface Identifier ExtendsInterfaces InterfaceBody
+ExtendsInterfaces extends Name
+ExtendsInterfaces ExtendsInterfaces , Name
 InterfaceBody { InterfaceMemberDeclarations }
 InterfaceMemberDeclarations
 InterfaceMemberDeclarations InterfaceMemberDeclarations InterfaceMemberDeclaration
@@ -292,17 +230,10 @@ InterfaceMemberDeclaration AbstractMethodDeclaration
 InterfaceMemberDeclaration ClassDeclaration
 InterfaceMemberDeclaration InterfaceDeclaration
 InterfaceMemberDeclaration ;
-ConstantDeclaration ConstantModifiers Type VariableDeclarator
-ConstantModifiers
-ConstantModifiers ConstantModifiers ConstantModifier
-ConstantModifier public
-ConstantModifier static
-ConstantModifier final
-AbstractMethodDeclaration AbstractMethodModifiers ResultType MethodDeclarator ;
-AbstractMethodModifiers
-AbstractMethodModifiers AbstractMethodModifiers AbstractMethodModifier
-AbstractMethodModifier public
-AbstractMethodModifier abstract
+ConstantDeclaration Modifiers Type Identifier
+ConstantDeclaration Modifiers Type Identifier = Expression
+AbstractMethodDeclaration Modifiers Type Identifier MethodDeclarator ;
+AbstractMethodDeclaration Modifiers void Identifier MethodDeclarator ;
 Block { BlockStatements }
 BlockStatements
 BlockStatements BlockStatements BlockStatement
@@ -310,7 +241,7 @@ BlockStatement LocalVariableDeclarationStatement
 BlockStatement ClassDeclaration
 BlockStatement Statement
 LocalVariableDeclarationStatement LocalVariableDeclaration ;
-LocalVariableDeclaration Type LocalVariableDeclarator
+LocalVariableDeclaration Type Identifier
 Statement StatementWithoutTrailingSubstatement
 Statement IfThenStatement
 Statement IfThenElseStatement
@@ -356,7 +287,7 @@ Primary PrimaryNoNewArray
 Primary ArrayCreationExpression
 PrimaryNoNewArray Literal
 PrimaryNoNewArray this
-PrimaryNoNewArray ClassOrInterfaceType . this
+PrimaryNoNewArray Name . this
 PrimaryNoNewArray ( Expression )
 PrimaryNoNewArray ClassInstanceCreationExpression
 PrimaryNoNewArray FieldAccess
@@ -367,10 +298,10 @@ Literal BooleanLiteral
 Literal CharacterLiteral
 Literal StringLiteral
 Literal NullLiteral
-ClassInstanceCreationExpression new ClassOrInterfaceType ( )
-ClassInstanceCreationExpression new ClassOrInterfaceType ( ) ClassBody
-ClassInstanceCreationExpression new ClassOrInterfaceType ( ArgumentList )
-ClassInstanceCreationExpression new ClassOrInterfaceType ( ArgumentList ) ClassBody
+ClassInstanceCreationExpression new Name ( )
+ClassInstanceCreationExpression new Name ( ) ClassBody
+ClassInstanceCreationExpression new Name ( ArgumentList )
+ClassInstanceCreationExpression new Name ( ArgumentList ) ClassBody
 ClassInstanceCreationExpression Primary . new Identifier ( )
 ClassInstanceCreationExpression Primary . new Identifier ( ) ClassBody
 ClassInstanceCreationExpression Primary . new Identifier ( ArgumentList )
@@ -378,29 +309,26 @@ ClassInstanceCreationExpression Primary . new Identifier ( ArgumentList ) ClassB
 ArgumentList Expression
 ArgumentList ArgumentList , Expression
 ArrayCreationExpression new PrimitiveType DimExpr
-ArrayCreationExpression new TypeName DimExpr
-ArrayCreationExpression new PrimitiveType Dims
-ArrayCreationExpression new TypeName Dims
+ArrayCreationExpression new Name DimExpr
+ArrayCreationExpression new PrimitiveType [ ]
+ArrayCreationExpression new Name [ ]
 DimExpr [ Expression ]
-Dims [ ]
 FieldAccess Primary . Identifier
-MethodInvocation MethodName ( )
-MethodInvocation MethodName ( ArgumentList )
+MethodInvocation Name ( )
+MethodInvocation Name ( ArgumentList )
 MethodInvocation Primary . Identifier ( )
 MethodInvocation Primary . Identifier ( ArgumentList )
-ArrayAccess ExpressionName [ Expression ]
-ArrayAccess PrimaryNoNewArray [ Expression ]
+ArrayAccess Name DimExpr
+ArrayAccess PrimaryNoNewArray DimExpr
 PostfixExpression Primary
-PostfixExpression ExpressionName
+PostfixExpression Name
 UnaryExpression - UnaryExpression
 UnaryExpression UnaryExpressionNotPlusMinus
 UnaryExpressionNotPlusMinus PostfixExpression
 UnaryExpressionNotPlusMinus ~ UnaryExpression
 UnaryExpressionNotPlusMinus ! UnaryExpression
 UnaryExpressionNotPlusMinus CastExpression
-CastExpression ( PrimitiveType ) UnaryExpression
-CastExpression ( PrimitiveType Dims ) UnaryExpression
-CastExpression ( ReferenceType ) UnaryExpressionNotPlusMinus
+CastExpression ( Type ) UnaryExpression
 MultiplicativeExpression UnaryExpression
 MultiplicativeExpression MultiplicativeExpression * UnaryExpression
 MultiplicativeExpression MultiplicativeExpression / UnaryExpression
@@ -429,62 +357,9 @@ ConditionalOrExpression ConditionalOrExpression || ConditionalAndExpression
 AssignmentExpression ConditionalOrExpression
 AssignmentExpression Assignment
 Assignment LeftHandSide AssignmentOperator AssignmentExpression
-LeftHandSide ExpressionName
+LeftHandSide Name
 LeftHandSide FieldAccess
 LeftHandSide ArrayAccess
 AssignmentOperator =
 Expression AssignmentExpression
 ConstantExpression Expression
-20
-51
-19 boolean reduce 12
-0 char shift 1
-3 boolean reduce 9
-8 boolean reduce 7
-0 IntegralType shift 2
-19 [ reduce 12
-10 . reduce 22
-8 [ reduce 7
-11 [ reduce 3
-0 ClassOrInterfaceType shift 3
-6 boolean reduce 5
-4 boolean reduce 2
-16 [ reduce 1
-12 [ reduce 10
-6 [ reduce 5
-7 . reduce 21
-3 [ reduce 9
-10 boolean reduce 16
-18 boolean reduce 11
-11 boolean reduce 3
-0 NumericType shift 4
-0 PrimitiveType shift 5
-2 boolean reduce 4
-14 boolean reduce 6
-5 [ reduce 0
-1 [ reduce 8
-14 [ reduce 6
-0 byte shift 6
-2 [ reduce 4
-5 boolean reduce 0
-7 boolean reduce 15
-0 Identifier shift 7
-0 int shift 8
-12 boolean reduce 10
-13 . shift 9
-4 [ reduce 2
-9 Identifier shift 10
-10 [ reduce 16
-0 boolean shift 11
-18 [ reduce 11
-16 boolean reduce 1
-0 ArrayType shift 12
-0 PackageOrTypeName shift 13
-0 short shift 14
-17 [ shift 15
-0 ReferenceType shift 16
-0 Type shift 17
-0 TypeName shift 18
-1 boolean reduce 8
-15 ] shift 19
-7 [ reduce 15

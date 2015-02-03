@@ -2,23 +2,8 @@
 // To generate the actual .cfg file, discard all blank lines and
 // lines beginning with "//".
 
-// Number of terminals
-// TODO
-
-// Terminals
-// TODO
-
-// Number of non-terminals
-// TODO
-
-// Non-terminals
-// TODO
-
 // Start symbol
-// TODO
-
-// Number of productions
-// TODO
+S CompilationUnit EOF
 
 // Productions
 // 4.1
@@ -37,31 +22,22 @@ IntegralType int
 IntegralType char
 
 // 4.3
-ReferenceType ClassOrInterfaceType
-ReferenceType ArrayType
+//ReferenceType ClassOrInterfaceType
+ReferenceType Name
+ReferenceType Type [ ]
 
-ClassOrInterfaceType TypeName
+//ClassOrInterfaceType TypeName
+//ClassOrInterfaceType Name
 
-ArrayType Type [ ]
+//ArrayType Type [ ]
 
 // 6.5
-PackageName Identifier
-PackageName PackageName . Identifier
 
-TypeName Identifier
-TypeName PackageOrTypeName . Identifier
+//TODO: in name resolution: disambiguate the following uses of Name?
+//      FooNames merged into a generic Name of dotted identifiers
 
-ExpressionName Identifier
-ExpressionName AmbiguousName . Identifier
-
-MethodName Identifier
-MethodName AmbiguousName . Identifier
-
-PackageOrTypeName Identifier
-PackageOrTypeName PackageOrTypeName . Identifier
-
-AmbiguousName Identifier
-AmbiguousName AmbiguousName . Identifier
+Name Identifier
+Name Name . Identifier
 
 // 7.3
 CompilationUnit PackageDeclaration ImportDeclarations TypeDeclarations
@@ -73,15 +49,18 @@ TypeDeclarations
 TypeDeclarations TypeDeclarations TypeDeclaration
 
 // 7.4
-PackageDeclaration package PackageName ;
+//PackageDeclaration package PackageName ;
+PackageDeclaration package Name ;
 
 // 7.5
 ImportDeclaration SingleTypeImportDeclaration
 ImportDeclaration TypeImportOnDemandDeclaration
 
-SingleTypeImportDeclaration import TypeName ;
+//SingleTypeImportDeclaration import TypeName ;
+SingleTypeImportDeclaration import Name ;
 
-TypeImportOnDemandDeclaration import PackageOrTypeName . * ;
+//TypeImportOnDemandDeclaration import PackageOrTypeName . * ;
+TypeImportOnDemandDeclaration import Name . * ;
 
 // 7.6
 TypeDeclaration ClassDeclaration
@@ -91,28 +70,29 @@ TypeDeclaration ;
 // 8.1
 // Joos disallows private
 // Joos disallows nested types
-ClassDeclaration ClassModifiers class Identifier ClassBody
-ClassDeclaration ClassModifiers class Identifier Super ClassBody
-ClassDeclaration ClassModifiers class Identifier Interfaces ClassBody
-ClassDeclaration ClassModifiers class Identifier Super Interfaces ClassBody
+ClassDeclaration Modifiers class Identifier ClassBody
+ClassDeclaration Modifiers class Identifier Super ClassBody
+ClassDeclaration Modifiers class Identifier Interfaces ClassBody
+ClassDeclaration Modifiers class Identifier Super Interfaces ClassBody
 
-ClassModifiers
-ClassModifiers ClassModifiers ClassModifier
-
-ClassModifier public
-ClassModifier protected
-ClassModifier abstract
-ClassModifier static
-ClassModifier final
+// TODO in weeder: Modifiers should be:
+//ClassModifier public
+//ClassModifier protected
+//ClassModifier abstract
+//ClassModifier static
+//ClassModifier final
 
 // TODO in weeder: ClassOrInterfaceType must be a ClassType
-Super extends ClassOrInterfaceType
+//Super extends ClassOrInterfaceType
+Super extends Name
 
 Interfaces implements InterfaceTypeList
 
 // TODO in weeder: All ClassOrInterfaceTypes must be InterfaceTypes
-InterfaceTypeList ClassOrInterfaceType
-InterfaceTypeList InterfaceTypeList , ClassOrInterfaceType
+//InterfaceTypeList ClassOrInterfaceType
+//InterfaceTypeList InterfaceTypeList , ClassOrInterfaceType
+InterfaceTypeList Name
+InterfaceTypeList InterfaceTypeList , Name
 
 ClassBody { ClassBodyDeclarations }
 
@@ -133,23 +113,20 @@ ClassMemberDeclaration ;
 // Joos disallows transient fields
 // Joos disallows final fields
 
-FieldDeclaration FieldModifiers Type VariableDeclarator ;
+FieldDeclaration Modifiers Type Identifier ;
+FieldDeclaration Modifiers Type Identifier = Expression ;
 
-VariableDeclarator VariableDeclaratorId
-VariableDeclarator VariableDeclaratorId = VariableInitializer
+// TODO in weeder: Check that Modifiers is one of the following: 
+//FieldModifier public
+//FieldModifier protected
+//FieldModifier static
 
-LocalVariableDeclarator VariableDeclaratorId
+//VariableDeclarator Identifier
+//VariableDeclarator Identifier = VariableInitializer
 
-VariableDeclaratorId Identifier
+//VariableDeclaratorId Identifier
 
-VariableInitializer Expression
-    
-FieldModifiers
-FieldModifiers FieldModifiers FieldModifier
-
-FieldModifier public
-FieldModifier protected
-FieldModifier static
+//VariableInitializer Expression
 
 // 8.4
 // Joos disallows array return type after method signature
@@ -157,29 +134,30 @@ FieldModifier static
 // Joos disallows native methods
 MethodDeclaration MethodHeader MethodBody
 
-MethodHeader MethodModifiers ResultType MethodDeclarator
+MethodHeader Modifiers Type Identifier MethodDeclarator
+MethodHeader Modifiers void Identifier MethodDeclarator
+// TODO in weeder: afaik there's nothing to filter for method modifiers?
 
-ResultType Type
-ResultType void
+//ResultType Type
+//ResultType void
 
-MethodDeclarator Identifier ( )
-MethodDeclarator Identifier ( FormalParameterList )
+MethodDeclarator ( )
+MethodDeclarator ( FormalParameterList )
 
 FormalParameterList FormalParameter
 FormalParameterList FormalParameterList , FormalParameter
 
-FormalParameter Type VariableDeclaratorId
+FormalParameter Type Identifier
 
-VariableDeclaratorId Identifier
+// GENERIC MODIFIERS REPLACE ALL SPECIALLY NAMED MODIFIERS
+Modifiers
+Modifiers Modifiers Modifier
 
-MethodModifiers
-MethodModifiers MethodModifiers MethodModifier
-
-MethodModifier public
-MethodModifier protected
-MethodModifier abstract
-MethodModifier static
-MethodModifier final
+Modifier public
+Modifier protected
+Modifier abstract
+Modifier static
+Modifier final
 
 MethodBody Block 
 MethodBody ;
@@ -191,36 +169,35 @@ MethodBody ;
 // Joos disallows static initializers
 
 // 8.8
-ConstructorDeclaration ConstructorModifiers ConstructorDeclarator ConstructorBody
+ConstructorDeclaration Modifiers ConstructorDeclarator ConstructorBody
+
+// TODO in weeder: check that Modifiers is one of the following:
+//ConstructorModifier public
+//ConstructorModifier protected
 
 // The Identifier in the next 2 productions must match the simple name of the class.
 ConstructorDeclarator Identifier ( )
 ConstructorDeclarator Identifier ( FormalParameterList )
-	
-ConstructorModifiers
-ConstructorModifiers ConstructorModifiers ConstructorModifier
 
-ConstructorModifier public
-ConstructorModifier protected
 
 // Joos disallows explicit this() and super() calls
 ConstructorBody { BlockStatements }
 
 // 9.1
-InterfaceDeclaration InterfaceModifiers interface Identifier InterfaceBody
-InterfaceDeclaration InterfaceModifiers interface Identifier ExtendsInterfaces InterfaceBody
-		
-InterfaceModifiers
-InterfaceModifiers InterfaceModifiers InterfaceModifier
+InterfaceDeclaration Modifiers interface Identifier InterfaceBody
+InterfaceDeclaration Modifiers interface Identifier ExtendsInterfaces InterfaceBody
 
-InterfaceModifier public
-InterfaceModifier protected
-InterfaceModifier abstract
-InterfaceModifier static
+// TODO in weeder: check Modifiers is one of:
+//InterfaceModifier public
+//InterfaceModifier protected
+//InterfaceModifier abstract
+//InterfaceModifier static
 
 // TODO in weeder: All ClassOrInterfaceTypes must be InterfaceTypes
-ExtendsInterfaces extends ClassOrInterfaceType
-ExtendsInterfaces ExtendsInterfaces , ClassOrInterfaceType
+//ExtendsInterfaces extends ClassOrInterfaceType
+//ExtendsInterfaces ExtendsInterfaces , ClassOrInterfaceType
+ExtendsInterfaces extends Name
+ExtendsInterfaces ExtendsInterfaces , Name
 	
 InterfaceBody { InterfaceMemberDeclarations }
 
@@ -235,23 +212,21 @@ InterfaceMemberDeclaration ;
 
 // 9.3
 
-ConstantDeclaration ConstantModifiers Type VariableDeclarator
+ConstantDeclaration Modifiers Type Identifier
+ConstantDeclaration Modifiers Type Identifier = Expression
 
-ConstantModifiers
-ConstantModifiers ConstantModifiers ConstantModifier 
-
-ConstantModifier public
-ConstantModifier static
-ConstantModifier final
+// TODO in weeder: check that Modifiers contains only:
+//ConstantModifier public
+//ConstantModifier static
+//ConstantModifier final
 	
 // 9.4
-AbstractMethodDeclaration AbstractMethodModifiers ResultType MethodDeclarator ;
+AbstractMethodDeclaration Modifiers Type Identifier MethodDeclarator ;
+AbstractMethodDeclaration Modifiers void Identifier MethodDeclarator ;
 
-AbstractMethodModifiers
-AbstractMethodModifiers AbstractMethodModifiers AbstractMethodModifier
-
-AbstractMethodModifier public
-AbstractMethodModifier abstract
+// TODO in weeder: Modifiers should only contain following.
+//AbstractMethodModifier public
+//AbstractMethodModifier abstract
 	
 // 10.6
 // Joos disallows array initializers
@@ -270,7 +245,7 @@ BlockStatement Statement
 // Joos disallows final local variables
 LocalVariableDeclarationStatement LocalVariableDeclaration ;
 
-LocalVariableDeclaration Type LocalVariableDeclarator
+LocalVariableDeclaration Type Identifier
 	
 // 14.5
 // The provided language standard fixes the dangling-if problem.
@@ -369,7 +344,8 @@ Primary ArrayCreationExpression
 PrimaryNoNewArray Literal
 PrimaryNoNewArray this
 // TODO in weeder: ClassOrInterfaceType must be a ClassType
-PrimaryNoNewArray ClassOrInterfaceType . this
+//PrimaryNoNewArray ClassOrInterfaceType . this
+PrimaryNoNewArray Name . this
 PrimaryNoNewArray ( Expression )
 PrimaryNoNewArray ClassInstanceCreationExpression
 PrimaryNoNewArray FieldAccess
@@ -383,10 +359,11 @@ Literal StringLiteral
 Literal NullLiteral
 	
 // 15.9
-ClassInstanceCreationExpression new ClassOrInterfaceType ( )
-ClassInstanceCreationExpression new ClassOrInterfaceType ( ) ClassBody
-ClassInstanceCreationExpression new ClassOrInterfaceType ( ArgumentList )
-ClassInstanceCreationExpression new ClassOrInterfaceType ( ArgumentList ) ClassBody
+// Name's below must be ClassOrInterfaceType.
+ClassInstanceCreationExpression new Name ( )
+ClassInstanceCreationExpression new Name ( ) ClassBody
+ClassInstanceCreationExpression new Name ( ArgumentList )
+ClassInstanceCreationExpression new Name ( ArgumentList ) ClassBody
 ClassInstanceCreationExpression Primary . new Identifier ( )
 ClassInstanceCreationExpression Primary . new Identifier ( ) ClassBody
 ClassInstanceCreationExpression Primary . new Identifier ( ArgumentList )
@@ -398,13 +375,14 @@ ArgumentList ArgumentList , Expression
 // 15.10
 // Joos disallows multi-dimensional arrays
 ArrayCreationExpression new PrimitiveType DimExpr
-ArrayCreationExpression new TypeName DimExpr
-ArrayCreationExpression new PrimitiveType Dims 
-ArrayCreationExpression new TypeName Dims
+//ArrayCreationExpression new TypeName DimExpr
+ArrayCreationExpression new Name DimExpr
+ArrayCreationExpression new PrimitiveType [ ] 
+//ArrayCreationExpression new TypeName [ ]
+ArrayCreationExpression new Name [ ]
 
 DimExpr [ Expression ]
-
-Dims [ ]
+//Dims [ ]
 
 // 15.11
 // Joos disallows super field access
@@ -412,18 +390,22 @@ FieldAccess Primary . Identifier
 
 // 15.12
 // Joos disallows super() calls
-MethodInvocation MethodName ( )
-MethodInvocation MethodName ( ArgumentList )
+//MethodInvocation MethodName ( )
+MethodInvocation Name ( )
+//MethodInvocation MethodName ( ArgumentList )
+MethodInvocation Name ( ArgumentList )
 MethodInvocation Primary . Identifier ( )
 MethodInvocation Primary . Identifier ( ArgumentList )
 	
 // 15.13
-ArrayAccess ExpressionName [ Expression ]
-ArrayAccess PrimaryNoNewArray [ Expression ]
+//ArrayAccess ExpressionName [ Expression ]
+ArrayAccess Name DimExpr
+ArrayAccess PrimaryNoNewArray DimExpr
 
 // 15.14
 PostfixExpression Primary
-PostfixExpression ExpressionName
+//PostfixExpression ExpressionName
+PostfixExpression Name
 	
 // 15.15
 // Joos disallows unary plus
@@ -436,9 +418,11 @@ UnaryExpressionNotPlusMinus ! UnaryExpression
 UnaryExpressionNotPlusMinus CastExpression
 	
 // 15.16
-CastExpression ( PrimitiveType ) UnaryExpression
-CastExpression ( PrimitiveType Dims ) UnaryExpression
-CastExpression ( ReferenceType ) UnaryExpressionNotPlusMinus
+//CastExpression ( PrimitiveType ) UnaryExpression
+//CastExpression ( PrimitiveType [ ] ) UnaryExpression
+//CastExpression ( ReferenceType ) UnaryExpressionNotPlusMinus
+// TODO in weeder: check above form. 
+CastExpression ( Type ) UnaryExpression
 
 // 15.17
 MultiplicativeExpression UnaryExpression
@@ -494,7 +478,8 @@ AssignmentExpression Assignment
 
 Assignment LeftHandSide AssignmentOperator AssignmentExpression
 
-LeftHandSide ExpressionName
+//LeftHandSide ExpressionName
+LeftHandSide Name
 LeftHandSide FieldAccess
 LeftHandSide ArrayAccess
 

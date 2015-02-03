@@ -15,6 +15,13 @@
 package Scanner;
 
 public enum TokenType {
+    
+    // (EOF token not used in Scanner, but all Parser input ends with it) 
+    EOF(Regex.Build(Regex.Type.EMPTY_SET)),
+    
+    // (Error token in case we want to catch parsing errors)
+    // ERROR(Regex.Build(Regex.Type.EMPTY_SET)),
+    
 	LineTerminator(Regex.Build(Regex.Type.DISJUNCTION, new Regex('\r'),
 			new Regex('\n'), new Regex("\r\n"))),
 
