@@ -20,10 +20,22 @@
 // Number of productions
 // TODO
 
+// 7.3
+CompilationUnit PackageDeclaration ImportDeclarations TypeDeclarations
+
+ImportDeclarations
+ImportDeclarations ImportDeclarations ImportDeclaration
+
+TypeDeclarations
+TypeDeclarations TypeDeclarations TypeDeclaration
+
 // Productions
 // 4.1
 Type PrimitiveType
 Type ReferenceType
+
+ReferenceType ReferenceTypeArray
+ReferenceType ReferenceTypeNonArray
 
 // 4.2
 PrimitiveType NumericType
@@ -37,40 +49,19 @@ IntegralType int
 IntegralType char
 
 // 4.3
-ReferenceType ClassOrInterfaceType
-ReferenceType ArrayType
+// TODO AmbiguousName must be a TypeName
+ReferenceTypeArray ArrayType
+ReferenceTypeNonArray AmbiguousName
 
-ClassOrInterfaceType TypeName
-
-ArrayType Type [ ]
+ArrayType PrimitiveType [ ]
+ArrayType ReferenceTypeNonArray [ ]
 
 // 6.5
 PackageName Identifier
 PackageName PackageName . Identifier
 
-TypeName Identifier
-TypeName PackageOrTypeName . Identifier
-
-ExpressionName Identifier
-ExpressionName AmbiguousName . Identifier
-
-MethodName Identifier
-MethodName AmbiguousName . Identifier
-
-PackageOrTypeName Identifier
-PackageOrTypeName PackageOrTypeName . Identifier
-
 AmbiguousName Identifier
 AmbiguousName AmbiguousName . Identifier
-
-// 7.3
-CompilationUnit PackageDeclaration ImportDeclarations TypeDeclarations
-
-ImportDeclarations
-ImportDeclarations ImportDeclarations ImportDeclaration
-
-TypeDeclarations
-TypeDeclarations TypeDeclarations TypeDeclaration
 
 // 7.4
 PackageDeclaration package PackageName ;
@@ -79,9 +70,11 @@ PackageDeclaration package PackageName ;
 ImportDeclaration SingleTypeImportDeclaration
 ImportDeclaration TypeImportOnDemandDeclaration
 
-SingleTypeImportDeclaration import TypeName ;
+// TODO in weeder: AmbiguousName must be a TypeName
+SingleTypeImportDeclaration import AmbiguousName ;
 
-TypeImportOnDemandDeclaration import PackageOrTypeName . * ;
+// TODO in weeder: AmbiguousName must be a PackageName or TypeName
+TypeImportOnDemandDeclaration import AmbiguousName . * ;
 
 // 7.6
 TypeDeclaration ClassDeclaration
@@ -91,28 +84,19 @@ TypeDeclaration ;
 // 8.1
 // Joos disallows private
 // Joos disallows nested types
-ClassDeclaration ClassModifiers class Identifier ClassBody
-ClassDeclaration ClassModifiers class Identifier Super ClassBody
-ClassDeclaration ClassModifiers class Identifier Interfaces ClassBody
-ClassDeclaration ClassModifiers class Identifier Super Interfaces ClassBody
+ClassDeclaration Modifiers class Identifier ClassBody
+ClassDeclaration Modifiers class Identifier Super ClassBody
+ClassDeclaration Modifiers class Identifier Interfaces ClassBody
+ClassDeclaration Modifiers class Identifier Super Interfaces ClassBody
 
-ClassModifiers
-ClassModifiers ClassModifiers ClassModifier
-
-ClassModifier public
-ClassModifier protected
-ClassModifier abstract
-ClassModifier static
-ClassModifier final
-
-// TODO in weeder: ClassOrInterfaceType must be a ClassType
-Super extends ClassOrInterfaceType
+// TODO in weeder: AmbiguousName must be a ClassType
+Super extends AmbiguousName
 
 Interfaces implements InterfaceTypeList
 
-// TODO in weeder: All ClassOrInterfaceTypes must be InterfaceTypes
-InterfaceTypeList ClassOrInterfaceType
-InterfaceTypeList InterfaceTypeList , ClassOrInterfaceType
+// TODO in weeder: All AmbiguousNames must be InterfaceTypes
+InterfaceTypeList AmbiguousName
+InterfaceTypeList InterfaceTypeList , AmbiguousName
 
 ClassBody { ClassBodyDeclarations }
 
@@ -133,7 +117,7 @@ ClassMemberDeclaration ;
 // Joos disallows transient fields
 // Joos disallows final fields
 
-FieldDeclaration FieldModifiers Type VariableDeclarator ;
+FieldDeclaration Modifiers Type VariableDeclarator ;
 
 VariableDeclarator VariableDeclaratorId
 VariableDeclarator VariableDeclaratorId = VariableInitializer
@@ -143,13 +127,6 @@ LocalVariableDeclarator VariableDeclaratorId
 VariableDeclaratorId Identifier
 
 VariableInitializer Expression
-    
-FieldModifiers
-FieldModifiers FieldModifiers FieldModifier
-
-FieldModifier public
-FieldModifier protected
-FieldModifier static
 
 // 8.4
 // Joos disallows array return type after method signature
@@ -157,10 +134,8 @@ FieldModifier static
 // Joos disallows native methods
 MethodDeclaration MethodHeader MethodBody
 
-MethodHeader MethodModifiers ResultType MethodDeclarator
-
-ResultType Type
-ResultType void
+MethodHeader Modifiers Type MethodDeclarator
+MethodHeader Modifiers void MethodDeclarator
 
 MethodDeclarator Identifier ( )
 MethodDeclarator Identifier ( FormalParameterList )
@@ -170,16 +145,19 @@ FormalParameterList FormalParameterList , FormalParameter
 
 FormalParameter Type VariableDeclaratorId
 
-VariableDeclaratorId Identifier
+Modifiers
+Modifiers Modifiers Modifier
 
-MethodModifiers
-MethodModifiers MethodModifiers MethodModifier
-
-MethodModifier public
-MethodModifier protected
-MethodModifier abstract
-MethodModifier static
-MethodModifier final
+// TODO in weeder: interface cannot be final
+// TODO in weeder: field cannot be abstract or final
+// constructor can only be public or protected
+// abstract method can only be public or abstract
+// constant can only be public, static or final
+Modifier public
+Modifier protected
+Modifier abstract
+Modifier static
+Modifier final
 
 MethodBody Block 
 MethodBody ;
@@ -191,36 +169,22 @@ MethodBody ;
 // Joos disallows static initializers
 
 // 8.8
-ConstructorDeclaration ConstructorModifiers ConstructorDeclarator ConstructorBody
+ConstructorDeclaration Modifiers ConstructorDeclarator ConstructorBody
 
 // The Identifier in the next 2 productions must match the simple name of the class.
 ConstructorDeclarator Identifier ( )
 ConstructorDeclarator Identifier ( FormalParameterList )
-	
-ConstructorModifiers
-ConstructorModifiers ConstructorModifiers ConstructorModifier
-
-ConstructorModifier public
-ConstructorModifier protected
 
 // Joos disallows explicit this() and super() calls
 ConstructorBody { BlockStatements }
 
 // 9.1
-InterfaceDeclaration InterfaceModifiers interface Identifier InterfaceBody
-InterfaceDeclaration InterfaceModifiers interface Identifier ExtendsInterfaces InterfaceBody
-		
-InterfaceModifiers
-InterfaceModifiers InterfaceModifiers InterfaceModifier
+InterfaceDeclaration Modifiers interface Identifier InterfaceBody
+InterfaceDeclaration Modifiers interface Identifier ExtendsInterfaces InterfaceBody
 
-InterfaceModifier public
-InterfaceModifier protected
-InterfaceModifier abstract
-InterfaceModifier static
-
-// TODO in weeder: All ClassOrInterfaceTypes must be InterfaceTypes
-ExtendsInterfaces extends ClassOrInterfaceType
-ExtendsInterfaces ExtendsInterfaces , ClassOrInterfaceType
+// TODO in weeder: All AmbiguousNames must be InterfaceTypes
+ExtendsInterfaces extends AmbiguousName
+ExtendsInterfaces ExtendsInterfaces , AmbiguousName
 	
 InterfaceBody { InterfaceMemberDeclarations }
 
@@ -235,23 +199,11 @@ InterfaceMemberDeclaration ;
 
 // 9.3
 
-ConstantDeclaration ConstantModifiers Type VariableDeclarator
-
-ConstantModifiers
-ConstantModifiers ConstantModifiers ConstantModifier 
-
-ConstantModifier public
-ConstantModifier static
-ConstantModifier final
+ConstantDeclaration Modifiers Type VariableDeclarator
 	
 // 9.4
-AbstractMethodDeclaration AbstractMethodModifiers ResultType MethodDeclarator ;
-
-AbstractMethodModifiers
-AbstractMethodModifiers AbstractMethodModifiers AbstractMethodModifier
-
-AbstractMethodModifier public
-AbstractMethodModifier abstract
+AbstractMethodDeclaration Modifiers Type MethodDeclarator ;
+AbstractMethodDeclaration Modifiers void MethodDeclarator ;
 	
 // 10.6
 // Joos disallows array initializers
@@ -368,8 +320,6 @@ Primary ArrayCreationExpression
 
 PrimaryNoNewArray Literal
 PrimaryNoNewArray this
-// TODO in weeder: ClassOrInterfaceType must be a ClassType
-PrimaryNoNewArray ClassOrInterfaceType . this
 PrimaryNoNewArray ( Expression )
 PrimaryNoNewArray ClassInstanceCreationExpression
 PrimaryNoNewArray FieldAccess
@@ -383,10 +333,11 @@ Literal StringLiteral
 Literal NullLiteral
 	
 // 15.9
-ClassInstanceCreationExpression new ClassOrInterfaceType ( )
-ClassInstanceCreationExpression new ClassOrInterfaceType ( ) ClassBody
-ClassInstanceCreationExpression new ClassOrInterfaceType ( ArgumentList )
-ClassInstanceCreationExpression new ClassOrInterfaceType ( ArgumentList ) ClassBody
+// TODO All AmbiguousNames must be ClassOrInterfaceTypes
+ClassInstanceCreationExpression new AmbiguousName ( )
+ClassInstanceCreationExpression new AmbiguousName ( ) ClassBody
+ClassInstanceCreationExpression new AmbiguousName ( ArgumentList )
+ClassInstanceCreationExpression new AmbiguousName ( ArgumentList ) ClassBody
 ClassInstanceCreationExpression Primary . new Identifier ( )
 ClassInstanceCreationExpression Primary . new Identifier ( ) ClassBody
 ClassInstanceCreationExpression Primary . new Identifier ( ArgumentList )
@@ -398,13 +349,13 @@ ArgumentList ArgumentList , Expression
 // 15.10
 // Joos disallows multi-dimensional arrays
 ArrayCreationExpression new PrimitiveType DimExpr
-ArrayCreationExpression new TypeName DimExpr
-ArrayCreationExpression new PrimitiveType Dims 
-ArrayCreationExpression new TypeName Dims
+// TODO in weeder: AmbiguousName must be a TypeName
+ArrayCreationExpression new AmbiguousName DimExpr
+ArrayCreationExpression new PrimitiveType [ ]
+// TODO in weeder: AmbiguousName must be a TypeName
+ArrayCreationExpression new AmbiguousName [ ]
 
 DimExpr [ Expression ]
-
-Dims [ ]
 
 // 15.11
 // Joos disallows super field access
@@ -412,18 +363,21 @@ FieldAccess Primary . Identifier
 
 // 15.12
 // Joos disallows super() calls
-MethodInvocation MethodName ( )
-MethodInvocation MethodName ( ArgumentList )
+// TODO These AmbiguousNames must be MethodNames
+MethodInvocation AmbiguousName ( )
+MethodInvocation AmbiguousName ( ArgumentList )
 MethodInvocation Primary . Identifier ( )
 MethodInvocation Primary . Identifier ( ArgumentList )
 	
 // 15.13
-ArrayAccess ExpressionName [ Expression ]
+// TODO ReferenceTypeNonArray must be an ExpressionName
+ArrayAccess ReferenceTypeNonArray [ Expression ]
 ArrayAccess PrimaryNoNewArray [ Expression ]
 
 // 15.14
 PostfixExpression Primary
-PostfixExpression ExpressionName
+// TODO AmbiguousName must be an ExpressionName
+PostfixExpression AmbiguousName
 	
 // 15.15
 // Joos disallows unary plus
@@ -437,7 +391,6 @@ UnaryExpressionNotPlusMinus CastExpression
 	
 // 15.16
 CastExpression ( PrimitiveType ) UnaryExpression
-CastExpression ( PrimitiveType Dims ) UnaryExpression
 CastExpression ( ReferenceType ) UnaryExpressionNotPlusMinus
 
 // 15.17
@@ -494,7 +447,8 @@ AssignmentExpression Assignment
 
 Assignment LeftHandSide AssignmentOperator AssignmentExpression
 
-LeftHandSide ExpressionName
+// TODO AmbiguousName must be an ExpressionName
+LeftHandSide AmbiguousName
 LeftHandSide FieldAccess
 LeftHandSide ArrayAccess
 
