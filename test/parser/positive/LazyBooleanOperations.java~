@@ -1,6 +1,0 @@
-public class LazyBooleanOperations.java {
-  public LazyBooleanOperations.java() {}
-  public boolean m(boolean x) {
-    return (x && true) || x;
-  }
-}

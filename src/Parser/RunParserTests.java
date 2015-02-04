@@ -8,7 +8,7 @@ public class RunParserTests {
 
     final static String LR1_FILE = "joosc/src/Parser/joos1w.lr1"; 
     final static String POSITIVES_DIR = "joosc/test/parser/positive/";
-    final static String NEGATIVES_DIR = "joosc/test/parser/positive/";
+    final static String NEGATIVES_DIR = "joosc/test/parser/negative/";
     
     public static void main(String[] args) {
         PrintStream stdout = System.out;

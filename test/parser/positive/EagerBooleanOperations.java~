@@ -1,6 +1,0 @@
-public class EagerBooleanOperations.java {
-  public EagerBooleanOperations.java() {}
-  public boolean m(boolean x) {
-    return (x & true) | !x;
-  }
-}
