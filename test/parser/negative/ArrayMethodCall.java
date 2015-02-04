@@ -1,0 +1,7 @@
+public class ArrayMethodCall {
+    public ArrayMethodCall(){}
+  public void m() {
+    int[] x = new int[42];
+    x.clone();
+  }
+}

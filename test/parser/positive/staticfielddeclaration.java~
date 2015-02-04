@@ -1,0 +1,3 @@
+public class staticfielddeclaration {
+  protected static int x;
+}

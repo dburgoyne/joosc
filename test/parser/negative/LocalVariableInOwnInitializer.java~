@@ -1,0 +1,6 @@
+public class LocalVariableInOwnInitializer.java {
+  public LocalVariableInOwnInitializer.java() {}
+  public void m() {
+    int x  = (x = 1) + x;
+  }
+}
