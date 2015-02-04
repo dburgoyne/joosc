@@ -166,37 +166,35 @@ class ParseTable{
         
         while (!tokenList.isEmpty()) {
         	// Read one symbol of input.
-        	Token token = tokenList.remove(0);
-        	
-        	System.out.println("About to look up transition");
-        	System.out.println("stateStack.peek(): " + stateStack.peek() + "; token.getCfgName(): " + token.getCfgName());
+        	Token token = tokenList.get(0);
             Transition transition = transitions.get(new Pair<Integer, String>(stateStack.peek(), token.getCfgName()));
 
-            if (transition.shift){
-            	stateStack.push(transition.target);
-            	symbolStack.push(new Terminal(token));
-            } else {
-            	// Reduce as long as we are able to.
-            	while (!transition.shift) {
-            		List<String> rule = rules.get(transition.target);
-            		String lhs = rule.get(0);
-            		System.out.println("Reducing a " + lhs);
-            		
-            		List<ParseTree> children = new ArrayList<ParseTree>();
-            		for (int i = 1; i < rule.size(); i++) {
-            			// Pop both stacks.
-            			stateStack.pop();
-            			children.add(0, symbolStack.pop());
-            		}
-            		
-            		// Build a ParseTree representing the LHS of the rule and push it.
-            		ParseTree newNode = new NonTerminal(lhs, children.toArray(new ParseTree[0]));
-            		symbolStack.push(newNode);
-            		
-            		// Move into the new state.
-            		transition = transitions.get(new Pair<Integer, String>(stateStack.peek(), newNode.getSymbol()));
-            	}
-            }
+    		System.out.println(stateStack.peek()+ " " + token.getCfgName());
+            // Reduce as long as we are able to.
+        	while (!transition.shift) {
+        		List<String> rule = rules.get(transition.target);
+        		String lhs = rule.get(0);
+        		System.out.println("Reducing to " + lhs);
+        		
+        		List<ParseTree> children = new ArrayList<ParseTree>();
+        		for (int i = 1; i < rule.size(); i++) {
+        			// Pop both stacks.
+        			stateStack.pop();
+        			children.add(0, symbolStack.pop());
+        		}
+        		
+        		// Build a ParseTree representing the LHS of the rule and push it.
+        		ParseTree newNode = new NonTerminal(lhs, children.toArray(new ParseTree[0]));
+        		symbolStack.push(newNode);
+        		
+        		// Move into the new state.
+        		stateStack.push(transitions.get(new Pair<Integer, String>(stateStack.peek(), newNode.getSymbol())).target);
+        		transition = transitions.get(new Pair<Integer, String>(stateStack.peek(), token.getCfgName()));
+        	}
+        	System.out.println("Shifting " + token.getCfgName());
+        	stateStack.push(transition.target);
+        	symbolStack.push(new Terminal(token));
+        	tokenList.remove(0);
         }
         
         assert symbolStack.size() == 1;

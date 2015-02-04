@@ -2,7 +2,7 @@ public class joos1w_test1 {
 
 	public static void main(String[] args) {
 	
-		int x = 3;
+		int x = 5;
 		System.out.println(x);
 	
 	}

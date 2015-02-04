@@ -21,15 +21,13 @@
 // TODO
 
 // 7.3
-CompilationUnit ImportDeclarations TypeDeclarations
-CompilationUnit PackageDeclaration ImportDeclarations TypeDeclarations
+CompilationUnit TypeDeclaration
+CompilationUnit PackageDeclaration TypeDeclaration
+CompilationUnit ImportDeclarations TypeDeclaration
+CompilationUnit PackageDeclaration ImportDeclarations TypeDeclaration
 
-
-ImportDeclarations
+ImportDeclarations ImportDeclaration
 ImportDeclarations ImportDeclarations ImportDeclaration
-
-TypeDeclarations
-TypeDeclarations TypeDeclarations TypeDeclaration
 
 // Productions
 // 4.1
@@ -86,6 +84,10 @@ TypeDeclaration ;
 // 8.1
 // Joos disallows private
 // Joos disallows nested types
+ClassDeclaration class Identifier ClassBody
+ClassDeclaration class Identifier Super ClassBody
+ClassDeclaration class Identifier Interfaces ClassBody
+ClassDeclaration class Identifier Super Interfaces ClassBody
 ClassDeclaration Modifiers class Identifier ClassBody
 ClassDeclaration Modifiers class Identifier Super ClassBody
 ClassDeclaration Modifiers class Identifier Interfaces ClassBody
@@ -100,9 +102,10 @@ Interfaces implements InterfaceTypeList
 InterfaceTypeList AmbiguousName
 InterfaceTypeList InterfaceTypeList , AmbiguousName
 
+ClassBody { }
 ClassBody { ClassBodyDeclarations }
 
-ClassBodyDeclarations
+ClassBodyDeclarations ClassBodyDeclaration
 ClassBodyDeclarations ClassBodyDeclarations ClassBodyDeclaration
 
 ClassBodyDeclaration ClassMemberDeclaration
@@ -119,12 +122,14 @@ ClassMemberDeclaration ;
 // Joos disallows transient fields
 // Joos disallows final fields
 
+FieldDeclaration Type VariableDeclarator ;
 FieldDeclaration Modifiers Type VariableDeclarator ;
+
 
 VariableDeclarator VariableDeclaratorId
 VariableDeclarator VariableDeclaratorId = VariableInitializer
 
-LocalVariableDeclarator VariableDeclaratorId
+LocalVariableDeclarator VariableDeclaratorId = VariableInitializer
 
 VariableDeclaratorId Identifier
 
@@ -136,6 +141,8 @@ VariableInitializer Expression
 // Joos disallows native methods
 MethodDeclaration MethodHeader MethodBody
 
+MethodHeader Type MethodDeclarator
+MethodHeader void MethodDeclarator
 MethodHeader Modifiers Type MethodDeclarator
 MethodHeader Modifiers void MethodDeclarator
 
@@ -147,7 +154,7 @@ FormalParameterList FormalParameterList , FormalParameter
 
 FormalParameter Type VariableDeclaratorId
 
-Modifiers
+Modifiers Modifier
 Modifiers Modifiers Modifier
 
 // TODO in weeder: interface cannot be final
@@ -171,6 +178,7 @@ MethodBody ;
 // Joos disallows static initializers
 
 // 8.8
+ConstructorDeclaration ConstructorDeclarator ConstructorBody
 ConstructorDeclaration Modifiers ConstructorDeclarator ConstructorBody
 
 // The Identifier in the next 2 productions must match the simple name of the class.
@@ -178,9 +186,12 @@ ConstructorDeclarator Identifier ( )
 ConstructorDeclarator Identifier ( FormalParameterList )
 
 // Joos disallows explicit this() and super() calls
+ConstructorBody { }
 ConstructorBody { BlockStatements }
 
 // 9.1
+InterfaceDeclaration interface Identifier InterfaceBody
+InterfaceDeclaration interface Identifier ExtendsInterfaces InterfaceBody
 InterfaceDeclaration Modifiers interface Identifier InterfaceBody
 InterfaceDeclaration Modifiers interface Identifier ExtendsInterfaces InterfaceBody
 
@@ -188,9 +199,10 @@ InterfaceDeclaration Modifiers interface Identifier ExtendsInterfaces InterfaceB
 ExtendsInterfaces extends AmbiguousName
 ExtendsInterfaces ExtendsInterfaces , AmbiguousName
 	
+InterfaceBody { }
 InterfaceBody { InterfaceMemberDeclarations }
 
-InterfaceMemberDeclarations
+InterfaceMemberDeclarations InterfaceMemberDeclaration
 InterfaceMemberDeclarations InterfaceMemberDeclarations InterfaceMemberDeclaration
 
 InterfaceMemberDeclaration ConstantDeclaration
@@ -201,9 +213,12 @@ InterfaceMemberDeclaration ;
 
 // 9.3
 
+ConstantDeclaration Type VariableDeclarator
 ConstantDeclaration Modifiers Type VariableDeclarator
 	
 // 9.4
+AbstractMethodDeclaration Type MethodDeclarator ;
+AbstractMethodDeclaration void MethodDeclarator ;
 AbstractMethodDeclaration Modifiers Type MethodDeclarator ;
 AbstractMethodDeclaration Modifiers void MethodDeclarator ;
 	
@@ -211,13 +226,13 @@ AbstractMethodDeclaration Modifiers void MethodDeclarator ;
 // Joos disallows array initializers
 
 // 14.2
+Block { }
 Block { BlockStatements }
 
-BlockStatements
+BlockStatements BlockStatement
 BlockStatements BlockStatements BlockStatement
 
 BlockStatement LocalVariableDeclarationStatement
-BlockStatement ClassDeclaration
 BlockStatement Statement
 	
 // 14.4
@@ -337,13 +352,7 @@ Literal NullLiteral
 // 15.9
 // TODO All AmbiguousNames must be ClassOrInterfaceTypes
 ClassInstanceCreationExpression new AmbiguousName ( )
-ClassInstanceCreationExpression new AmbiguousName ( ) ClassBody
 ClassInstanceCreationExpression new AmbiguousName ( ArgumentList )
-ClassInstanceCreationExpression new AmbiguousName ( ArgumentList ) ClassBody
-ClassInstanceCreationExpression Primary . new Identifier ( )
-ClassInstanceCreationExpression Primary . new Identifier ( ) ClassBody
-ClassInstanceCreationExpression Primary . new Identifier ( ArgumentList )
-ClassInstanceCreationExpression Primary . new Identifier ( ArgumentList ) ClassBody
 
 ArgumentList Expression
 ArgumentList ArgumentList , Expression
