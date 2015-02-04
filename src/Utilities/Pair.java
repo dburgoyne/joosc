@@ -30,4 +30,25 @@ public class Pair<L, R> {
     public R getRight() {
         return right;
     }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Pair<?,?> other = (Pair<?,?>) obj;
+        if (left != other.left)
+            return false;
+        if (right != other.right)
+            return false;
+        return true;
+    }
+    
+    @Override
+    public int hashCode() {
+        return (this.left.hashCode()*711) ^ this.right.hashCode();
+    }
 }

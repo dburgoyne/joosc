@@ -21,7 +21,9 @@
 // TODO
 
 // 7.3
+CompilationUnit ImportDeclarations TypeDeclarations
 CompilationUnit PackageDeclaration ImportDeclarations TypeDeclarations
+
 
 ImportDeclarations
 ImportDeclarations ImportDeclarations ImportDeclaration

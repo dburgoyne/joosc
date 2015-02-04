@@ -15,7 +15,7 @@
 package Scanner;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -90,7 +90,7 @@ public class Scanner {
 
 	public static List<Token> scan(String joosSourceFileName, String joosSource) {
 
-		List<Token> tokens = new ArrayList<Token>();
+		List<Token> tokens = new LinkedList<Token>();
 		int line = 1, column = 1;
 
 		while (joosSource.length() > 0) {
@@ -112,7 +112,7 @@ public class Scanner {
 				return null;
 			}
 			String lexeme = joosSource.substring(0, longestMatchLength);
-			List<TokenType> largestList = new ArrayList<TokenType>();
+			List<TokenType> largestList = new LinkedList<TokenType>();
 			for (Entry<TokenType, Integer> entry : matchLengths.entrySet()) {
 				if (entry.getValue() == longestMatchLength) {
 					largestList.add(entry.getKey());
@@ -131,11 +131,11 @@ public class Scanner {
 			}
 			TokenType tokenType = largestList.get(0);
 			// If the longest match was unique, we know how to consume it.
-			System.out.println("Consuming \"" + lexeme + "\" as "
-					+ tokenType.name());
-			// TODO Store the lexeme and token type in a Token object, and
-			// add it to a list.
-			tokens.add(new Token(lexeme, tokenType, joosSourceFileName, line, column));
+			if (tokenType != TokenType.WhiteSpace && tokenType != TokenType.Comment) {
+				System.out.println("Consuming \"" + lexeme + "\" as "
+						+ tokenType.name());
+				tokens.add(new Token(lexeme, tokenType, joosSourceFileName, line, column));
+			}
 
 			// Calculate the new line and column number.
 			int numberOfNewlines = StringUtils.countNewlines(lexeme);

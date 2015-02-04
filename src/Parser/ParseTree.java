@@ -11,9 +11,11 @@ public interface ParseTree {
     ParseTree[] getChildren();
     void setChildren(ParseTree... newChildren);
     void visit(Visitor v);
+    public String getRuleString();
+    public String getSymbol();
     public interface Visitor {
         void visit(Token t); // Terminal node
-        void visit(String rule, ParseTree... children); // Non-Terminal
+        void visit(String lhs, ParseTree... children); // Non-Terminal
     }
 }
 
@@ -22,23 +24,39 @@ abstract class AParseTree implements ParseTree {
     public ParseTree[] getChildren() { return children; }
     public void setChildren(ParseTree... newChildren) { children = newChildren; }
     protected AParseTree(ParseTree... children) { this.children = children; }
+    
+    public String getRuleString() {
+    	String s = getSymbol();
+    	for (ParseTree child : children) {
+    		s += " " + child.getSymbol();
+    	}
+    	return s;
+    }
 }
 
 class Terminal extends AParseTree {
     public final Token token;
-    public Terminal(Token t, ParseTree... children) { super(children); token = t; }
+    public Terminal(Token t) {
+    	token = t;
+    	}
     @Override public void visit(Visitor v) {
         v.visit(token);
+    }
+    public String getSymbol() {
+        return token.getCfgName();
     }
 }
 
 class NonTerminal extends AParseTree {
-    public final String rule;
-    public NonTerminal(String rule, ParseTree... children) {
+    public final String lhs;
+    public NonTerminal(String lhs, ParseTree... children) {
         super(children);
-        this.rule = rule;
+        this.lhs = lhs;
     }
     @Override public void visit(Visitor v) {
-        v.visit(rule, children);
+        v.visit(lhs, children);
+    }
+    public String getSymbol() {
+        return lhs;
     }
 }
