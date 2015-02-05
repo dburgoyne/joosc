@@ -407,6 +407,7 @@ AdditiveExpression AdditiveExpression - MultiplicativeExpression
 // Joos disallows bit shifts
 
 // 15.20
+RelationalExpression AdditiveExpression
 RelationalExpression RelationalExpression < AdditiveExpression
 RelationalExpression RelationalExpression > AdditiveExpression
 RelationalExpression RelationalExpression <= AdditiveExpression
@@ -443,7 +444,6 @@ ConditionalOrExpression ConditionalOrExpression || ConditionalAndExpression
 // Joos disallows compound assignment operators
 AssignmentExpression ConditionalOrExpression
 AssignmentExpression Assignment
-AssignmentExpression UnaryExpression
 
 Assignment LeftHandSide AssignmentOperator AssignmentExpression
 

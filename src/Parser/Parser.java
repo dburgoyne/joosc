@@ -198,7 +198,8 @@ class ParseTable{
         	tokenList.remove(0);
         }
         
-        assert symbolStack.size() == 1;
-        return symbolStack.peek();
+        // Since S -> CompilationUnit EOF is the start symbol,
+        // contents of symbolStack should now be [CompilationUnit, EOF].
+        return symbolStack.firstElement();
 	}
 }
