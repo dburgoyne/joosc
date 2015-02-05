@@ -1,4 +1,4 @@
 public class Implements implements java.io.Serializable {
-  public Implements() {}
-  int x;
+    public Implements() {}
+    public int x;
 }

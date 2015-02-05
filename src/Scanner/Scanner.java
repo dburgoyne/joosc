@@ -62,7 +62,7 @@ public class Scanner {
 			TokenType.CharacterLiteral, TokenType.StringLiteral,
 			TokenType.NullLiteral, TokenType.Separator, TokenType.Identifier,
 			TokenType.Keyword, TokenType.Operator, TokenType.WhiteSpace,
-			TokenType.Comment, };
+			TokenType.Comment, TokenType.JavadocComment };
 
 	// Returns the length of the longest prefix of s that matches r. Examples:
 	// longestPrefix("ab*", "abbbbderp") = 5
@@ -133,7 +133,9 @@ public class Scanner {
 			}
 			TokenType tokenType = largestList.get(0);
 			// If the longest match was unique, we know how to consume it.
-			if (tokenType != TokenType.WhiteSpace && tokenType != TokenType.Comment) {
+			if (tokenType != TokenType.WhiteSpace
+			        && tokenType != TokenType.Comment
+			        && tokenType != TokenType.JavadocComment) {
 				System.out.println("Consuming \"" + lexeme + "\" as "
 						+ tokenType.name());
 				tokens.add(new Token(lexeme, tokenType, joosSourceFileName, line, column));

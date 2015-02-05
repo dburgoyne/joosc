@@ -325,7 +325,7 @@ Primary ArrayCreationExpression
 
 PrimaryNoNewArray Literal
 PrimaryNoNewArray this
-// PrimaryNoNewArray ( Expression )
+PrimaryNoNewArray ( Expression )
 PrimaryNoNewArray ClassInstanceCreationExpression
 PrimaryNoNewArray FieldAccess
 PrimaryNoNewArray MethodInvocation
@@ -390,7 +390,9 @@ UnaryExpressionNotPlusMinus CastExpression
 	
 // 15.16
 CastExpression ( PrimitiveType ) UnaryExpression
-CastExpression ( ReferenceType ) UnaryExpressionNotPlusMinus
+CastExpression ( ReferenceTypeArray ) UnaryExpressionNotPlusMinus
+// TODO in weeder: Expression is the name of a non-array ReferenceType
+CastExpression ( Expression ) UnaryExpressionNotPlusMinus
 
 // 15.17
 MultiplicativeExpression UnaryExpression
