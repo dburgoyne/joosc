@@ -337,7 +337,7 @@ Primary ArrayCreationExpression
 
 PrimaryNoNewArray Literal
 PrimaryNoNewArray this
-PrimaryNoNewArray ( Expression )
+// PrimaryNoNewArray ( Expression )
 PrimaryNoNewArray ClassInstanceCreationExpression
 PrimaryNoNewArray FieldAccess
 PrimaryNoNewArray MethodInvocation
@@ -455,6 +455,7 @@ ConditionalOrExpression ConditionalOrExpression || ConditionalAndExpression
 // Joos disallows compound assignment operators
 AssignmentExpression ConditionalOrExpression
 AssignmentExpression Assignment
+AssignmentExpression UnaryExpression
 
 Assignment LeftHandSide AssignmentOperator AssignmentExpression
 
