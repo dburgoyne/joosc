@@ -13,6 +13,8 @@ public interface ParseTree {
     void visit(Visitor v);
     public String getRuleString();
     public String getSymbol();
+    public boolean isTerminal();
+    public Token getToken();
     public interface Visitor {
         void visit(Token t); // Terminal node
         void visit(String lhs, ParseTree... children); // Non-Terminal
@@ -45,6 +47,14 @@ class Terminal extends AParseTree {
     public String getSymbol() {
         return token.getCfgName();
     }
+    
+    public boolean isTerminal(){
+    	return true;
+    }
+    
+    public Token getToken(){
+    	return token;
+    }
 }
 
 class NonTerminal extends AParseTree {
@@ -58,5 +68,13 @@ class NonTerminal extends AParseTree {
     }
     public String getSymbol() {
         return lhs;
+    }
+    
+    public boolean isTerminal(){
+    	return false;
+    }
+    
+    public Token getToken(){
+    	return null;
     }
 }
