@@ -59,8 +59,9 @@ public class Parser{
 		
 		// Scanning
         List<Token> tokens = Scanner.Scanner.scan(args[1], inputSource);
-		
-		// Parsing
+        tokens.add(new Token("$", Scanner.TokenType.EOF, args[1], -1, -1));
+
+        // Parsing
 		ParseTree pt = parseTable.parse(tokens);
 		
 		// Print parse tree

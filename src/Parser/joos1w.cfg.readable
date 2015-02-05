@@ -2,23 +2,8 @@
 // To generate the actual .cfg file, discard all blank lines and
 // lines beginning with "//".
 
-// Number of terminals
-// TODO
-
-// Terminals
-// TODO
-
-// Number of non-terminals
-// TODO
-
-// Non-terminals
-// TODO
-
-// Start symbol
-// TODO
-
-// Number of productions
-// TODO
+// (This line helps generate parse tree with less difficulty..?)
+S CompilationUnit EOF
 
 // 7.3
 CompilationUnit TypeDeclaration
@@ -84,10 +69,11 @@ TypeDeclaration ;
 // 8.1
 // Joos disallows private
 // Joos disallows nested types
-ClassDeclaration class Identifier ClassBody
-ClassDeclaration class Identifier Super ClassBody
-ClassDeclaration class Identifier Interfaces ClassBody
-ClassDeclaration class Identifier Super Interfaces ClassBody
+// Joos disallows package private classes. 
+//ClassDeclaration class Identifier ClassBody
+//ClassDeclaration class Identifier Super ClassBody
+//ClassDeclaration class Identifier Interfaces ClassBody
+//ClassDeclaration class Identifier Super Interfaces ClassBody
 ClassDeclaration Modifiers class Identifier ClassBody
 ClassDeclaration Modifiers class Identifier Super ClassBody
 ClassDeclaration Modifiers class Identifier Interfaces ClassBody
@@ -122,7 +108,8 @@ ClassMemberDeclaration ;
 // Joos disallows transient fields
 // Joos disallows final fields
 
-FieldDeclaration Type VariableDeclarator ;
+// Joos disallows package private fields
+//FieldDeclaration Type VariableDeclarator ;
 FieldDeclaration Modifiers Type VariableDeclarator ;
 
 
@@ -138,11 +125,12 @@ VariableInitializer Expression
 // 8.4
 // Joos disallows array return type after method signature
 // Joos disallows final formal parameters
-// Joos disallows native methods
+// Joos disallows native methods with MethodBody
 MethodDeclaration MethodHeader MethodBody
 
-MethodHeader Type MethodDeclarator
-MethodHeader void MethodDeclarator
+// Joos disallows package private concrete methods
+//MethodHeader Type MethodDeclarator
+//MethodHeader void MethodDeclarator
 MethodHeader Modifiers Type MethodDeclarator
 MethodHeader Modifiers void MethodDeclarator
 
@@ -162,11 +150,13 @@ Modifiers Modifiers Modifier
 // constructor can only be public or protected
 // abstract method can only be public or abstract
 // constant can only be public, static or final
+// only `static int m(int x);' abstractmethoddecls can be native.
 Modifier public
 Modifier protected
 Modifier abstract
 Modifier static
 Modifier final
+Modifier native
 
 MethodBody Block 
 MethodBody ;
@@ -190,8 +180,9 @@ ConstructorBody { }
 ConstructorBody { BlockStatements }
 
 // 9.1
-InterfaceDeclaration interface Identifier InterfaceBody
-InterfaceDeclaration interface Identifier ExtendsInterfaces InterfaceBody
+// Joos disallows package private interfaces
+//InterfaceDeclaration interface Identifier InterfaceBody
+//InterfaceDeclaration interface Identifier ExtendsInterfaces InterfaceBody
 InterfaceDeclaration Modifiers interface Identifier InterfaceBody
 InterfaceDeclaration Modifiers interface Identifier ExtendsInterfaces InterfaceBody
 
@@ -205,18 +196,15 @@ InterfaceBody { InterfaceMemberDeclarations }
 InterfaceMemberDeclarations InterfaceMemberDeclaration
 InterfaceMemberDeclarations InterfaceMemberDeclarations InterfaceMemberDeclaration
 
-InterfaceMemberDeclaration ConstantDeclaration
+// Joos disallows interface constants, nested type declarations.
+//InterfaceMemberDeclaration ConstantDeclaration
 InterfaceMemberDeclaration AbstractMethodDeclaration
-InterfaceMemberDeclaration ClassDeclaration 
-InterfaceMemberDeclaration InterfaceDeclaration
+//InterfaceMemberDeclaration ClassDeclaration 
+//InterfaceMemberDeclaration InterfaceDeclaration
 InterfaceMemberDeclaration ;
 
-// 9.3
-
-ConstantDeclaration Type VariableDeclarator
-ConstantDeclaration Modifiers Type VariableDeclarator
-	
 // 9.4
+// TODO in weeder: if abstract method in class, should not be package private.
 AbstractMethodDeclaration Type MethodDeclarator ;
 AbstractMethodDeclaration void MethodDeclarator ;
 AbstractMethodDeclaration Modifiers Type MethodDeclarator ;
@@ -469,5 +457,5 @@ AssignmentOperator =
 // 15.27
 Expression AssignmentExpression
 	
-// 15.28
-ConstantExpression Expression
+// 15.28 Not used anywhere?
+// ConstantExpression Expression
