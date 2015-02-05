@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import Parser.ParseTree;
 import Scanner.Token;
+import Scanner.TokenType;
 
 public class Weeder{
 	public int weed(ParseTree tree){
@@ -20,7 +21,8 @@ public class Weeder{
 		// Terminal symbol
 		if(tree.isTerminal()){
 			Token token=tree.getToken();
-			if(!validSevenBit(token.getFileName())){
+			TokenType type=token.getTokenType();
+			if((type.equals(TokenType.StringLiteral)||type.equals(TokenType.Identifier)||type.equals(TokenType.CharacterLiteral))&&!validSevenBit(token.getFileName())){
 				throw new WeederException(token,"Input contains an invalid 7-bit ASCII character");
 			}
 		}else{
@@ -30,7 +32,8 @@ public class Weeder{
 			if(symbol.equals("ClassDeclaration")){
 				for(ParseTree child:children){
 					if(child.getSymbol().equals("Modifiers")){
-						ArrayList<String> modifiers=classModifierList(child);
+						ArrayList<String> modifiers=modifierList(child);
+						// A class cannot be both abstract and final
 						if(modifiers.contains("abstract")&&modifiers.contains("final")){
 							assert children[2].isTerminal();
 							throw new WeederException(children[2].getToken(),"Class is both abstract and final");
@@ -38,6 +41,36 @@ public class Weeder{
 					}else{
 						weedBranch(child);
 					}
+				}
+			// Method declaration
+			}else if(symbol.equals("MethodHeader")){
+				ArrayList<String> modifiers=null;
+				boolean abs=false;
+				boolean hasBody=false;
+				Token idToken=null;
+				for(ParseTree child:children){
+					if(child.getSymbol().equals("Modifiers")){
+						modifiers=modifierList(child);
+						abs=modifiers.contains("abstract");
+					}else if(child.getSymbol().equals("MethodDeclarator")){
+						hasBody=child.getChildren().length==4;
+						idToken=child.getChildren()[0].getToken();
+						weedBranch(child);
+					}else{
+						weedBranch(child);
+					}
+				}
+				// A method has a body if and only if it is not abstract
+				// An abstract method cannot be static or final
+				// A static method cannot be final
+				if(abs==hasBody){
+					throw new WeederException(idToken,"A Method has a body if and only if it is not abstract");
+				}
+				if(abs&&(modifiers.contains("static")||modifiers.contains("final"))){
+					throw new WeederException(idToken,"An abstract method cannot be static or final");
+				}
+				if(modifiers.contains("static")&&modifiers.contains("final")){
+					throw new WeederException(idToken,"A static method cannot be final");
 				}
 			// Otherwise
 			}else{
@@ -58,11 +91,11 @@ public class Weeder{
 		return true;
 	}
 	
-	// A class cannot be both abstract and final
-	private ArrayList<String> classModifierList(ParseTree tree){
+	// Grab all modifiers
+	private ArrayList<String> modifierList(ParseTree tree){
 		ParseTree[] children=tree.getChildren();
 		if(children[0].getSymbol().equals("Modifiers")){
-			ArrayList<String> modifiers=classModifierList(children[0]);
+			ArrayList<String> modifiers=modifierList(children[0]);
 			modifiers.add(children[1].getSymbol());
 			return modifiers;
 		}else{
