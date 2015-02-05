@@ -35,7 +35,7 @@ public class RunParserTests {
             stdout.printf("%-60s", "-> " + filename + ":");
             try {
                 Parser.main(new String[] { LR1_FILE, NEGATIVES_DIR + filename});
-                stdout.println("--- FAIL ---");
+                System.err.println("--- FAIL ---");
             } catch (Exception e) {
                 stdout.println("+++ PASS +++");
                 negatives_passed++;
@@ -51,7 +51,7 @@ public class RunParserTests {
                 stdout.println("+++ PASS +++");
                 positives_passed++;
             } catch (Exception e) {
-                stdout.println("--- FAIL ---");
+                System.err.println("--- FAIL ---");
             }
         }
         

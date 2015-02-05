@@ -118,9 +118,11 @@ public class Scanner {
 					largestList.add(entry.getKey());
 				}
 			}
-			// If Identifier and Keyword both matched, choose Keyword.
+			// If Identifier and Keyword/NullLiteral/BooleanLiteral both matched, choose the latter.
 			if (largestList.contains(TokenType.Identifier)
-					&& largestList.contains(TokenType.Keyword)) {
+					&& (largestList.contains(TokenType.Keyword) ||
+			            largestList.contains(TokenType.NullLiteral) ||
+                        largestList.contains(TokenType.BooleanLiteral))) {
 				largestList.remove(TokenType.Identifier);
 			}
 
