@@ -19,7 +19,9 @@ public class RunParserTests {
         }));
 
         ArrayList<String> positives = new ArrayList<String>();
+        int positives_passed = 0;
         ArrayList<String> negatives = new ArrayList<String>();
+        int negatives_passed = 0;
 
         for (File entry : new File(POSITIVES_DIR).listFiles())
             if (entry.getName().endsWith(".java"))
@@ -36,8 +38,10 @@ public class RunParserTests {
                 stdout.println("--- FAIL ---");
             } catch (Exception e) {
                 stdout.println("+++ PASS +++");
+                negatives_passed++;
             }
         }
+        stdout.println("=== Passed " + negatives_passed + " / " + negatives.size() + " tests ===");
         
         stdout.println("\n=== TESTING POSITIVES ===");
         for (String filename : positives) {
@@ -45,10 +49,13 @@ public class RunParserTests {
             try {
                 Parser.main(new String[] { LR1_FILE, POSITIVES_DIR + filename});
                 stdout.println("+++ PASS +++");
+                positives_passed++;
             } catch (Exception e) {
                 stdout.println("--- FAIL ---");
             }
         }
+        
+        stdout.println("=== Passed " + positives_passed + " / " + positives.size() + " tests ===");
     }
     
     
