@@ -16,7 +16,7 @@ public interface ParseTree {
     public boolean isTerminal();
     public Token getToken();
     public interface Visitor {
-        void visit(Token t); // Terminal node
+    	void visit(Token t); // Terminal node
         void visit(String lhs, ParseTree... children); // Non-Terminal
     }
 }
