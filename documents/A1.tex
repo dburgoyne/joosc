@@ -41,7 +41,7 @@ We tested the parser against a few valid inputs (produced by our scanner) before
 
 \section{Weeding}
 
-TODO: Describe the weeding process.
+Our weeder performs three traversals of the parse tree using the visitor pattern described in lecture.  The first pass detects nearly all disallowed syntax that was not caught during scanning or parsing.  Invalid class, interface and method modifiers; classes lacking constructors; public classes whose names do not match the names of the files they appear in; and abstract methods with bodies are detected during this pass.  The second pass detects invalid cast expressions, which may appear due to relaxations we made in the syntactic grammar to make it LR(1).  The third pass detects integer literals and enforces that they are within the valid range for a Java integer.
 
 Once the weeder was largely complete, we began to test our compiler as a whole.
 
