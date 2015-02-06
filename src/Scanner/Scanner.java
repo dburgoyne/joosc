@@ -107,7 +107,8 @@ public class Scanner {
 			int longestMatchLength = Collections.max(matchLengths.values());
 			if (longestMatchLength == 0) {
 				System.err
-						.println("ERROR: Invalid lexical input element at line "
+						.println("ERROR: Invalid lexical input element at "
+						        + "file " + joosSourceFileName + ", line "
 								+ line + ", column " + column);
 				return null;
 			}
@@ -127,8 +128,9 @@ public class Scanner {
 			}
 
 			if (largestList.size() != 1) {
-				System.err
-						.println("ERROR: Don't know how to consume " + lexeme);
+				System.err.printf("ERROR: Don't know how to consume lexeme '%s'" + 
+				                "\n in file %s, line %d, column %d\n", 
+				                  lexeme, joosSourceFileName, line, column);
 				return null;
 			}
 			TokenType tokenType = largestList.get(0);

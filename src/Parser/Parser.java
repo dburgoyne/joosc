@@ -1,10 +1,8 @@
 package Parser;
 
 import java.io.IOException;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Deque;
 import java.util.Stack;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +33,6 @@ public class Parser{
 		// Store parse table
 		int numTerminal=Integer.parseInt(lrLines[0]);
 		int numNonTerminal=Integer.parseInt(lrLines[numTerminal+1]);
-		String startSymbol=lrLines[numTerminal+numNonTerminal+2];
 		int numRule=Integer.parseInt(lrLines[numTerminal+numNonTerminal+3]);
 		int numState=Integer.parseInt(lrLines[numTerminal+numNonTerminal+numRule+4]);
 		int numTransition=Integer.parseInt(lrLines[numTerminal+numNonTerminal+numRule+5]);
@@ -56,6 +53,18 @@ public class Parser{
 			e.printStackTrace();
 			return;
 		}
+		
+		// Check char range
+        String[] inputLines = inputSource.split("\n");
+        for (int i = 0; i < inputLines.length; i++)
+            for (int j = 0; j < inputLines[i].length(); j++)
+                if (inputLines[i].charAt(j) < 0 || inputLines[i].charAt(j) > 127) {
+                    System.err.printf("Error: non-7-bit ASCII character 0x%02x at " +
+                                       "file %s, line %d, column %d", 
+                                       (int)inputLines[i].charAt(j), 
+                                       args[1], (i+1), (j+1));
+                    ((Object)null).toString();
+                }
 		
 		// Scanning
         List<Token> tokens = Scanner.Scanner.scan(args[1], inputSource);
@@ -126,39 +135,6 @@ class ParseTable{
 		transitions.put(new Pair<Integer, String>(sourceState, symbol), new Transition(shift, target));
 	}
 	
-	// Prints rightmost derivation.
-	/*public void parse(String[] tokenList){
-		Deque<Integer> tokens=new ArrayDeque<Integer>();
-		Deque<Integer> stack=new ArrayDeque<Integer>();
-		Deque<Integer> steps=new ArrayDeque<Integer>();
-		
-		for(int i=tokenList.length-1;i>=0;i--){
-			tokens.push(symbols.indexOf(tokenList[i]));
-		}
-		stack.push(0);
-		
-		while(!tokens.isEmpty()){
-			Transition transition=searchTransition(stack.peek(),tokens.peek());
-			if(transition.m_shift){
-				stack.push(tokens.pop());
-				stack.push(transition.m_to);
-			}else{
-				ArrayList<Integer> rule=rules.get(transition.m_to);
-				tokens.push(rule.get(0));
-				for(int i=0;i<rule.size()-1;i++){
-					stack.pop();
-					stack.pop();
-				}
-				steps.push(transition.m_to);
-			}
-		}
-		
-		while(!steps.isEmpty()){
-			printRule(rules.get(steps.pop()));
-		}
-	}*/
-	
-	
 	public ParseTree parse(List<Token> tokenList){
         Stack<Integer> stateStack  = new Stack<Integer>();
         Stack<ParseTree> symbolStack  = new Stack<ParseTree>();
@@ -172,7 +148,7 @@ class ParseTable{
 
     		System.out.println(stateStack.peek()+ " " + token.getCfgName());
             // Reduce as long as we are able to.
-        	while (!transition.shift) {
+        	while (transition != null && !transition.shift) {
         		List<String> rule = rules.get(transition.target);
         		String lhs = rule.get(0);
         		System.out.println("Reducing to " + lhs);
@@ -192,6 +168,15 @@ class ParseTable{
         		stateStack.push(transitions.get(new Pair<Integer, String>(stateStack.peek(), newNode.getSymbol())).target);
         		transition = transitions.get(new Pair<Integer, String>(stateStack.peek(), token.getCfgName()));
         	}
+        	
+        	if (transition == null) {
+                System.err.printf("ERROR: unexpected token \"%s\"", 
+                        token.getLexeme().trim());
+                System.err.printf("\n at file %s, line %d, column %d\n", 
+                        token.getFileName(), token.getLine(), token.getColumn());
+        	    return null;
+        	}
+        	
         	System.out.println("Shifting " + token.getCfgName());
         	stateStack.push(transition.target);
         	symbolStack.push(new Terminal(token));
