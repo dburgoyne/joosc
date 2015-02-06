@@ -14,7 +14,7 @@ public class A1Main {
     //Argument 1: .lr1 file input
     //Argument 2: test file input
     // Exits with 0 if syntactically valid Joos, 42 if not, 1 if bug. 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ParseException {
         if(args.length<2){
             System.out.println("Error: Please provide a Joos input file.");
             return;

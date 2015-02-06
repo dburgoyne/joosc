@@ -285,19 +285,22 @@ ForStatement for ( ; ; ) Statement
 ForStatement for ( ; ; StatementExpression ) Statement
 ForStatement for ( ; Expression ; ) Statement
 ForStatement for ( ; Expression ; StatementExpression ) Statement
-ForStatement for ( LocalVariableDeclaration ; ; ) Statement
-ForStatement for ( LocalVariableDeclaration ; ; StatementExpression ) Statement
-ForStatement for ( LocalVariableDeclaration ; Expression ; ) Statement
-ForStatement for ( LocalVariableDeclaration ; Expression ; StatementExpression ) Statement
+ForStatement for ( ForInit ; ; ) Statement
+ForStatement for ( ForInit ; ; StatementExpression ) Statement
+ForStatement for ( ForInit ; Expression ; ) Statement
+ForStatement for ( ForInit ; Expression ; StatementExpression ) Statement
 
 ForStatementNoShortIf for ( ; ; ) StatementNoShortIf
 ForStatementNoShortIf for ( ; ; StatementExpression ) StatementNoShortIf
 ForStatementNoShortIf for ( ; Expression ; ) StatementNoShortIf
 ForStatementNoShortIf for ( ; Expression ; StatementExpression ) StatementNoShortIf
-ForStatementNoShortIf for ( LocalVariableDeclaration ; ; ) StatementNoShortIf
-ForStatementNoShortIf for ( LocalVariableDeclaration ; ; StatementExpression ) StatementNoShortIf
-ForStatementNoShortIf for ( LocalVariableDeclaration ; Expression ; ) StatementNoShortIf
-ForStatementNoShortIf for ( LocalVariableDeclaration ; Expression ; StatementExpression ) StatementNoShortIf
+ForStatementNoShortIf for ( ForInit ; ; ) StatementNoShortIf
+ForStatementNoShortIf for ( ForInit ; ; StatementExpression ) StatementNoShortIf
+ForStatementNoShortIf for ( ForInit ; Expression ; ) StatementNoShortIf
+ForStatementNoShortIf for ( ForInit ; Expression ; StatementExpression ) StatementNoShortIf
+
+ForInit StatementExpression
+ForInit LocalVariableDeclaration
 	
 // 14.14
 // Joos disallows break statements

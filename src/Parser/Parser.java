@@ -14,7 +14,7 @@ import Scanner.Token;
 //Argument 1: .lr1 file input
 //Argument 2: test file input
 public class Parser{
-	public static void main(String[] args){
+	public static void main(String[] args) throws ParseException {
 		if(args.length<2){
 			return;
 		}
@@ -59,11 +59,11 @@ public class Parser{
         for (int i = 0; i < inputLines.length; i++)
             for (int j = 0; j < inputLines[i].length(); j++)
                 if (inputLines[i].charAt(j) < 0 || inputLines[i].charAt(j) > 127) {
-                    System.err.printf("Error: non-7-bit ASCII character 0x%02x at " +
-                                       "file %s, line %d, column %d", 
-                                       (int)inputLines[i].charAt(j), 
-                                       args[1], (i+1), (j+1));
-                    ((Object)null).toString();
+                	String error = String.format(
+                			"Error: non-7-bit ASCII character 0x%02x at file %s, line %d, column %d", 
+                            (int)inputLines[i].charAt(j), 
+                            args[1], (i+1), (j+1));
+                	throw new ParseException(error);
                 }
 		
 		// Scanning
@@ -135,7 +135,7 @@ class ParseTable{
 		transitions.put(new Pair<Integer, String>(sourceState, symbol), new Transition(shift, target));
 	}
 	
-	public ParseTree parse(List<Token> tokenList){
+	public ParseTree parse(List<Token> tokenList) throws ParseException{
         Stack<Integer> stateStack  = new Stack<Integer>();
         Stack<ParseTree> symbolStack  = new Stack<ParseTree>();
 
@@ -170,11 +170,13 @@ class ParseTable{
         	}
         	
         	if (transition == null) {
-                System.err.printf("ERROR: unexpected token \"%s\"", 
-                        token.getLexeme().trim());
-                System.err.printf("\n at file %s, line %d, column %d\n", 
-                        token.getFileName(), token.getLine(), token.getColumn());
-        	    return null;
+        		String error = String.format(
+        				"ERROR: unexpected token \"%s\"\n at file %s, line %d, column %d\n", 
+                        token.getLexeme(),
+                        token.getFileName(),
+                        token.getLine(),
+                        token.getColumn());
+        	    throw new ParseException(error);
         	}
         	
         	System.out.println("Shifting " + token.getCfgName());

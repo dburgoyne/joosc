@@ -66,11 +66,11 @@ public enum TokenType {
 			new Regex("/")))),
 
 	JavadocComment(Regex
-			.Build(Regex.Type.DISJUNCTION, new Regex("/**/"),
+			.Build(Regex.Type.DISJUNCTION, new Regex("/***/"),
 					Regex.Build(
 							Regex.Type.CONCATENATION,
 							new Regex("/**"),
-							NotStar.getRegex(),
+							NotStarNotSlash.getRegex(),
 							new Regex(Regex.Type.KLEENE_CLOSURE, Regex.Build(
 									Regex.Type.DISJUNCTION, new Regex('/'),
 									new Regex(Regex.Type.CONCATENATION,
