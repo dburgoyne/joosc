@@ -10,14 +10,14 @@ import Scanner.Token;
 public interface ParseTree {
     ParseTree[] getChildren();
     void setChildren(ParseTree... newChildren);
-    void visit(Visitor v);
+    void visit(Visitor v) throws ParseException;
     public String getRuleString();
     public String getSymbol();
     public boolean isTerminal();
     public Token getToken();
     public interface Visitor {
-    	void visit(Token t); // Terminal node
-        void visit(String lhs, ParseTree... children); // Non-Terminal
+    	void visit(Token t) throws ParseException; // Terminal node
+        void visit(String lhs, ParseTree... children) throws ParseException; // Non-Terminal
     }
 }
 
@@ -41,7 +41,7 @@ class Terminal extends AParseTree {
     public Terminal(Token t) {
     	token = t;
     	}
-    @Override public void visit(Visitor v) {
+    @Override public void visit(Visitor v) throws ParseException {
         v.visit(token);
     }
     public String getSymbol() {
@@ -63,7 +63,7 @@ class NonTerminal extends AParseTree {
         super(children);
         this.lhs = lhs;
     }
-    @Override public void visit(Visitor v) {
+    @Override public void visit(Visitor v) throws ParseException {
         v.visit(lhs, children);
     }
     public String getSymbol() {

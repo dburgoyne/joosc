@@ -54,4 +54,30 @@ public class StringUtils {
     		if (s != null) s.close();
     	}
     }
+    
+    // Extracts the filename from an absolute or relative path.
+	public static String extractFileName( String path ) {
+	    if ( path == null ) {
+		    return null;
+	    }
+	
+	    int slashPos = path.lastIndexOf( '\\' );
+	    if ( slashPos == -1 ) {
+		    slashPos = path.lastIndexOf( '/' );
+	    }
+	
+	    return path.substring( slashPos > 0 ? slashPos + 1 : 0 );
+	}
+	
+	// Validates an integer literal value.
+	public static boolean validateIntegerLiteral(String lexeme,
+			boolean isNegative) {
+		if (isNegative) lexeme = "-" + lexeme;
+		try {
+			Integer.parseInt(lexeme);
+			return true;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
 }

@@ -104,15 +104,13 @@ public enum TokenType {
 					CharacterClass.NonZeroDigit), Regex.Optional(Digits
 					.getRegex())))),
 
-	DecimalIntegerLiteral(DecimalNumeral.getRegex()),
+	IntegerLiteral(DecimalNumeral.getRegex()),
 
-	IntegerLiteral(DecimalIntegerLiteral.getRegex()),
-
-	SignedInteger(Regex.Build(Regex.Type.CONCATENATION, new Regex(
+	SignedIntegerLiteral(Regex.Build(Regex.Type.CONCATENATION, new Regex(
 			CharacterClass.Sign), Digits.getRegex())),
 
 	ExponentPart(Regex.Build(Regex.Type.CONCATENATION, new Regex(
-			CharacterClass.ExponentIndicator), SignedInteger.getRegex())),
+			CharacterClass.ExponentIndicator), SignedIntegerLiteral.getRegex())),
 
 	BooleanLiteral(Regex.Build(Regex.Type.DISJUNCTION, new Regex("true"),
 			new Regex("false"))),
@@ -154,28 +152,9 @@ public enum TokenType {
 
 	NullLiteral(new Regex("null")),
 
-	Literal(Regex.Build(Regex.Type.DISJUNCTION, IntegerLiteral.getRegex(),
-			BooleanLiteral.getRegex(), CharacterLiteral.getRegex(),
-			StringLiteral.getRegex(), NullLiteral.getRegex())),
-
 	Operator(Regex.Build(Regex.Type.DISJUNCTION, Scanner.OPERATOR_REGEXES)),
 
-	Separator(new Regex(CharacterClass.Separator)),
-
-	Token(Regex.Build(Regex.Type.DISJUNCTION, Identifier.getRegex(),
-			Keyword.getRegex(), Literal.getRegex(), Separator.getRegex(),
-			Operator.getRegex())),
-
-	InputElement(Regex.Build(Regex.Type.DISJUNCTION, WhiteSpace.getRegex(),
-			Comment.getRegex(), Token.getRegex())),
-
-	InputElements(Regex.Build(Regex.Type.CONCATENATION,
-			InputElement.getRegex(), new Regex(Regex.Type.KLEENE_CLOSURE,
-					InputElement.getRegex()))),
-
-	Input(Regex.Build(Regex.Type.CONCATENATION,
-			Regex.Optional(InputElements.getRegex()),
-			Regex.Optional(new Regex(CharacterClass.Sub))));
+	Separator(new Regex(CharacterClass.Separator));
 
 	private Regex m_regex;
 

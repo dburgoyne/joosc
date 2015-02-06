@@ -1,22 +1,22 @@
-package Parser;
+package Scanner;
 
-public class ParseException extends Exception {
+public class ScanException extends Exception {
 
-	public ParseException() {
+	public ScanException() {
 		// TODO Auto-generated constructor stub
 	}
 
-	public ParseException(String arg0) {
+	public ScanException(String arg0) {
 		super(arg0);
 		// TODO Auto-generated constructor stub
 	}
 
-	public ParseException(Throwable cause) {
+	public ScanException(Throwable cause) {
 		super(cause);
 		// TODO Auto-generated constructor stub
 	}
 
-	public ParseException(String message, Throwable cause) {
+	public ScanException(String message, Throwable cause) {
 		super(message, cause);
 		// TODO Auto-generated constructor stub
 	}

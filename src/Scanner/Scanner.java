@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import Parser.ParseException;
 import Utilities.StringUtils;
 
 public class Scanner {
@@ -84,11 +85,11 @@ public class Scanner {
 		return length;
 	}
 	
-	public static List<Token> scan(String joosSource) {
+	public static List<Token> scan(String joosSource) throws ScanException {
 	    return scan("<unspecified file>", joosSource);
 	}
 
-	public static List<Token> scan(String joosSourceFileName, String joosSource) {
+	public static List<Token> scan(String joosSourceFileName, String joosSource) throws ScanException {
 
 		List<Token> tokens = new LinkedList<Token>();
 		int line = 1, column = 1;
@@ -106,11 +107,12 @@ public class Scanner {
 			// Find the longest match(es).
 			int longestMatchLength = Collections.max(matchLengths.values());
 			if (longestMatchLength == 0) {
-				System.err
-						.println("ERROR: Invalid lexical input element at "
-						        + "file " + joosSourceFileName + ", line "
-								+ line + ", column " + column);
-				return null;
+				String error = String.format(
+						"Error: Invalid lexical input element\n "
+					  + "Line: %d Column: %d", 
+		                 line,
+		                 column);
+                throw new ScanException(error);
 			}
 			String lexeme = joosSource.substring(0, longestMatchLength);
 			List<TokenType> largestList = new LinkedList<TokenType>();
@@ -128,10 +130,13 @@ public class Scanner {
 			}
 
 			if (largestList.size() != 1) {
-				System.err.printf("ERROR: Don't know how to consume lexeme '%s'" + 
-				                "\n in file %s, line %d, column %d\n", 
-				                  lexeme, joosSourceFileName, line, column);
-				return null;
+				String error = String.format(
+						"Error: Don't know how to consume lexeme '%s'\n "
+					  + "Line: %d Column: %d", 
+		                 lexeme,
+		                 line,
+		                 column);
+                throw new ScanException(error);
 			}
 			TokenType tokenType = largestList.get(0);
 			// If the longest match was unique, we know how to consume it.
@@ -140,7 +145,8 @@ public class Scanner {
 			        && tokenType != TokenType.JavadocComment) {
 				System.out.println("Consuming \"" + lexeme + "\" as "
 						+ tokenType.name());
-				tokens.add(new Token(lexeme, tokenType, joosSourceFileName, line, column));
+				Token token = new Token(lexeme, tokenType, joosSourceFileName, line, column);
+				tokens.add(token);
 			}
 
 			// Calculate the new line and column number.
@@ -159,7 +165,7 @@ public class Scanner {
 		return tokens;
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws ScanException {
 
 		if (args.length > 0) {
 			String filename = args[0];

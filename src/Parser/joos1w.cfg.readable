@@ -387,13 +387,12 @@ UnaryExpression - UnaryExpression
 UnaryExpression UnaryExpressionNotPlusMinus
 
 UnaryExpressionNotPlusMinus PostfixExpression
-UnaryExpressionNotPlusMinus ~ UnaryExpression
 UnaryExpressionNotPlusMinus ! UnaryExpression
 UnaryExpressionNotPlusMinus CastExpression
 	
 // 15.16
 CastExpression ( PrimitiveType ) UnaryExpression
-CastExpression ( ReferenceTypeArray ) UnaryExpressionNotPlusMinus
+CastExpression ( ArrayType ) UnaryExpressionNotPlusMinus
 // TODO in weeder: Expression is the name of a non-array ReferenceType
 CastExpression ( Expression ) UnaryExpressionNotPlusMinus
 
