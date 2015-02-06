@@ -49,7 +49,11 @@ Once the weeder was largely complete, we began to test our compiler as a whole.
 
 TODO: Describe the testing process.
 
-TODO: Run Marmoset tests locally, and describe the process.
+In the early phases of this assignment, we have fed a small amount of ad-hoc Joos source to the scanner in order to test its correctness. Afterwards, it was only once our Joos grammar file had grown to encompass most of the language, and would furthermore successully generate an LR(1) parse table, that we began to rigorously test the parser.
+
+Initially we had created a set of test input files based on the Joos 1W features page from the course website. The examples given there were saved in their own files, with necessary modifications made, such as renaming the public class to match its file name, or adding a constructor. To automate the testing of these cases, we created \tt{RunParserTests.java}, which runs the compiler on each test file, reporting if the compiler accepted or failed to accept the file as expected. 
+
+After the grammar and weeder were developed enough to pass these initial test cases, we downloaded the public Marmoset tests and used them with \tt{RunParserTests.java}, which provided the basis of the rest of our testing. We would typically run the tests, and if we noticed that one of them failed, then we would focus on making the changes required to make the test pass.
 
 
 \end{document}
