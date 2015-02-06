@@ -88,7 +88,7 @@ Interfaces implements InterfaceTypeList
 InterfaceTypeList AmbiguousName
 InterfaceTypeList InterfaceTypeList , AmbiguousName
 
-ClassBody { }
+// ClassBody { }
 ClassBody { ClassBodyDeclarations }
 
 ClassBodyDeclarations ClassBodyDeclaration
