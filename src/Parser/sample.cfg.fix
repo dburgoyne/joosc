@@ -1,0 +1,34 @@
+8
+bof ignore
+eof ignore
++ intermedia
+* intermedia
+x final
+y final
+( ignore
+) ignore
+
+8
+S
+E
+T
+F
+M
+Q
+H
+J
+S
+13
+S bof E eof
+S bof M eof
+E E + T
+E T
+T T * F
+T F
+F ( E )
+F x
+M M Q
+M Q
+Q H
+H J
+J y
