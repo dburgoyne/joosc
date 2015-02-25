@@ -9,6 +9,7 @@ import Scanner.Token;
 
 public interface ParseTree {
     ParseTree[] getChildren();
+    public int numChildren();
     void setChildren(ParseTree... newChildren);
     void visit(Visitor v) throws ParseException;
     public String getRuleString();
@@ -26,6 +27,9 @@ abstract class AParseTree implements ParseTree {
     public ParseTree[] getChildren() { return children; }
     public void setChildren(ParseTree... newChildren) { children = newChildren; }
     protected AParseTree(ParseTree... children) { this.children = children; }
+    public int numChildren() {
+    	return children.length;
+    }
     
     public String getRuleString() {
     	String s = getSymbol();
