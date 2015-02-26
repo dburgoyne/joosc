@@ -6,5 +6,9 @@ public enum Modifier {
 	ABSTRACT,
 	STATIC,
 	FINAL,
-	NATIVE
+	NATIVE;
+	
+	public static Modifier fromString(String s) {
+		return Modifier.valueOf(s.toUpperCase());
+	}
 }

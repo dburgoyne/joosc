@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Parser.ParseTree;
+import Utilities.Cons;
 
 public class Classfile extends ASTNode {
 	
@@ -22,43 +23,43 @@ public class Classfile extends ASTNode {
 			if (firstChildName.equals("PackageDeclaration")) {
 				packageName = new Identifier(tree.getChildren()[0].getChildren()[1]);
 			} else if (firstChildName.equals("ImportDeclarations")) {
-				flattenImports(tree.getChildren()[0], imports);
+				extractImports(tree.getChildren()[0]);
 			}
 			break;
 		case 3:
 			packageName = new Identifier(tree.getChildren()[0].getChildren()[1]);
-			flattenImports(tree.getChildren()[1], imports);
+			extractImports(tree.getChildren()[1]);
 			break;
 		}
 		typeDecl = new TypeDecl(tree.getChildren()[tree.numChildren()-1]);
 		
 	}
 	
-	private static void flattenImports(ParseTree tree, List<Identifier> list) {
+	private void extractImports(ParseTree tree) {
 		while (tree.getChildren().length > 1) {
 			Identifier identifier = new Identifier(tree.getChildren()[1]);
-			flattenImport(tree.getChildren()[1], identifier);
+			extractImport(tree.getChildren()[1], identifier);
 			tree = tree.getChildren()[0];
-			list.add(identifier);
+			imports.add(identifier);
 		}
 		Identifier identifier = new Identifier(tree.getChildren()[0]);
-		flattenImport(tree.getChildren()[0], identifier);
-		list.add(identifier);
+		extractImport(tree.getChildren()[0], identifier);
+		imports.add(identifier);
 	}
 	
-	private static void flattenImport(ParseTree tree, Identifier identifier) {
+	private static void extractImport(ParseTree tree, Identifier identifier) {
 		String firstChildName = tree.getChildren()[0].getSymbol();
-		flattenAmbiguousName(tree.getChildren()[0].getChildren()[1], identifier);
+		extractAmbiguousName(tree.getChildren()[0].getChildren()[1], identifier);
 		if (firstChildName.equals("TypeImportOnDemandDeclaration")) {
 			identifier.components.add("*");
 		}
 	}
 
-	private static void flattenAmbiguousName(ParseTree tree, Identifier identifier) {
+	private static void extractAmbiguousName(ParseTree tree, Identifier identifier) {
 		while (tree.getChildren().length > 1) {
-			identifier.components.add(tree.getChildren()[2].getSymbol());
+			identifier.components.add(0, tree.getChildren()[2].getSymbol());
 			tree = tree.getChildren()[0];
 		}
-		identifier.components.add(tree.getChildren()[0].getSymbol());
+		identifier.components.add(0, tree.getChildren()[0].getSymbol());
 	}
 }
