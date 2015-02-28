@@ -19,8 +19,28 @@ public class BinaryExpression extends Expression {
 		LT,
 		GE,
 		LE,
-		ASSIGN,
-		INSTANCEOF
+		ASSIGN;
+		
+		public static BinaryOperator fromString(String s) {
+			return s.equals("+") ? PLUS
+				 : s.equals("-") ? MINUS
+				 : s.equals("*") ? STAR
+				 : s.equals("/") ? SLASH
+				 : s.equals("%") ? MOD
+				 : s.equals("&") ? AND
+				 : s.equals("&&") ? LAND
+				 : s.equals("|") ? OR
+				 : s.equals("||") ? LOR
+				 : s.equals("^") ? XOR
+				 : s.equals("==") ? EQ
+				 : s.equals("!=") ? NE
+				 : s.equals(">") ? GT
+				 : s.equals("<") ? LT
+				 : s.equals(">=") ? GE
+				 : s.equals("<=") ? LE
+				 : s.equals("=") ? ASSIGN
+				 : null;
+		}
 	}
 	
 	protected Expression left, right;

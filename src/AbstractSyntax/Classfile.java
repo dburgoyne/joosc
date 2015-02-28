@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Parser.ParseTree;
-import Utilities.Cons;
 
 public class Classfile extends ASTNode {
 	
@@ -14,7 +13,7 @@ public class Classfile extends ASTNode {
 
 	public Classfile(ParseTree tree) {
 		super(tree);
-		imports = new ArrayList<Identifier>();
+		assert(tree.getSymbol().equals("CompilationUnit"));
 		String firstChildName = tree.getChildren()[0].getSymbol();
 		switch(tree.getChildren().length) {
 		case 1:
@@ -36,30 +35,24 @@ public class Classfile extends ASTNode {
 	}
 	
 	private void extractImports(ParseTree tree) {
+		assert(tree.getSymbol().equals("ImportDeclarations"));
+		imports = new ArrayList<Identifier>();
 		while (tree.getChildren().length > 1) {
-			Identifier identifier = new Identifier(tree.getChildren()[1]);
-			extractImport(tree.getChildren()[1], identifier);
-			tree = tree.getChildren()[0];
+			Identifier identifier = extractImport(tree.getChildren()[1]);
 			imports.add(identifier);
+			tree = tree.getChildren()[0];
 		}
-		Identifier identifier = new Identifier(tree.getChildren()[0]);
-		extractImport(tree.getChildren()[0], identifier);
+		Identifier identifier = extractImport(tree.getChildren()[0]);
 		imports.add(identifier);
 	}
 	
-	private static void extractImport(ParseTree tree, Identifier identifier) {
+	private static Identifier extractImport(ParseTree tree) {
+		assert(tree.getSymbol().equals("ImportDeclaration"));
 		String firstChildName = tree.getChildren()[0].getSymbol();
-		extractAmbiguousName(tree.getChildren()[0].getChildren()[1], identifier);
+		Identifier identifier = new Identifier(tree.getChildren()[0].getChildren()[1]);
 		if (firstChildName.equals("TypeImportOnDemandDeclaration")) {
 			identifier.components.add("*");
 		}
-	}
-
-	private static void extractAmbiguousName(ParseTree tree, Identifier identifier) {
-		while (tree.getChildren().length > 1) {
-			identifier.components.add(0, tree.getChildren()[2].getSymbol());
-			tree = tree.getChildren()[0];
-		}
-		identifier.components.add(0, tree.getChildren()[0].getSymbol());
+		return identifier;
 	}
 }

@@ -6,7 +6,13 @@ public class UnaryExpression extends Expression {
 
 	enum UnaryOperator {
 		NOT,
-		MINUS
+		MINUS;
+		
+		public static UnaryOperator fromString(String s) {
+			return s.equals("!") ? NOT
+				 : s.equals("-") ? MINUS
+				 : null;
+		}
 	};
 	
 	protected UnaryOperator operator;
@@ -14,12 +20,10 @@ public class UnaryExpression extends Expression {
 	
 	public UnaryExpression(ParseTree tree) {
 		super(tree);
-		if (tree.getChildren()[0].getSymbol().equals("-")) {
-			operator = UnaryOperator.NOT;
-		} else if (tree.getChildren()[0].getSymbol().equals("!")) {
-			operator = UnaryOperator.MINUS;
-		}
+		assert(tree.getSymbol().equals("UnaryExpression")
+			|| tree.getSymbol().equals("UnaryExpressionNotPlusMinus"));
 		
-		this.expression = new Expression(tree.getChildren()[1]);
+		this.operator = UnaryOperator.fromString(tree.getChildren()[0].getSymbol());
+		this.expression = Expression.extractExpression(tree.getChildren()[1]);
 	}
 }
