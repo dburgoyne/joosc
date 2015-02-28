@@ -1,5 +1,6 @@
 package AbstractSyntax;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Parser.ParseTree;
@@ -124,16 +125,36 @@ public class TypeDecl extends ASTNode implements EnvironmentDecl {
 	
 	// Extracts method declarations from an InterfaceMemberDeclaration node.
 	private void extractInterfaceMemberDecls(ParseTree tree) {
-		// TODO
+		if(tree.numChildren() == 3){
+			tree=tree.getChildren()[1];
+			while(tree.numChildren()>1) {
+				Method method = new Method(tree.getChildren()[1]);
+				this.methods.add(method);
+				tree=tree.getChildren()[0];
+			}
+			Method method = new Method(tree.getChildren()[0]);
+			this.methods.add(method);
+		}
 	}
 	
 	// Extracts extended class name from a Super node.
 	private void extractSuper(ParseTree tree) {
-		// TODO
+		// Super extends AmbiguousName
+		this.superclass = new Identifier(tree.getChildren()[1]);
 	}
 	
 	// Extracts implemented/extended interface names from an Interfaces/ExtendsInterfaces node.
 	private void extractInterfaces(ParseTree tree) {
-		// TODO
+		// Interfaces implements InterfaceTypeList
+		// InterfaceTypeList AmbiguousName
+		// InterfaceTypeList InterfaceTypeList , AmbiguousName
+		tree = tree.getChildren()[1];
+		while(tree.numChildren()>1) {
+			Identifier identifer = new Identifier(tree.getChildren()[2]);
+			this.interfaces.add(identifer);
+			tree=tree.getChildren()[0];
+		}
+		Identifier identifer = new Identifier(tree.getChildren()[0]);
+		this.interfaces.add(identifer);
 	}
 }
