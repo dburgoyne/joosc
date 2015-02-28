@@ -42,7 +42,7 @@ public class Method extends Decl {
 	
 	private void extractMethodDeclarator(ParseTree tree) {
 		assert(tree.getSymbol().equals("MethodDeclarator"));
-		this.name = tree.getChildren()[0].getSymbol();
+		this.name = new Identifier(tree.getChildren()[0]);
 		if (tree.numChildren() == 4) {
 			this.parameters = extractFormalParameterList(tree.getChildren()[2]);
 		} else {

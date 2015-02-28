@@ -31,7 +31,7 @@ public class Field extends Decl {
 
 	private void extractVariableDeclaratorId(ParseTree tree) {
 		assert(tree.getSymbol().equals("VariableDeclaratorId"));
-		this.name = tree.getChildren()[0].getSymbol();
+		this.name = new Identifier(tree.getChildren()[0]);
 	}
 	
 	private void extractVariableInitializer(ParseTree tree) {

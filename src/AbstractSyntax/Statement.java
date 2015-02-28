@@ -42,8 +42,8 @@ public abstract class Statement extends BlockStatement {
 		if (tree.getSymbol().equals("ExpressionStatement")) {
 			return Expression.extractExpression(tree);
 		}
-		if (tree.getSymbol().equals("ReturnStatement")) {
+		//if (tree.getSymbol().equals("ReturnStatement")) {
 			return new ReturnStatement(tree);
-		}
+		//}
 	}
 }

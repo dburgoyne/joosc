@@ -15,7 +15,7 @@ public class IfStatement extends Statement {
 		    || tree.getSymbol().equals("IfThenElseStatement")
 			|| tree.getSymbol().equals("IfThenElseStatementNoShortIf"));
 		
-		this.condition = new Expression(tree.getChildren()[2]);
+		this.condition = Expression.extractExpression(tree.getChildren()[2]);
 		this.body = Statement.extractStatement(tree.getChildren()[4]);
 		if (tree.getSymbol().equals("IfThenStatement")) {
 			// No extra work
