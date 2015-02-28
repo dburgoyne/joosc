@@ -38,13 +38,31 @@ public class Method extends Decl {
 		this.modifiers = new ArrayList<Modifier>();
 		this.parameters = new ArrayList<Formal>();
 		
+		if (tree.getSymbol().equals("MethodDeclaration")) {
+			extractMethodDeclaration(tree);
+		} else {
+			extractAbstractMethodDeclaration(tree);
+		}
 	}
+	
+	// Extracts elements from a MethodDeclaration node.
+	private void extractMethodDeclaration(ParseTree tree) {
+		extractMethodHeader(tree.getChildren()[0]);
+		extractMethodBody(tree.getChildren()[1]);
+	}	
 	
 	// Extracts elements from a MethodHeader node.
 	private void extractMethodHeader(ParseTree tree) {
 		extractModifiers(tree.getChildren()[0]);
 		this.type = new Identifier(tree.getChildren()[1]);
 		extractMethodDeclarator(tree.getChildren()[2]);
+	}
+	
+	// Extracts elements from a MethodBody node.
+	private void extractMethodBody(ParseTree tree) {
+		if(tree.getChildren()[0].getSymbol().equals("Block")) {
+			this.statements = new Block(tree.getChildren()[0]);
+		}
 	}
 	
 	// Extracts elements from a AbstractMethodDeclaration node.
@@ -61,7 +79,7 @@ public class Method extends Decl {
 	
 	// Extracts elements from a MethodDeclarator node.
 	private void extractMethodDeclarator(ParseTree tree) {
-		this.name=new Identifier(tree.getChildren()[0]);
+		this.name = new Identifier(tree.getChildren()[0]);
 		if(tree.numChildren() > 3){
 			extractParameters(tree.getChildren()[2]);
 		}
