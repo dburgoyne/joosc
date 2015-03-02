@@ -11,7 +11,13 @@ public class ArrayAccessExpression extends Expression {
 		super(tree);
 		assert(tree.getSymbol().equals("ArrayAccess"));
 		
-		this.array = Expression.extractExpression(tree.getChildren()[0]);
+		ParseTree firstChild = tree.getChildren()[0];
+		if (firstChild.getSymbol().equals("ReferenceTypeNonArray")) {
+			this.array = new Identifier(firstChild.getChildren()[0]);
+		} else if (firstChild.getSymbol().equals("PrimaryNoNewArray")) {
+			this.array = Expression.extractExpression(tree.getChildren()[0]);
+		}
+		
 		this.dimExpr = Expression.extractExpression(tree.getChildren()[2]);
 	}
 }

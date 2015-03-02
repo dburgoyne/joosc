@@ -23,7 +23,11 @@ public class UnaryExpression extends Expression {
 		assert(tree.getSymbol().equals("UnaryExpression")
 			|| tree.getSymbol().equals("UnaryExpressionNotPlusMinus"));
 		
-		this.operator = UnaryOperator.fromString(tree.getChildren()[0].getSymbol());
-		this.expression = Expression.extractExpression(tree.getChildren()[1]);
+		if (tree.numChildren() == 1) {
+			this.expression = Expression.extractExpression(tree.getChildren()[0]);
+		} else if (tree.numChildren() == 2) {
+			this.operator = UnaryOperator.fromString(tree.getChildren()[0].getSymbol());
+			this.expression = Expression.extractExpression(tree.getChildren()[1]);
+		}
 	}
 }

@@ -19,13 +19,15 @@ public enum Modifier {
 	
 	// Extracts modifiers from a Modifiers node.
 	public static List<Modifier> extractModifiers(ParseTree tree) {
+		assert(tree.getSymbol().equals("Modifiers"));
+		
 		List<Modifier> modifiers = new ArrayList<Modifier>();
 		while (tree.getChildren().length > 1) {
-			Modifier modifier = Modifier.fromString(tree.getChildren()[1].getSymbol());
+			Modifier modifier = Modifier.fromString(tree.getChildren()[1].getChildren()[0].getSymbol());
 			modifiers.add(modifier);
 			tree = tree.getChildren()[0];
 		}
-		Modifier modifier = Modifier.fromString(tree.getChildren()[0].getSymbol());
+		Modifier modifier = Modifier.fromString(tree.getChildren()[0].getChildren()[0].getSymbol());
 		modifiers.add(modifier);
 		return modifiers;
 	}
