@@ -32,7 +32,7 @@ public abstract class Expression extends Statement {
 				return new Identifier(tree);
 			} else if (tree.getSymbol().equals("Primary")) {
 				return extractPrimary(tree);
-			} else if (tree.getSymbol().equals("CastExpression")) {
+			} else { //if (tree.getSymbol().equals("CastExpression")) {
 				return new CastExpression(tree);
 			}
 		}
@@ -40,7 +40,34 @@ public abstract class Expression extends Statement {
 	
 	public static Expression extractPrimary(ParseTree tree) {
 		assert(tree.getSymbol().equals("Primary"));
+
+		ParseTree firstChild = tree.getChildren()[0];
+		if (firstChild.getSymbol().equals("PrimaryNoNewArray")) {
+			ParseTree grandChild = firstChild.getChildren()[0];
+			if (grandChild.getSymbol().equals("Literal")) {
+				return new Literal(grandChild);
+			}
+			if (grandChild.getSymbol().equals("this")) {
+				return new Identifier(grandChild);
+			}
+			if (grandChild.getSymbol().equals("MethodInvocation")) {
+				return new MethodInvocationExpression(grandChild);
+			}
+			if (grandChild.getSymbol().equals("ArrayAccess")) {
+				return new ArrayAccessExpression(grandChild);
+			}
+			if (grandChild.getSymbol().equals("FieldAccess")) {
+				return new FieldAccessExpression(grandChild);
+			}
+			if (grandChild.getSymbol().equals("ClassInstanceCreationExpression")) {
+				return new ClassInstanceCreationExpression(grandChild);
+			}
+			// Must be the rule "PrimaryNoNewArray ( Expression )"
+			ParseTree ggChild = grandChild.getChildren()[1];
+			return Expression.extractExpression(ggChild);
+		} else { //if (firstChild.getSymbol().equals("ArrayCreationExpression")) {
+			return new ArrayCreationExpression(firstChild);
+		}
 		
-		// TODO
 	}
 }

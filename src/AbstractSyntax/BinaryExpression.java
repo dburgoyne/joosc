@@ -1,5 +1,7 @@
 package AbstractSyntax;
 
+import Parser.ParseTree;
+
 public class BinaryExpression extends Expression {
 	
 	enum BinaryOperator {
@@ -45,4 +47,11 @@ public class BinaryExpression extends Expression {
 	
 	protected Expression left, right;
 	protected BinaryOperator operator;
+	
+	public BinaryExpression(ParseTree tree) {
+		super(tree);
+		this.left = Expression.extractExpression(tree.getChildren()[0]);
+		this.operator = BinaryOperator.fromString(tree.getChildren()[1].getSymbol());
+		this.right = Expression.extractExpression(tree.getChildren()[2]);
+	}
 }

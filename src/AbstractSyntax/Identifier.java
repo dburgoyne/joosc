@@ -25,12 +25,29 @@ public class Identifier extends Expression {
 		assert(tree.getSymbol().equals("AmbiguousName")
 			|| tree.getSymbol().equals("PackageName")
 			|| tree.getSymbol().equals("Type")
+			|| tree.getSymbol().equals("ReferenceType")
+			|| tree.getSymbol().equals("ArrayType")
+			|| tree.getSymbol().equals("PrimitiveType")
+			|| tree.getSymbol().equals("Expression")
 			|| tree.isTerminal());
 		components = new ArrayList<String>();
+		
+		// For Expressions, walk down the left spine until we hit the AmbiguousName.
+		if (tree.getSymbol().equals("Expression")) {
+			while (!tree.getSymbol().equals("AmbiguousName")) {
+				tree = tree.getChildren()[0];
+			}
+		}
 		
 		// Type has a different grammatical structure than the others.
 		if (tree.getSymbol().equals("Type")) {
 			extractType(tree);
+		} else if (tree.getSymbol().equals("ReferenceType")) {
+			extractReferenceType(tree);
+		} else if (tree.getSymbol().equals("ArrayType")) {
+			extractArrayType(tree);
+		} else if (tree.getSymbol().equals("PrimitiveType")) {
+			extractPrimitiveType(tree);
 		} else if (tree.getSymbol().equals("AmbiguousName") || tree.getSymbol().equals("PackageName")) {
 			extractAmbiguousOrPackageName(tree);
 		} else if (tree.isTerminal()) {
@@ -74,15 +91,21 @@ public class Identifier extends Expression {
 		
 		ParseTree firstChild = tree.getChildren()[0];
 		if (firstChild.getSymbol().equals("ReferenceTypeArray")) {
-			ParseTree ggChild = firstChild.getChildren()[0].getChildren()[0];
-			if (ggChild.getSymbol().equals("PrimitiveType")) {
-				extractPrimitiveType(ggChild);
-			} else if (ggChild.getSymbol().equals("ReferenceTypeNonArray")) {
-				extractAmbiguousOrPackageName(ggChild);
-			}
-			components.add("[]");
+			extractArrayType(firstChild.getChildren()[0]);
 		} else if (firstChild.getSymbol().equals("ReferenceTypeNonArray")) {
 			extractAmbiguousOrPackageName(firstChild.getChildren()[0]);
 		}
+	}
+	
+	private void extractArrayType(ParseTree tree) {
+		assert(tree.getSymbol().equals("ArrayType"));
+		
+		ParseTree firstChild = tree.getChildren()[0];
+		if (firstChild.getSymbol().equals("PrimitiveType")) {
+			extractPrimitiveType(firstChild);
+		} else if (firstChild.getSymbol().equals("ReferenceTypeNonArray")) {
+			extractAmbiguousOrPackageName(firstChild);
+		}
+		components.add("[]");
 	}
 }
