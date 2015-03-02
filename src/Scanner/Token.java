@@ -60,7 +60,7 @@ public class Token {
         case Keyword:
         case Operator:
         case Separator:
-            return lexeme.trim();            
+            return lexeme.trim();
         default:
             return tokenType.name();
         }
