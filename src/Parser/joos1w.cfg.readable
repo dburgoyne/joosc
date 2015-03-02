@@ -372,8 +372,8 @@ MethodInvocation Primary . Identifier ( )
 MethodInvocation Primary . Identifier ( ArgumentList )
 	
 // 15.13
-// TODO ReferenceTypeNonArray must be an ExpressionName
-ArrayAccess ReferenceTypeNonArray [ Expression ]
+// TODO This changed 2015-03-01 21:00; re-run A1 tests!
+ArrayAccess AmbiguousName [ Expression ]
 ArrayAccess PrimaryNoNewArray [ Expression ]
 
 // 15.14
