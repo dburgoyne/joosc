@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Parser.ParseTree;
+import Utilities.Cons;
 
 public class Classfile extends ASTNode {
 	
@@ -54,5 +55,19 @@ public class Classfile extends ASTNode {
 			identifier.components.add("*");
 		}
 		return identifier;
+	}
+	
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) {
+		this.environment = parentEnvironment;
+		
+		for (Identifier id : imports) {
+			// TODO Resolve all imports.
+		}
+		
+		typeDecl.buildEnvironment(this.environment);
+	}
+	
+	public List<EnvironmentDecl> exportEnvironmentDecls() {
+		return this.typeDecl.exportEnvironmentDecls();
 	}
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Parser.ParseTree;
+import Utilities.Cons;
 
 public class TypeDecl extends ASTNode implements EnvironmentDecl {
 	
@@ -179,5 +180,41 @@ public class TypeDecl extends ASTNode implements EnvironmentDecl {
 		}
 		Identifier identifier = new Identifier(tree.getChildren()[1]);
 		this.interfacesNames.add(identifier);
+	}
+	
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) {
+		this.environment = parentEnvironment;
+		
+		// For each field, build its environment, then stick its exported
+		// symbol in our environment (then move on to the next field).
+		for (Field field : fields) {
+			field.buildEnvironment(this.environment);
+			List<EnvironmentDecl> exports = field.exportEnvironmentDecls();
+			this.environment = this.environment.append(exports);
+		}
+		
+		// Add all symbols exported by methods and constructors to our
+		// environment before building the environments for these nodes.
+		for (Constructor constructor : constructors) {
+			List<EnvironmentDecl> exports = constructor.exportEnvironmentDecls();
+			this.environment = this.environment.append(exports);
+		}
+		for (Method method : methods) {
+			List<EnvironmentDecl> exports = method.exportEnvironmentDecls();
+			this.environment = this.environment.append(exports);
+		}
+		for (Constructor constructor : constructors) {
+			constructor.buildEnvironment(this.environment);
+		}
+		for (Method method : methods) {
+			method.buildEnvironment(this.environment);
+		}
+		
+	}
+	
+	public List<EnvironmentDecl> exportEnvironmentDecls() {
+		List<EnvironmentDecl> exports = new ArrayList<EnvironmentDecl>();
+		exports.add(this);
+		return exports;
 	}
 }

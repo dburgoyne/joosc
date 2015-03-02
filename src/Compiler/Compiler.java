@@ -32,6 +32,7 @@ public class Compiler {
         
         // Generate the AST
         ASTNode program = new Program(parseTrees);
+        program.buildEnvironment(null);
 
     }
     
