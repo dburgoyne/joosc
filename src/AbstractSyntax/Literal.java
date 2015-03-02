@@ -29,6 +29,7 @@ public class Literal extends Expression {
 		assert(tree.getSymbol().equals("Literal"));
 		
 		ParseTree firstChild = tree.getChildren()[0];
+		assert(firstChild.isTerminal());
 		this.type = LiteralType.fromString(firstChild.getSymbol());
 		this.value = firstChild.getToken().getLexeme();
 	}

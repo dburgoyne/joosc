@@ -2,7 +2,7 @@ package AbstractSyntax;
 
 import Parser.ParseTree;
 
-public abstract class Decl extends ASTNode {
+public abstract class Decl extends ASTNode implements EnvironmentDecl {
 
 	protected Identifier type;
 	protected Identifier name;

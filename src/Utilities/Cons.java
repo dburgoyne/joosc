@@ -2,8 +2,6 @@ package Utilities;
 
 import java.util.List;
 
-import AbstractSyntax.EnvironmentDecl;
-
 public class Cons<T> {
 
 	public T head;
@@ -14,11 +12,15 @@ public class Cons<T> {
 		this.tail = tail;
 	}
 	
-	public Cons<T> append(List<T> list) {
-		Cons<T> toReturn = this;
-		for (T t : list) {
-			toReturn = new Cons<T>(t, toReturn);
+	public static<T> Cons<T> filter(Cons<T> toFilter, Predicate<T> p) {
+		if (toFilter == null) {
+			return null;
 		}
-		return toReturn;
+		if (p.test(toFilter.head)) {
+			return new Cons<T>(toFilter.head, Cons.filter(toFilter.tail, p));
+		}
+		else { // if (!p.test(toFilter.head)) {
+			return Cons.filter(toFilter.tail, p);
+		}
 	}
 }

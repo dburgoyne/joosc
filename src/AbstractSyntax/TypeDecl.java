@@ -5,6 +5,7 @@ import java.util.List;
 
 import Parser.ParseTree;
 import Utilities.Cons;
+import Utilities.Predicate;
 
 public class TypeDecl extends ASTNode implements EnvironmentDecl {
 	
@@ -27,13 +28,25 @@ public class TypeDecl extends ASTNode implements EnvironmentDecl {
 	protected List<Field> fields;
 	protected List<Method> methods;
 	
+	// Back reference to the parent Classfile node.
+	protected Classfile parent;
+	
 	public Identifier getName() {
 		return this.name;
 	}
 	
-	public TypeDecl(ParseTree tree) {
+	public String getCanonicalName() {
+		return this.getPackageName().toString() + "." + this.getName().toString();
+	}
+	
+	public Identifier getPackageName() {
+		return this.parent.packageName;
+	}
+	
+	public TypeDecl(ParseTree tree, Classfile parent) {
 		super(tree);
 		assert(tree.getSymbol().equals("TypeDeclaration"));
+		this.parent = parent;
 		
 		this.interfaces = new ArrayList<TypeDecl>();
 		this.interfacesNames = new ArrayList<Identifier>();
@@ -182,26 +195,50 @@ public class TypeDecl extends ASTNode implements EnvironmentDecl {
 		this.interfacesNames.add(identifier);
 	}
 	
-	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) {
-		this.environment = parentEnvironment;
+	protected void checkNameConflicts(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+		final Identifier packageName = this.getPackageName();
+		final Identifier typeName = this.getName();
+		Cons<EnvironmentDecl> conflicts = Cons.filter(parentEnvironment,
+				new Predicate<EnvironmentDecl>() {
+					public boolean test(EnvironmentDecl decl) {
+						if (!(decl instanceof TypeDecl)) return false;
+						TypeDecl type = (TypeDecl)decl;
+						return type.getPackageName().equals(packageName)
+						    && type.getName().equals(typeName);
+					}
+			});
+		if(conflicts != null) {
+			// Give up.
+			throw new NameConflictException((TypeDecl)conflicts.head, this);
+		}
+	}
+	
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+		// Make sure our canonical name is not already taken.
+		checkNameConflicts(parentEnvironment);
+		
+		this.environment = new Cons<EnvironmentDecl>(this, parentEnvironment);
 		
 		// For each field, build its environment, then stick its exported
 		// symbol in our environment (then move on to the next field).
 		for (Field field : fields) {
 			field.buildEnvironment(this.environment);
-			List<EnvironmentDecl> exports = field.exportEnvironmentDecls();
-			this.environment = this.environment.append(exports);
+			EnvironmentDecl export = field.exportEnvironmentDecls();
+			assert(export != null);
+			this.environment = new Cons<EnvironmentDecl>(export, this.environment);
 		}
 		
 		// Add all symbols exported by methods and constructors to our
 		// environment before building the environments for these nodes.
 		for (Constructor constructor : constructors) {
-			List<EnvironmentDecl> exports = constructor.exportEnvironmentDecls();
-			this.environment = this.environment.append(exports);
+			EnvironmentDecl export = constructor.exportEnvironmentDecls();
+			assert(export != null);
+			this.environment = new Cons<EnvironmentDecl>(export, this.environment);
 		}
 		for (Method method : methods) {
-			List<EnvironmentDecl> exports = method.exportEnvironmentDecls();
-			this.environment = this.environment.append(exports);
+			EnvironmentDecl export = method.exportEnvironmentDecls();
+			assert(export != null);
+			this.environment = new Cons<EnvironmentDecl>(export, this.environment);
 		}
 		for (Constructor constructor : constructors) {
 			constructor.buildEnvironment(this.environment);
@@ -209,12 +246,9 @@ public class TypeDecl extends ASTNode implements EnvironmentDecl {
 		for (Method method : methods) {
 			method.buildEnvironment(this.environment);
 		}
-		
 	}
 	
-	public List<EnvironmentDecl> exportEnvironmentDecls() {
-		List<EnvironmentDecl> exports = new ArrayList<EnvironmentDecl>();
-		exports.add(this);
-		return exports;
+	public EnvironmentDecl exportEnvironmentDecls() {
+		return this;
 	}
 }

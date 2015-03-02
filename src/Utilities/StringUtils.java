@@ -16,6 +16,7 @@ package Utilities;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.List;
 import java.util.Scanner;
 
 public class StringUtils {
@@ -79,5 +80,16 @@ public class StringUtils {
 		} catch (NumberFormatException e) {
 			return false;
 		}
+	}
+	
+	// Joins the components of a list of strings, inserting a delimiter between consecutive components.
+	public static String join(List<String> list, String delimiter) {
+	    StringBuilder sb = new StringBuilder();
+	    String realDelimiter = "";
+	    for (String s : list) {
+	        sb.append(realDelimiter).append(s);            
+	        realDelimiter = delimiter;
+	    }
+	    return sb.toString();
 	}
 }

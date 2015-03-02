@@ -5,7 +5,7 @@ import java.util.List;
 
 import Parser.ParseTree;
 
-public class Constructor extends ASTNode {
+public class Constructor extends ASTNode implements EnvironmentDecl {
 	// The class this constructor belongs to.
 	protected TypeDecl parent;
 	protected List<Modifier> modifiers;

@@ -18,14 +18,18 @@ public class Program extends ASTNode {
 		}
 	}
 	
-	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) {
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
 		for (Classfile file : files) {
-			List<EnvironmentDecl> exports = file.exportEnvironmentDecls();
-			this.environment = this.environment.append(exports);
+			EnvironmentDecl export = file.exportEnvironmentDecls();
+			assert(export != null);
+			this.environment = new Cons<EnvironmentDecl>(export, this.environment);
+		}
+		for (Classfile file : files) {
+			file.buildEnvironment(this.environment);
 		}
 	}
 
-	public List<EnvironmentDecl> exportEnvironmentDecls() {
+	public EnvironmentDecl exportEnvironmentDecls() {
 		// Do nothing.
 		return null;
 	}

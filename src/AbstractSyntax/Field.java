@@ -3,6 +3,8 @@ package AbstractSyntax;
 import java.util.List;
 
 import Parser.ParseTree;
+import Utilities.Cons;
+import Utilities.Predicate;
 
 public class Field extends Decl {
 
@@ -37,5 +39,31 @@ public class Field extends Decl {
 	private void extractVariableInitializer(ParseTree tree) {
 		assert(tree.getSymbol().equals("VariableInitializer"));
 		this.initializer = Expression.extractExpression(tree.getChildren()[0]);
+	}
+	
+	protected void checkNameConflicts(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+		final Identifier name = this.getName();
+		Cons<EnvironmentDecl> conflicts = Cons.filter(parentEnvironment,
+				new Predicate<EnvironmentDecl>() {
+					public boolean test(EnvironmentDecl decl) {
+						if (!(decl instanceof Field)) return false;
+						Field field = (Field)decl;
+						return field.getName().equals(name);
+					}
+			});
+		if(conflicts != null) {
+			// Give up.
+			throw new NameConflictException((Field)conflicts.head, this);
+		}
+	}
+
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+		// Make sure our name is not already taken.
+		checkNameConflicts(parentEnvironment);
+
+	}
+
+	public EnvironmentDecl exportEnvironmentDecls() {
+		return this;
 	}
 }

@@ -9,6 +9,8 @@ import Scanner.Token;
 
 public interface ParseTree {
     ParseTree[] getChildren();
+    public ParseTree getParent();
+    public void setParent(ParseTree parent);
     public int numChildren();
     void setChildren(ParseTree... newChildren);
     void visit(Visitor v) throws ParseException;
@@ -24,9 +26,23 @@ public interface ParseTree {
 
 abstract class AParseTree implements ParseTree {
     ParseTree[] children;
+    ParseTree parent;
+    public ParseTree getParent() {
+    	return this.parent;
+    }
+    public void setParent(ParseTree parent) {
+    	this.parent = parent;
+    }
     public ParseTree[] getChildren() { return children; }
-    public void setChildren(ParseTree... newChildren) { children = newChildren; }
-    protected AParseTree(ParseTree... children) { this.children = children; }
+    public void setChildren(ParseTree... newChildren) {
+    	for (ParseTree child : newChildren) {
+    		child.setParent(this);
+    	}
+    	this.children = newChildren;
+    }
+    protected AParseTree(ParseTree... children) {
+    	this.setChildren(children);
+    }
     public int numChildren() {
     	return children.length;
     }
@@ -42,6 +58,7 @@ abstract class AParseTree implements ParseTree {
 
 class Terminal extends AParseTree {
     public final Token token;
+    ParseTree parent;
     public Terminal(Token t) {
     	token = t;
     	}
@@ -79,6 +96,11 @@ class NonTerminal extends AParseTree {
     }
     
     public Token getToken(){
-    	return null;
+    	// Walk down the left spine.
+    	if (this.children.length == 0) {
+    		// Should never happen.
+    		return null;
+    	} 
+    	return this.children[0].getToken();
     }
 }

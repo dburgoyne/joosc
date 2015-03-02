@@ -4,19 +4,58 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Parser.ParseTree;
+import Utilities.StringUtils;
 
-// TODO Should override equals(), hashCode()
 public class Identifier extends Expression {
 
 	protected List<String> components;
 	
+	// Equals and hashCode
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (!(obj instanceof Identifier)) return false;
+		Identifier other = (Identifier)obj;
+		return this.components.equals(other.components);
+	}
+	
+	@Override
+	public int hashCode() {
+		return this.components.hashCode();
+	}
+	
+	public String toString() {
+		return StringUtils.join(components, ".");
+	}
+	
 	// Convenience functions.
 	protected boolean isArray() {
-		return components.get(components.size() - 1).equals("[]");
+		return this.components.get(this.components.size() - 1).equals("[]");
 	}
 	
 	protected boolean isStarImport() {
-		return components.get(components.size() - 1).equals("*");
+		return this.components.get(this.components.size() - 1).equals("*");
+	}
+	
+	protected List<String> getComponents() {
+		return this.components;
+	}
+	
+	protected String getSingleComponent() {
+		assert(this.components.size() == 1);
+		return this.components.get(0);
+	}
+	
+	protected List<String> getPackageName() {
+		List<String> packageName = new ArrayList<String>();
+		for (int i = 0; i < this.components.size() - 1; i++) {
+			packageName.add(this.components.get(i));
+		}
+		return packageName;
+	}
+	
+	protected String getLastComponent() {
+		return this.components.get(this.components.size() - 1);
 	}
 	
 	// Flattens almost anything.

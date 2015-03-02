@@ -5,6 +5,7 @@ import java.util.List;
 
 import Parser.ParseTree;
 import Utilities.Cons;
+import Utilities.Predicate;
 
 public class Classfile extends ASTNode {
 	
@@ -31,7 +32,7 @@ public class Classfile extends ASTNode {
 			extractImports(tree.getChildren()[1]);
 			break;
 		}
-		typeDecl = new TypeDecl(tree.getChildren()[tree.numChildren()-1]);
+		typeDecl = new TypeDecl(tree.getChildren()[tree.numChildren()-1], this);
 		
 	}
 	
@@ -57,17 +58,39 @@ public class Classfile extends ASTNode {
 		return identifier;
 	}
 	
-	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) {
-		this.environment = parentEnvironment;
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+		// Don't inherit everything from the parent environment.
+		this.environment = null;
 		
-		for (Identifier id : imports) {
-			// TODO Resolve all imports.
+		for (Identifier id : imports) {			
+			final List<String> packageName = id.getPackageName();
+			if (id.isStarImport()) {
+				this.environment = Cons.filter(parentEnvironment,
+					new Predicate<EnvironmentDecl>() {
+						public boolean test(EnvironmentDecl decl) {
+							if (!(decl instanceof TypeDecl)) return false;
+							TypeDecl type = (TypeDecl)decl;
+							return type.getPackageName().getComponents().equals(packageName);
+						}
+				});
+			} else {
+				final String typeName = id.getLastComponent();
+				this.environment = Cons.filter(parentEnvironment,
+						new Predicate<EnvironmentDecl>() {
+							public boolean test(EnvironmentDecl decl) {
+								if (!(decl instanceof TypeDecl)) return false;
+								TypeDecl type = (TypeDecl)decl;
+								return type.getPackageName().getComponents().equals(packageName)
+								    && type.getName().equals(typeName);
+							}
+					});
+			}
 		}
 		
 		typeDecl.buildEnvironment(this.environment);
 	}
 	
-	public List<EnvironmentDecl> exportEnvironmentDecls() {
+	public EnvironmentDecl exportEnvironmentDecls() {
 		return this.typeDecl.exportEnvironmentDecls();
 	}
 }

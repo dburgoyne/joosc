@@ -15,32 +15,32 @@
  
 package Scanner;
 
-interface P { boolean test(char c); }
+import Utilities.Predicate;
 
 public enum CharacterClass {
-    HexDigit                                (new P() { public boolean test(char c) { return "0123456789abcdefABCDEF".indexOf(c) != -1; }} ),
-    InputCharacter                          (new P() { public boolean test(char c) { return "\r\n".indexOf(c) == -1; }} ),
-    InputCharacterNotSingleQuoteNotSlash    (new P() { public boolean test(char c) { return "\r\n\'\\".indexOf(c) == -1; }} ),
-    InputCharacterNotDoubleQuoteNotSlash    (new P() { public boolean test(char c) { return "\r\n\"\\".indexOf(c) == -1; }} ),
-    InputCharacterNotStar                   (new P() { public boolean test(char c) { return "\r\n*".indexOf(c) == -1; }} ),
-    InputCharacterNotStarNotSlash           (new P() { public boolean test(char c) { return "\r\n*/".indexOf(c) == -1; }} ),
-    Sub                                     (new P() { public boolean test(char c) { return c == (char)0x1a; }}),
-    WhiteSpace                              (new P() { public boolean test(char c) { return " \t\f\r\n".indexOf(c) != -1; }} ),
-    JavaLetter                              (new P() { public boolean test(char c) { return Character.isJavaIdentifierStart(c); }} ),
-    JavaLetterOrDigit                       (new P() { public boolean test(char c) { return Character.isJavaIdentifierPart(c); }} ),
-    Digit                                   (new P() { public boolean test(char c) { return "0123456789".indexOf(c) != -1; }} ),
-    NonZeroDigit                            (new P() { public boolean test(char c) { return "123456789".indexOf(c) != -1; }} ),
-    OctalDigit                              (new P() { public boolean test(char c) { return "01234567".indexOf(c) != -1; }} ),
-    ZeroToThree                             (new P() { public boolean test(char c) { return "0123".indexOf(c) != -1; }} ),
-    Separator                               (new P() { public boolean test(char c) { return "(){}[];,.".indexOf(c) != -1; }} ),
-    IntegerTypeSuffix                       (new P() { public boolean test(char c) { return "lL".indexOf(c) != -1; }} ),
-    ExponentIndicator                       (new P() { public boolean test(char c) { return "eE".indexOf(c) != -1; }} ),
-    Sign                                    (new P() { public boolean test(char c) { return "+-".indexOf(c) != -1; }} ),
-    FloatTypeSuffix                         (new P() { public boolean test(char c) { return "fFdD".indexOf(c) != -1; }} );
+    HexDigit                                (new Predicate<Character>() { public boolean test(Character c) { return "0123456789abcdefABCDEF".indexOf(c) != -1; }} ),
+    InputCharacter                          (new Predicate<Character>() { public boolean test(Character c) { return "\r\n".indexOf(c) == -1; }} ),
+    InputCharacterNotSingleQuoteNotSlash    (new Predicate<Character>() { public boolean test(Character c) { return "\r\n\'\\".indexOf(c) == -1; }} ),
+    InputCharacterNotDoubleQuoteNotSlash    (new Predicate<Character>() { public boolean test(Character c) { return "\r\n\"\\".indexOf(c) == -1; }} ),
+    InputCharacterNotStar                   (new Predicate<Character>() { public boolean test(Character c) { return "\r\n*".indexOf(c) == -1; }} ),
+    InputCharacterNotStarNotSlash           (new Predicate<Character>() { public boolean test(Character c) { return "\r\n*/".indexOf(c) == -1; }} ),
+    Sub                                     (new Predicate<Character>() { public boolean test(Character c) { return c == (char)0x1a; }}),
+    WhiteSpace                              (new Predicate<Character>() { public boolean test(Character c) { return " \t\f\r\n".indexOf(c) != -1; }} ),
+    JavaLetter                              (new Predicate<Character>() { public boolean test(Character c) { return Character.isJavaIdentifierStart(c); }} ),
+    JavaLetterOrDigit                       (new Predicate<Character>() { public boolean test(Character c) { return Character.isJavaIdentifierPart(c); }} ),
+    Digit                                   (new Predicate<Character>() { public boolean test(Character c) { return "0123456789".indexOf(c) != -1; }} ),
+    NonZeroDigit                            (new Predicate<Character>() { public boolean test(Character c) { return "123456789".indexOf(c) != -1; }} ),
+    OctalDigit                              (new Predicate<Character>() { public boolean test(Character c) { return "01234567".indexOf(c) != -1; }} ),
+    ZeroToThree                             (new Predicate<Character>() { public boolean test(Character c) { return "0123".indexOf(c) != -1; }} ),
+    Separator                               (new Predicate<Character>() { public boolean test(Character c) { return "(){}[];,.".indexOf(c) != -1; }} ),
+    IntegerTypeSuffix                       (new Predicate<Character>() { public boolean test(Character c) { return "lL".indexOf(c) != -1; }} ),
+    ExponentIndicator                       (new Predicate<Character>() { public boolean test(Character c) { return "eE".indexOf(c) != -1; }} ),
+    Sign                                    (new Predicate<Character>() { public boolean test(Character c) { return "+-".indexOf(c) != -1; }} ),
+    FloatTypeSuffix                         (new Predicate<Character>() { public boolean test(Character c) { return "fFdD".indexOf(c) != -1; }} );
 
-    private P m_predicate;
+    private Predicate<Character> m_predicate;
     
-    CharacterClass(P predicate) {
+    CharacterClass(Predicate<Character> predicate) {
         m_predicate = predicate;
     }
     

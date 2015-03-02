@@ -3,6 +3,7 @@ package AbstractSyntax;
 import java.util.List;
 
 import Parser.ParseTree;
+import Scanner.Token;
 import Utilities.Cons;
 
 public abstract class ASTNode {
@@ -15,6 +16,15 @@ public abstract class ASTNode {
 		parseTree = tree;
 	}
 	
-	public abstract void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment);
-	public abstract List<EnvironmentDecl> exportEnvironmentDecls();
+	public String getPositionalString() {
+		Token token = this.parseTree.getToken();
+		String info = String.format("file %s, line %d, column %d",
+                token.getFileName(),
+                token.getLine(),
+                token.getColumn());
+		return info;
+	}
+	
+	public abstract void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException;
+	public abstract EnvironmentDecl exportEnvironmentDecls();
 }
