@@ -14,6 +14,10 @@ public class Field extends Decl {
 	// TODO Fill this in during type resolution
 	protected EnvironmentDecl type;
 	
+	public Identifier getName() {
+		return this.name;
+	}
+	
 	public Field(ParseTree tree) {
 		super(tree);
 		assert(tree.getSymbol().equals("FieldDeclaration"));
@@ -61,6 +65,11 @@ public class Field extends Decl {
 		// Make sure our name is not already taken.
 		checkNameConflicts(parentEnvironment);
 
+		this.typeName.buildEnvironment(this.environment);
+		this.environment = parentEnvironment;
+		if (this.initializer != null) {
+			this.initializer.buildEnvironment(this.environment);
+		}
 	}
 
 	public EnvironmentDecl exportEnvironmentDecls() {

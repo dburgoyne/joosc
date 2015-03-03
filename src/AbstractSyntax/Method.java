@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Parser.ParseTree;
+import Utilities.Cons;
 
 public class Method extends Decl {
 
@@ -12,8 +13,11 @@ public class Method extends Decl {
 	protected Identifier typeName;
 	// TODO Fill this in during type resolution
 	protected EnvironmentDecl type;
+	protected Block block;
 	
-	protected Block statements;
+	public Identifier getName() {
+		return this.name;
+	}
 	
 	public Method(ParseTree tree, boolean isAbstract) {
 		super(tree);
@@ -46,7 +50,7 @@ public class Method extends Decl {
 		if (tree.numChildren() == 4) {
 			this.parameters = extractFormalParameterList(tree.getChildren()[2]);
 		} else {
-			return;
+			this.parameters = new ArrayList<Formal>();
 		}
 	}
 	
@@ -55,21 +59,40 @@ public class Method extends Decl {
 		List<Formal> parameters = new ArrayList<Formal>();
 		while (tree.numChildren() > 1) {
 			Formal f = new Formal(tree.getChildren()[2]);
-			parameters.add(f);
+			parameters.add(0, f);
 			tree = tree.getChildren()[0];
 		}
 		Formal f = new Formal(tree.getChildren()[0]);
-		parameters.add(f);
+		parameters.add(0, f);
 		return parameters;
 	}
 	
 	private void extractMethodBody(ParseTree tree) {
 		assert(tree.getSymbol().equals("MethodBody"));
 		if (tree.getChildren()[0].getSymbol().equals("Block")) {
-			this.statements = new Block(tree.getChildren()[0]);
+			this.block = new Block(tree.getChildren()[0]);
 		} else {
-			// Leave this.statements null to indicate no block (semicolon).
+			// Leave this.block null to indicate no block (semicolon).
 			return;
 		}
+	}
+	
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+		this.environment = parentEnvironment;
+		
+		// Build the environment for each formal parameter
+		for (Formal formal : this.parameters) {
+			formal.buildEnvironment(this.environment);
+			this.environment = new Cons<EnvironmentDecl>(formal.exportEnvironmentDecls(), this.environment);
+		}
+		this.typeName.buildEnvironment(this.environment);
+		// Build the environment for the body statements.
+		if (this.block != null) {
+			this.block.buildEnvironment(this.environment);
+		}
+	}
+
+	public EnvironmentDecl exportEnvironmentDecls() {
+		return this;
 	}
 }

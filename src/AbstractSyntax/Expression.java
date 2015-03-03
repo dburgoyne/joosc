@@ -18,6 +18,17 @@ public abstract class Expression extends Statement {
 		   && !tree.getSymbol().equals("AmbiguousName")) {
 			tree = tree.getChildren()[0];
 		}
+		
+		if (tree.getSymbol().equals("MethodInvocation")) {
+			return new MethodInvocationExpression(tree);
+		}
+		if (tree.getSymbol().equals("ClassInstanceCreationExpression")) {
+			return new ClassInstanceCreationExpression(tree);
+		}
+		if (tree.getSymbol().equals("FieldAccess")) {
+			return new FieldAccessExpression(tree);
+		}
+		
 		if (tree.numChildren() == 2) {
 			return new UnaryExpression(tree);
 		} else if (tree.numChildren() == 3) {
@@ -63,8 +74,8 @@ public abstract class Expression extends Statement {
 				return new ClassInstanceCreationExpression(grandChild);
 			}
 			// Must be the rule "PrimaryNoNewArray ( Expression )"
-			ParseTree ggChild = grandChild.getChildren()[1];
-			return Expression.extractExpression(ggChild);
+			grandChild = firstChild.getChildren()[1];
+			return Expression.extractExpression(grandChild);
 		} else { //if (firstChild.getSymbol().equals("ArrayCreationExpression")) {
 			return new ArrayCreationExpression(firstChild);
 		}

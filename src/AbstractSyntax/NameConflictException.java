@@ -21,4 +21,31 @@ public class NameConflictException extends Exception {
 				second.getPositionalString(),
 				first.getPositionalString()));
 	}
+	
+	public NameConflictException(Formal first, Formal second) {
+		super(String.format("The formal paramater %s is already defined.\n"
+				+ " at %s\n"
+				+ "First defined at %s\n",
+				second.getName().toString(),
+				second.getPositionalString(),
+				first.getPositionalString()));
+	}
+
+	public NameConflictException(Local first, Local second) {
+		super(String.format("The local variable %s is already defined.\n"
+				+ " at %s\n"
+				+ "First defined at %s\n",
+				second.getName().toString(),
+				second.getPositionalString(),
+				first.getPositionalString()));
+	}
+
+	public NameConflictException(Formal first, Local second) {
+		super(String.format("The local variable %s shadows a formal parameter.\n"
+				+ " at %s\n"
+				+ "Formal parameter defined at %s\n",
+				second.getName().toString(),
+				second.getPositionalString(),
+				first.getPositionalString()));
+	}
 }

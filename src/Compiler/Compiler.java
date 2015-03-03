@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import AbstractSyntax.ASTNode;
+import AbstractSyntax.NameConflictException;
 import AbstractSyntax.Program;
 import Parser.ParseException;
 import Parser.ParseTable;
@@ -22,7 +23,7 @@ public class Compiler {
     //Argument 1: .lr1 file input
     //Argument 2: test file input
     // Exits with 0 if syntactically valid Joos, 42 if not, 1 if bug. 
-    public static void compile(String lr1File, String... joosFiles) throws ParseException, ScanException, IOException {
+    public static void compile(String lr1File, String... joosFiles) throws ParseException, ScanException, IOException, NameConflictException {
     	buildParseTable(lr1File);
         
     	parseTrees = new ParseTree[joosFiles.length];

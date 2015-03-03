@@ -24,8 +24,21 @@ public class Program extends ASTNode {
 			assert(export != null);
 			this.environment = new Cons<EnvironmentDecl>(export, this.environment);
 		}
+		// If environment generation fails for one file, continue with the others,
+		// then throw the original exception.
+		NameConflictException err = null;
 		for (Classfile file : files) {
-			file.buildEnvironment(this.environment);
+			try {
+				file.buildEnvironment(this.environment);
+			} catch (NameConflictException caught) {
+				if (err != null) {
+					System.err.println(err);
+				}
+				err = caught;
+			}
+		}
+		if (err != null) {
+			throw err;
 		}
 	}
 

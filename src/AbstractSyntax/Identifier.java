@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Parser.ParseTree;
+import Utilities.Cons;
 import Utilities.StringUtils;
 
 public class Identifier extends Expression {
@@ -90,7 +91,7 @@ public class Identifier extends Expression {
 		} else if (tree.getSymbol().equals("AmbiguousName") || tree.getSymbol().equals("PackageName")) {
 			extractAmbiguousOrPackageName(tree);
 		} else if (tree.isTerminal()) {
-			components.add(0, tree.getSymbol());
+			components.add(0, tree.getToken().getLexeme());
 		}
 	}
 	
@@ -146,5 +147,9 @@ public class Identifier extends Expression {
 			extractAmbiguousOrPackageName(firstChild);
 		}
 		components.add("[]");
+	}
+	
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+		this.environment = parentEnvironment;
 	}
 }

@@ -1,6 +1,7 @@
 package AbstractSyntax;
 
 import Parser.ParseTree;
+import Utilities.Cons;
 
 public class UnaryExpression extends Expression {
 
@@ -29,5 +30,10 @@ public class UnaryExpression extends Expression {
 			this.operator = UnaryOperator.fromString(tree.getChildren()[0].getSymbol());
 			this.expression = Expression.extractExpression(tree.getChildren()[1]);
 		}
+	}
+	
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+		this.environment = parentEnvironment;
+		this.expression.buildEnvironment(this.environment);
 	}
 }

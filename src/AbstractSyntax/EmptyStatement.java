@@ -1,6 +1,7 @@
 package AbstractSyntax;
 
 import Parser.ParseTree;
+import Utilities.Cons;
 
 public class EmptyStatement extends Statement {
 	
@@ -10,4 +11,7 @@ public class EmptyStatement extends Statement {
 		// Do nothing.
 	}
 	
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) {
+		this.environment = parentEnvironment;
+	}	
 }

@@ -1,6 +1,7 @@
 package AbstractSyntax;
 
 import Parser.ParseTree;
+import Utilities.Cons;
 
 public class IfStatement extends Statement {
 	
@@ -23,6 +24,14 @@ public class IfStatement extends Statement {
 				|| tree.getSymbol().equals("IfThenElseStatementNoShortIf")) {
 			this.elseBody = Statement.extractStatement(tree.getChildren()[6]);
 		}
-		
+	}
+	
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+		this.environment = parentEnvironment;
+		this.condition.buildEnvironment(this.environment);
+		this.body.buildEnvironment(this.environment);
+		if (this.elseBody != null) {
+			this.elseBody.buildEnvironment(this.environment);
+		}
 	}
 }

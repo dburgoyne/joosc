@@ -1,6 +1,7 @@
 package AbstractSyntax;
 
 import Parser.ParseTree;
+import Utilities.Cons;
 
 public class ArrayCreationExpression extends Expression {
 
@@ -20,6 +21,13 @@ public class ArrayCreationExpression extends Expression {
 		} else if (tree.numChildren() == 4) {
 			// Do nothing.
 		}
+	}
+	
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+		this.environment = parentEnvironment;
+		
+		this.typeName.buildEnvironment(this.environment);
+		this.dimExpr.buildEnvironment(this.environment);
 	}
 	
 }

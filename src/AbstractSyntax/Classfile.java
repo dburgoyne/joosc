@@ -15,7 +15,9 @@ public class Classfile extends ASTNode {
 
 	public Classfile(ParseTree tree) {
 		super(tree);
+		
 		assert(tree.getSymbol().equals("CompilationUnit"));
+		imports = new ArrayList<Identifier>();
 		String firstChildName = tree.getChildren()[0].getSymbol();
 		switch(tree.getChildren().length) {
 		case 1:
@@ -38,7 +40,6 @@ public class Classfile extends ASTNode {
 	
 	private void extractImports(ParseTree tree) {
 		assert(tree.getSymbol().equals("ImportDeclarations"));
-		imports = new ArrayList<Identifier>();
 		while (tree.getChildren().length > 1) {
 			Identifier identifier = extractImport(tree.getChildren()[1]);
 			imports.add(identifier);

@@ -40,10 +40,14 @@ public abstract class Statement extends BlockStatement {
 			return new EmptyStatement(tree);
 		}
 		if (tree.getSymbol().equals("ExpressionStatement")) {
-			return Expression.extractExpression(tree);
+			return Expression.extractExpression(tree.getChildren()[0]);
 		}
 		//if (tree.getSymbol().equals("ReturnStatement")) {
 			return new ReturnStatement(tree);
 		//}
+	}
+	
+	public EnvironmentDecl exportEnvironmentDecls() {
+		return null;
 	}
 }

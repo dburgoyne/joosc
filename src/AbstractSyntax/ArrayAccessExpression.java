@@ -1,6 +1,7 @@
 package AbstractSyntax;
 
 import Parser.ParseTree;
+import Utilities.Cons;
 
 public class ArrayAccessExpression extends Expression {
 
@@ -19,5 +20,12 @@ public class ArrayAccessExpression extends Expression {
 		}
 		
 		this.dimExpr = Expression.extractExpression(tree.getChildren()[2]);
+	}
+	
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+		this.environment = parentEnvironment;
+		
+		this.array.buildEnvironment(this.environment);
+		this.dimExpr.buildEnvironment(this.environment);
 	}
 }

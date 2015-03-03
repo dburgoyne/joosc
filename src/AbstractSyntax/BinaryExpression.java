@@ -1,6 +1,7 @@
 package AbstractSyntax;
 
 import Parser.ParseTree;
+import Utilities.Cons;
 
 public class BinaryExpression extends Expression {
 	
@@ -53,5 +54,12 @@ public class BinaryExpression extends Expression {
 		this.left = Expression.extractExpression(tree.getChildren()[0]);
 		this.operator = BinaryOperator.fromString(tree.getChildren()[1].getSymbol());
 		this.right = Expression.extractExpression(tree.getChildren()[2]);
+	}
+	
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+		this.environment = parentEnvironment;
+		
+		this.left.buildEnvironment(this.environment);
+		this.right.buildEnvironment(this.environment);
 	}
 }

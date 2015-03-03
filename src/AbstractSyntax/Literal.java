@@ -1,6 +1,7 @@
 package AbstractSyntax;
 
 import Parser.ParseTree;
+import Utilities.Cons;
 
 public class Literal extends Expression {
 	
@@ -32,5 +33,9 @@ public class Literal extends Expression {
 		assert(firstChild.isTerminal());
 		this.type = LiteralType.fromString(firstChild.getSymbol());
 		this.value = firstChild.getToken().getLexeme();
+	}
+	
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) {
+		this.environment = parentEnvironment;
 	}
 }

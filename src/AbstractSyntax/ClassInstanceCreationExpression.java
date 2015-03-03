@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 import Parser.ParseTree;
+import Utilities.Cons;
 
 public class ClassInstanceCreationExpression extends Expression {
 
@@ -17,6 +18,7 @@ public class ClassInstanceCreationExpression extends Expression {
 		super(tree);
 		assert(tree.getSymbol().equals("ClassInstanceCreationExpression"));
 		
+		this.arguments = new ArrayList<Expression>();
 		this.typeName = new Identifier(tree.getChildren()[1]);
 		if (tree.numChildren() == 4) {
 			// Do nothing.
@@ -28,13 +30,21 @@ public class ClassInstanceCreationExpression extends Expression {
 	private void extractArgumentList(ParseTree tree) {
 		assert(tree.getSymbol().equals("ArgumentList"));
 		
-		this.arguments = new ArrayList<Expression>();
 		while (tree.numChildren() == 3) {
 			Expression expr = Expression.extractExpression(tree.getChildren()[2]);
 			this.arguments.add(0, expr);
 		}
 		Expression expr = Expression.extractExpression(tree.getChildren()[0]);
 		this.arguments.add(0, expr);
+	}
+	
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+		this.environment = parentEnvironment;
+		
+		this.typeName.buildEnvironment(this.environment);
+		for (Expression argument : this.arguments) {
+			argument.buildEnvironment(this.environment);
+		}
 	}
 	
 }
