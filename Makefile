@@ -2,8 +2,8 @@ sources = $(shell find src | grep .java$$)
 
 script: compileall
 	echo "#!/bin/sh" > ./joosc
-	echo 'exec java -classpath classes Parser.A1Main' \
-	     ' src/Parser/joos1w.lr1 $$1' >> ./joosc
+	echo 'exec java -classpath classes Compiler.Main' \
+	     ' src/Parser/joos1w.lr1 $$@' >> ./joosc
 	chmod +x ./joosc
 
 compileall: classes
