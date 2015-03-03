@@ -493,6 +493,7 @@ class IntegerLiteralWeeder extends Weeder{
 class ExpressionDerivesAmbiguousNameEnforcer extends Weeder{
 	
 	public boolean isAmbiguousName = false;
+	public boolean failed = false;
 	public Token token;
 	
 	public void visit(Token token) {
@@ -501,13 +502,18 @@ class ExpressionDerivesAmbiguousNameEnforcer extends Weeder{
 	
 	public void visit(String lhs,ParseTree... children) throws ParseException{
 		if (lhs.equals("AmbiguousName")) {
-			isAmbiguousName = true;
+			if (!failed) {
+				isAmbiguousName = true;
+			}
 			children[0].visit(this);
 		}
 		else if (children.length == 1) {
 			children[0].visit(this);
 		}
 		else if (isAmbiguousName && children.length != 1) {
+			children[0].visit(this);
+		} else {
+			failed = true;
 			children[0].visit(this);
 		}
 	}

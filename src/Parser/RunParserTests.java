@@ -14,11 +14,14 @@ public class RunParserTests {
     
     public static void main(String[] args) {
         PrintStream stdout = System.out;
-        System.setOut(new PrintStream(new java.io.OutputStream() {
+        PrintStream stderr = System.err;
+        PrintStream redirect = new PrintStream(new java.io.OutputStream() {
             public void write(int b) {
-                // Disable Tests' output
+                // Disable Tests' error output
             }
-        }));
+        });
+        System.setOut(redirect);
+        System.setErr(redirect);
 
         ArrayList<String> positives = new ArrayList<String>();
         int positives_passed = 0;
@@ -35,12 +38,12 @@ public class RunParserTests {
         stdout.println("=== TESTING NEGATIVES ===");
         for (String filename : negatives) {
             stdout.printf("%-60s", "-> " + filename + ":");
-            try {
-            	Compiler.compile(LR1_FILE, NEGATIVES_DIR + filename);
-                System.err.println("--- FAIL ---");
-            } catch (Exception e) {
-                stdout.println("+++ PASS +++");
+        	int retval = Compiler.compile(LR1_FILE, NEGATIVES_DIR + filename);
+        	if (retval == 42) {
+        		stdout.println("+++ PASS +++");
                 negatives_passed++;
+        	} else {
+        		stderr.println("--- FAIL ---");
             }
         }
         stdout.println("=== Passed " + negatives_passed + " / " + negatives.size() + " tests ===");
@@ -48,12 +51,12 @@ public class RunParserTests {
         stdout.println("\n=== TESTING POSITIVES ===");
         for (String filename : positives) {
             stdout.printf("%-60s", "-> " + filename + ":");
-            try {
-            	Compiler.compile(LR1_FILE, POSITIVES_DIR + filename);
-                stdout.println("+++ PASS +++");
+            int retval = Compiler.compile(LR1_FILE, POSITIVES_DIR + filename);
+        	if (retval == 0) {
+        		stdout.println("+++ PASS +++");
                 positives_passed++;
-            } catch (Exception e) {
-                System.err.println("--- FAIL ---");
+        	} else {
+        		stderr.println("--- FAIL ---");
             }
         }
         

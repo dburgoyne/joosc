@@ -22,19 +22,49 @@ public class Compiler {
 
     //Argument 1: .lr1 file input
     //Argument 2: test file input
-    // Exits with 0 if syntactically valid Joos, 42 if not, 1 if bug. 
-    public static void compile(String lr1File, String... joosFiles) throws ParseException, ScanException, IOException, NameConflictException {
+    // Returns 0 if compilation succeeded, 42 if it did not, 1 if it crashed. 
+    public static int compile(String lr1File, String... joosFiles) {
     	buildParseTable(lr1File);
         
     	parseTrees = new ParseTree[joosFiles.length];
+    	boolean failed = false;
     	for (int i = 0; i < joosFiles.length; i++) {
-    		parseTrees[i] = buildParseTree(joosFiles[i]);
+    		try {
+    			parseTrees[i] = buildParseTree(joosFiles[i]);
+    		} catch (Exception e) {
+    			if (e instanceof ParseException
+    			 || e instanceof ScanException) {
+    				System.err.println(e.getMessage());
+	    			failed = true;
+    			} else {
+    				//IOExceptions trigger this case.
+    				return 1;
+    			}
+    		}
     	}
         
+    	if (failed) {
+    		return 42;
+    	}
+    	
         // Generate the AST
-        ASTNode program = new Program(parseTrees);
-        program.buildEnvironment(null);
-
+		ASTNode program = new Program(parseTrees);
+    	try {
+    		program.buildEnvironment(null);
+    	} catch (Exception e) {
+			if (e instanceof NameConflictException) {
+    			System.err.println(e.getMessage());
+    			failed = true;
+			} else {
+				return 1;
+			}
+		}
+        
+        if (failed) {
+    		return 42;
+    	}
+        
+        return 0;
     }
     
     // Given the name of a Joos source file, produce a valid parse tree for it.

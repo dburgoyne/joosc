@@ -28,6 +28,9 @@ public abstract class Expression extends Statement {
 		if (tree.getSymbol().equals("FieldAccess")) {
 			return new FieldAccessExpression(tree);
 		}
+		if (tree.getSymbol().equals("AmbiguousName")) {
+			return new Identifier(tree);
+		}
 		
 		if (tree.numChildren() == 2) {
 			return new UnaryExpression(tree);
@@ -38,10 +41,8 @@ public abstract class Expression extends Statement {
 				return new BinaryExpression(tree);
 			}
 		} else {
-			// Could be a CastExpression, a Primary or an AmbiguousName.
-			if (tree.getSymbol().equals("AmbiguousName")) {
-				return new Identifier(tree);
-			} else if (tree.getSymbol().equals("Primary")) {
+			// Could be a CastExpression or a Primary.
+			if (tree.getSymbol().equals("Primary")) {
 				return extractPrimary(tree);
 			} else { //if (tree.getSymbol().equals("CastExpression")) {
 				return new CastExpression(tree);

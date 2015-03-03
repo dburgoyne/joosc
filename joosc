@@ -1,2 +1,0 @@
-#!/bin/sh
-exec java -classpath classes Parser.A1Main  src/Parser/joos1w.lr1 $1

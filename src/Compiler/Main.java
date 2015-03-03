@@ -1,11 +1,6 @@
 package Compiler;
 
-import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import Parser.ParseException;
 
 // Main entry point for assignments.
 
@@ -25,20 +20,11 @@ public class Main {
             }
         }));
         
-        try {
-        	String[] filenames = new String[args.length - 1];
-        	for (int i = 0; i < args.length - 1; i++) {
-        		filenames[i] = args[i + 1];
-        	}
-        	
-        	Compiler.compile(args[0], filenames);
-        } catch (IOException e) {
-        	System.err.println(e.getMessage());
-        	System.exit(1);
-        } catch (Exception e) {
-        	System.err.println(e.getMessage());
-        	throw(e);
-        	//System.exit(42);
-        }
+    	String[] filenames = new String[args.length - 1];
+    	for (int i = 0; i < args.length - 1; i++) {
+    		filenames[i] = args[i + 1];
+    	}
+    	
+    	System.exit(Compiler.compile(args[0], filenames));
     }
 }
