@@ -169,7 +169,8 @@ public class Identifier extends Expression {
 		// Special case, this denotes an array type:
 		if (this.isArray()) {
 			Identifier clone = new Identifier(this.parseTree);
-			assert clone.components.remove(clone.components.size() - 1).equals("[]");
+			String removed = clone.components.remove(clone.components.size() - 1);
+			assert(removed.equals("[]"));
 			return new ArrayType(clone.resolveType(allTypes, localEnv));
 		}
 		
