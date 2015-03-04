@@ -78,6 +78,42 @@ public class Classfile extends ASTNode {
 			}
 		}
 		
+		class MatchesPackageOrPrefix implements Predicate<EnvironmentDecl> {
+			List<String> packageName;
+			public MatchesPackageOrPrefix(List<String> packageName) {
+				this.packageName = packageName;
+			}
+			private boolean matchesPrefix(List<String> prefix, List<String> packageName) {
+				if (prefix.size() > packageName.size()) return false;
+				for (int i = 0; i < prefix.size() - 2; i++) {
+					if (!prefix.get(i).equals(packageName.get(i))) return false;
+				}
+				return true;
+			}
+			public boolean test(EnvironmentDecl decl) {
+				if (!(decl instanceof TypeDecl)) return false;
+				TypeDecl type = (TypeDecl)decl;
+				Identifier typePackageName = type.getPackageName();
+				return typePackageName == null 
+					 ? packageName.isEmpty() 
+					 : matchesPrefix(this.packageName, typePackageName.getComponents());
+			}
+		}
+		
+		class MatchesSimpleName implements Predicate<EnvironmentDecl> {
+			String simpleName;
+			public MatchesSimpleName(String simpleName) {
+				this.simpleName = simpleName;
+			}
+
+			public boolean test(EnvironmentDecl decl) {
+				if (!(decl instanceof TypeDecl)) return false;
+				TypeDecl type = (TypeDecl)decl;
+				String typeName = type.getName().getSingleComponent();
+				return this.simpleName.equals(typeName);
+			}
+		}
+		
 		// Don't inherit everything from the parent environment.
 		this.environment = null;
 		
@@ -118,8 +154,9 @@ public class Classfile extends ASTNode {
 					throw new ImportException.Clash(id, (TypeDecl)maybeClash.head);
 				}
 				
-				// Importing yourself has no effect.
-				if (!this.typeDecl.equals((TypeDecl)maybeTypeDecl.head)) {
+				// Importing yourself or repeating an import has no effect.
+				if (!this.typeDecl.equals((TypeDecl)maybeTypeDecl.head)
+				 && !Cons.contains(this.environment, maybeTypeDecl.head)) {
 					// If everything is OK, add the imported type to our environment.
 					this.environment = new Cons<EnvironmentDecl>(maybeTypeDecl.head, this.environment);
 				}
@@ -133,8 +170,10 @@ public class Classfile extends ASTNode {
 				this.packageName == null ? new ArrayList<String>() : this.packageName.components;
 			Cons<EnvironmentDecl> maybeTypeDecls =
 				Cons.filter(parentEnvironment, new MatchesPackage(currentPackage));	
-			for (EnvironmentDecl decl : Cons.toList(maybeTypeDecls)) {
-				if (!Cons.contains(this.environment, decl)) {
+			for (EnvironmentDecl decl : Cons.toList(maybeTypeDecls)) {// Only import decl if its simple name is not taken.
+				Cons<EnvironmentDecl> declsMatchingSimpleName =
+						Cons.filter(this.environment, new MatchesSimpleName(decl.getName().getSingleComponent()));
+				if (declsMatchingSimpleName == null && !Cons.contains(this.environment, decl)) {
 					this.environment = new Cons<EnvironmentDecl>(decl, this.environment);
 				}
 			}
@@ -144,14 +183,17 @@ public class Classfile extends ASTNode {
 		for (Identifier id : imports) {
 			if (id.isStarImport()) {
 				Cons<EnvironmentDecl> maybeTypeDecls =
-					Cons.filter(parentEnvironment, new MatchesPackage(id.getPackageName()));
+					Cons.filter(parentEnvironment, new MatchesPackageOrPrefix(id.getPackageName()));
 				if (maybeTypeDecls == null) {
 					// Non-existent package.
 					throw new ImportException.NonExistentPackage(id);
 				}
 				
 				for (EnvironmentDecl decl : Cons.toList(maybeTypeDecls)) {
-					if (!Cons.contains(this.environment, decl)) {
+					// Only import decl if its simple name is not taken.
+					Cons<EnvironmentDecl> declsMatchingSimpleName =
+							Cons.filter(this.environment, new MatchesSimpleName(decl.getName().getSingleComponent()));
+					if (declsMatchingSimpleName == null && !Cons.contains(this.environment, decl)) {
 						this.environment = new Cons<EnvironmentDecl>(decl, this.environment);
 					}
 				}
@@ -161,10 +203,13 @@ public class Classfile extends ASTNode {
 		// ...then add everything in java.lang that wasn't already added
 		{
 		List<String> javaDotLang = new ArrayList<String>(Arrays.asList("java", "lang"));
-			Cons<EnvironmentDecl> maybeTypeDecls =
+			Cons<EnvironmentDecl> javaLangDecls =
 				Cons.filter(parentEnvironment, new MatchesPackage(javaDotLang));
-			for (EnvironmentDecl decl : Cons.toList(maybeTypeDecls)) {
-				if (!Cons.contains(this.environment, decl)) {
+			for (EnvironmentDecl decl : Cons.toList(javaLangDecls)) {
+				// Only import decl if its simple name is not taken.
+				Cons<EnvironmentDecl> declsMatchingSimpleName =
+						Cons.filter(this.environment, new MatchesSimpleName(decl.getName().getSingleComponent()));
+				if (declsMatchingSimpleName == null && !Cons.contains(this.environment, decl)) {
 					this.environment = new Cons<EnvironmentDecl>(decl, this.environment);
 				}
 			}
