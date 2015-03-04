@@ -59,6 +59,8 @@ public class RunCompilerTests {
         stdout.println("\n=== TESTING POSITIVES ===");
         for (List<String> filenames : positives) {
             stdout.printf("%-60s", "-> " + filenames.toString() + ":");
+            // Include all standard libraries in the build.
+            filenames.addAll(libraries);
             int retval = Compiler.compile(LR1_FILE, filenames.toArray(new String[0]));
         	if (retval == 0) {
         		stdout.println("+++ PASS +++");

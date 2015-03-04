@@ -1,6 +1,7 @@
 package AbstractSyntax;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import java.util.List;
 
@@ -139,7 +140,7 @@ public class Classfile extends ASTNode {
 			}
 		}
 		
-		// ...then process the actual star imports:
+		// ...then process the actual star imports...
 		for (Identifier id : imports) {
 			if (id.isStarImport()) {
 				Cons<EnvironmentDecl> maybeTypeDecls =
@@ -153,6 +154,18 @@ public class Classfile extends ASTNode {
 					if (!Cons.contains(this.environment, decl)) {
 						this.environment = new Cons<EnvironmentDecl>(decl, this.environment);
 					}
+				}
+			}
+		}
+		
+		// ...then add everything in java.lang that wasn't already added
+		{
+		List<String> javaDotLang = new ArrayList<String>(Arrays.asList("java", "lang"));
+			Cons<EnvironmentDecl> maybeTypeDecls =
+				Cons.filter(parentEnvironment, new MatchesPackage(javaDotLang));
+			for (EnvironmentDecl decl : Cons.toList(maybeTypeDecls)) {
+				if (!Cons.contains(this.environment, decl)) {
+					this.environment = new Cons<EnvironmentDecl>(decl, this.environment);
 				}
 			}
 		}
