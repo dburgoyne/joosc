@@ -7,7 +7,7 @@ import Utilities.Predicate;
 public class Local extends BlockStatement implements EnvironmentDecl {
 	
 	protected Identifier typeName;
-	protected EnvironmentDecl type;
+	protected Type type;
 	protected Identifier name;
 	protected Expression initializer;  // Never null!
 	
@@ -73,7 +73,7 @@ public class Local extends BlockStatement implements EnvironmentDecl {
 	}
 
 	@Override
-	public void linkTypes(Cons<TypeDecl> types) {
+	public void linkTypes(Cons<TypeDecl> types) throws TypeLinkingException {
 		this.type = this.typeName.resolveType(types, this.environment);
 		this.initializer.linkTypes(types);
 	}

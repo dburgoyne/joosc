@@ -6,7 +6,7 @@ import Utilities.Cons;
 public class ArrayCreationExpression extends Expression {
 
 	protected Identifier typeName;
-	protected EnvironmentDecl type;
+	protected ArrayType type;
 	
 	protected Expression dimExpr;
 	
@@ -31,8 +31,9 @@ public class ArrayCreationExpression extends Expression {
 		this.dimExpr.buildEnvironment(this.environment);
 	}
 	
-	@Override public void linkTypes(Cons<TypeDecl> types) {
-		this.type = this.typeName.resolveType(types, this.environment);
+	@Override public void linkTypes(Cons<TypeDecl> types) throws TypeLinkingException {
+		Type type = this.typeName.resolveType(types, this.environment);
+		this.type = new ArrayType(type);
 		if (this.dimExpr != null) {
 			this.dimExpr.linkTypes(types);
 		}

@@ -36,7 +36,7 @@ public class IfStatement extends Statement {
 	}
 
 	@Override
-	public void linkTypes(Cons<TypeDecl> types) {
+	public void linkTypes(Cons<TypeDecl> types) throws TypeLinkingException {
 		this.condition.linkTypes(types);
 		this.body.linkTypes(types);
 		if (this.elseBody != null)

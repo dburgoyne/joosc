@@ -2,6 +2,8 @@ package Scanner;
 
 public class ScanException extends Exception {
 
+	private static final long serialVersionUID = 148932378711751902L;
+
 	public ScanException() {
 		// TODO Auto-generated constructor stub
 	}

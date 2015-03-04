@@ -73,4 +73,14 @@ public class Program extends ASTNode {
 			throw new RuntimeException(err);
 		}
 	}
+	
+	// Re-export this.environment as a list of TypeDecls.
+	public Cons<TypeDecl> getAllTypeDecls() {
+		List<EnvironmentDecl> decls = Cons.toList(this.environment);
+		Cons<TypeDecl> typeDecls = null;
+		for (int i = decls.size() - 1; i >= 0; i--) {
+			typeDecls = new Cons<TypeDecl>((TypeDecl)decls.get(i), typeDecls);
+		}
+		return typeDecls;
+	}
 }

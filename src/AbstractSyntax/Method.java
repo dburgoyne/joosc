@@ -11,7 +11,7 @@ public class Method extends Decl {
 	protected List<Modifier> modifiers;
 	protected List<Formal> parameters;
 	protected Identifier typeName;
-	protected EnvironmentDecl type;
+	protected Type type; // null if void !
 	protected Block block;
 	
 	public Identifier getName() {
@@ -96,8 +96,13 @@ public class Method extends Decl {
 	}
 
 	@Override
-	public void linkTypes(Cons<TypeDecl> types) {
-		this.type = this.typeName.resolveType(types, this.environment);
+	public void linkTypes(Cons<TypeDecl> types) throws TypeLinkingException {
+		
+		if (!(typeName.isSimple()
+				&& typeName.getSingleComponent().equals("void"))) {
+			this.type = this.typeName.resolveType(types, this.environment);
+		}
+		
 		for (Formal formal : parameters) {
 			formal.linkTypes(types);
 		}

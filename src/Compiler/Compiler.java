@@ -3,7 +3,6 @@ package Compiler;
 import java.io.IOException;
 import java.util.List;
 
-import AbstractSyntax.ASTNode;
 import AbstractSyntax.ImportException;
 import AbstractSyntax.NameConflictException;
 import AbstractSyntax.Program;
@@ -49,10 +48,10 @@ public class Compiler {
     	}
     	
         // Generate the AST
-		ASTNode program = new Program(parseTrees);
+		Program program = new Program(parseTrees);
     	try {
     		program.buildEnvironment(null);
-    		program.linkTypes();
+    		program.linkTypes(program.getAllTypeDecls());
     	} catch (Exception e) {
 			if (e instanceof NameConflictException || e instanceof ImportException) {
     			System.err.println(e.getMessage());

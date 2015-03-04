@@ -25,7 +25,7 @@ public class FieldAccessExpression extends Expression {
 		this.primary.buildEnvironment(this.environment);
 	}
 
-	@Override public void linkTypes(Cons<TypeDecl> types) {
+	@Override public void linkTypes(Cons<TypeDecl> types) throws TypeLinkingException {
 		this.primary.linkTypes(types);
 	}
 }

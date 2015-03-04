@@ -53,7 +53,7 @@ public class ForStatement extends Statement {
 		this.body.buildEnvironment(this.environment);
 	}
 
-	@Override public void linkTypes(Cons<TypeDecl> types) {
+	@Override public void linkTypes(Cons<TypeDecl> types) throws TypeLinkingException {
 		if (this.initializer != null) {
 			this.initializer.linkTypes(types);
 		}

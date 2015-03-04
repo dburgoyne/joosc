@@ -163,7 +163,23 @@ public class Identifier extends Expression {
 		this.environment = parentEnvironment;
 	}
 	
-	public TypeDecl resolveType(Cons<TypeDecl> allTypes, Cons<EnvironmentDecl> localEnv) {
+	public Type resolveType(Cons<TypeDecl> allTypes, Cons<EnvironmentDecl> localEnv) throws TypeLinkingException {
+		
+		// Special case, this denotes an array type:
+		if (this.isArray()) {
+			Identifier clone = new Identifier(this.parseTree);
+			assert clone.components.remove(clone.components.size() - 1).equals("[]");
+			return new ArrayType(clone.resolveType(allTypes, localEnv));
+		}
+		
+		// Special case, this denotes a primitive type.
+		if (this.isSimple()) {
+			PrimitiveType prim = PrimitiveType.fromString(this.getSingleComponent());
+			if (prim != null) 
+				return prim;
+		}
+		
+		// General case, this should resolve to a TypeDecl:
 		Cons<?> maybeTypeDecl = null;
 		final List<String> packageName = this.getPackageName();
 		final String typeName = this.getLastComponent();
@@ -195,7 +211,8 @@ public class Identifier extends Expression {
 		
 		if (maybeTypeDecl.tail != null) {
 			// Ambiguous type
-			throw new TypeLinkingException.AmbiguousType(this);
+			throw new TypeLinkingException.AmbiguousType(this, 
+					Cons.toList(maybeTypeDecl).toArray(new TypeDecl[0]));
 		}
 		// Everything is OK
 		assert(maybeTypeDecl.head instanceof TypeDecl);

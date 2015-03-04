@@ -65,7 +65,7 @@ public class Constructor extends ASTNode implements EnvironmentDecl {
 		return this;
 	}
 
-	@Override public void linkTypes(Cons<TypeDecl> types) {
+	@Override public void linkTypes(Cons<TypeDecl> types) throws TypeLinkingException {
 		for (Formal formal : parameters) {
 			formal.linkTypes(types);
 		}

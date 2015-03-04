@@ -90,6 +90,7 @@ class AstTable{
 	private ArrayList<String> finalTerminals;
 	private ArrayList<String> intermediaTerminals;
 	private ArrayList<String> nonTerminals;
+	@SuppressWarnings("unused")
 	private String startSymbol;
 	private Map<String,ArrayList<String>> rules;
 	private Map<String,ArrayList<String>> relations;

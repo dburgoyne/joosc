@@ -8,7 +8,7 @@ import Utilities.Cons;
 import Utilities.ObjectUtils;
 import Utilities.Predicate;
 
-public class TypeDecl extends ASTNode implements EnvironmentDecl {
+public class TypeDecl extends ASTNode implements EnvironmentDecl, Type {
 	
 	enum Kind {
 		CLASS,
@@ -253,16 +253,26 @@ public class TypeDecl extends ASTNode implements EnvironmentDecl {
 		return this;
 	}
 
-	@Override public void linkTypes(Cons<TypeDecl> allTypes) {
+	@Override public void linkTypes(Cons<TypeDecl> allTypes) throws TypeLinkingException {
 		
 		// Hierarchy decls:
 		
 		if (this.superclassName != null) {
-			this.superclass = this.superclassName.resolveType(allTypes, this.environment);
+			Type type = this.superclassName.resolveType(allTypes, this.environment);
+			if (!(type instanceof TypeDecl)) {
+				throw new TypeLinkingException.NotRefType(type, 
+						this.superclassName.getPositionalString());
+			}
+			this.superclass = (TypeDecl)type;
 		}
 		
 		for (Identifier iface : this.interfacesNames) {
-			this.interfaces.add(iface.resolveType(allTypes, this.environment));
+			Type type = iface.resolveType(allTypes, this.environment);
+			if (!(type instanceof TypeDecl)) {
+				throw new TypeLinkingException.NotRefType(type, 
+							iface.getPositionalString());
+			}
+			this.interfaces.add((TypeDecl)type);
 		}
 		
 		// Class body decls: 

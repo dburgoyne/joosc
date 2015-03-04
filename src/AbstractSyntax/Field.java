@@ -12,7 +12,7 @@ public class Field extends Decl {
 	protected Expression initializer;
 	
 	protected Identifier typeName;
-	protected EnvironmentDecl type;
+	protected Type type;
 	
 	public Identifier getName() {
 		return this.name;
@@ -77,7 +77,7 @@ public class Field extends Decl {
 	}
 
 	@Override
-	public void linkTypes(Cons<TypeDecl> types) {
+	public void linkTypes(Cons<TypeDecl> types) throws TypeLinkingException {
 		this.type = this.typeName.resolveType(types, this.environment);
 		this.initializer.linkTypes(types);
 	}

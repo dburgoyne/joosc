@@ -164,7 +164,7 @@ public class Classfile extends ASTNode {
 		return this.typeDecl.exportEnvironmentDecls();
 	}
 
-	@Override public void linkTypes(Cons<TypeDecl> allTypes) {
+	@Override public void linkTypes(Cons<TypeDecl> allTypes) throws TypeLinkingException {
 		typeDecl.linkTypes(allTypes);
 	}
 }

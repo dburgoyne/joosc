@@ -23,7 +23,7 @@ public class ReturnStatement extends Statement {
 	}
 
 	@Override
-	public void linkTypes(Cons<TypeDecl> types) {
+	public void linkTypes(Cons<TypeDecl> types) throws TypeLinkingException {
 		if (this.expression != null) {
 			this.expression.linkTypes(types);
 		}

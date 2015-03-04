@@ -2,6 +2,8 @@ package Parser;
 
 public class ParseException extends Exception {
 
+	private static final long serialVersionUID = -8329758053428182268L;
+
 	public ParseException() {
 		// TODO Auto-generated constructor stub
 	}

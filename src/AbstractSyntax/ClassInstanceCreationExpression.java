@@ -9,7 +9,7 @@ import Utilities.Cons;
 public class ClassInstanceCreationExpression extends Expression {
 
 	protected Identifier typeName;
-	protected EnvironmentDecl type;
+	protected TypeDecl type;
 	
 	protected List<Expression> arguments;
 	
@@ -46,8 +46,13 @@ public class ClassInstanceCreationExpression extends Expression {
 		}
 	}
 
-	@Override public void linkTypes(Cons<TypeDecl> types) {
-		this.type = this.typeName.resolveType(types, this.environment);
+	@Override public void linkTypes(Cons<TypeDecl> types) throws TypeLinkingException {
+		Type type = this.typeName.resolveType(types, this.environment);
+		if (!(type instanceof TypeDecl)) {
+			throw new TypeLinkingException.NotRefType(type,
+					this.typeName.getPositionalString());
+		}
+		this.type = (TypeDecl)type;
 		for (Expression arg : this.arguments) {
 			arg.linkTypes(types);
 		}
