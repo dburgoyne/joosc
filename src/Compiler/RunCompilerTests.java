@@ -11,6 +11,7 @@ public class RunCompilerTests {
     final static String LR1_FILE = "src/Parser/joos1w.lr1"; 
     final static String POSITIVES_DIR = "test/marmoset/a2/positive/";
     final static String NEGATIVES_DIR = "test/marmoset/a2/negative/";
+    final static String LIBRARY_DIR = "lib/2.0/";
     
     public static void main(String[] args) {
         PrintStream stdout = System.out;
@@ -27,6 +28,7 @@ public class RunCompilerTests {
         int positives_passed = 0;
         List<List<String>> negatives = new ArrayList<List<String>>();
         int negatives_passed = 0;
+        List<String> libraries = new ArrayList<String>();
         
         for (File f : new File(POSITIVES_DIR).listFiles()) {
         	positives.add(findTests(f));
@@ -36,9 +38,15 @@ public class RunCompilerTests {
         	negatives.add(findTests(f));
         }
         
+        for (File f : new File(LIBRARY_DIR).listFiles()) {
+        	libraries.addAll(findTests(f));
+        }
+        
         stdout.println("=== TESTING NEGATIVES ===");
         for (List<String> filenames : negatives) {
             stdout.printf("%-60s", "-> " + filenames.toString() + ":");
+            // Include all standard libraries in the build.
+            filenames.addAll(libraries);
         	int retval = Compiler.compile(LR1_FILE, filenames.toArray(new String[0]));
         	if (retval == 42) {
         		stdout.println("+++ PASS +++");
