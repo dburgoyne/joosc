@@ -114,7 +114,7 @@ public class Classfile extends ASTNode {
 					});
 				if (maybeClash != null) {
 					// We tried to import a (different) type with the same simple name already.
-					throw new ImportException.Clash(id, (Identifier)maybeClash.head);
+					throw new ImportException.Clash(id, (TypeDecl)maybeClash.head);
 				}
 				
 				// Importing yourself has no effect.

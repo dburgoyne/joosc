@@ -41,7 +41,6 @@ public class RunCompilerTests {
         for (File f : new File(LIBRARY_DIR).listFiles()) {
         	libraries.addAll(findTests(f));
         }
-        
         stdout.println("=== TESTING NEGATIVES ===");
         for (List<String> filenames : negatives) {
             stdout.printf("%-60s", "-> " + filenames.toString() + ":");

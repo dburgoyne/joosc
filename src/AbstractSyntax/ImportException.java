@@ -59,12 +59,12 @@ public abstract class ImportException extends Exception {
 		 */
 		private static final long serialVersionUID = 1L;
 
-		public Clash(Identifier id1, Identifier id2) {
-			super(String.format("The imports %s and %s are in conflict.\n"
+		public Clash(Identifier id, TypeDecl decl) {
+			super(String.format("The import %s clashes with the already-imported type %s.\n"
 					+ " at %s\n",
-					id1.toString(),
-					id2.toString(),
-					id2.getPositionalString()));
+					id.toString(),
+					decl.getName().toString(),
+					id.getPositionalString()));
 		}
 	}
 
