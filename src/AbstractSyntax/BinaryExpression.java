@@ -62,4 +62,10 @@ public class BinaryExpression extends Expression {
 		this.left.buildEnvironment(this.environment);
 		this.right.buildEnvironment(this.environment);
 	}
+
+	@Override
+	public void linkTypes(Cons<TypeDecl> types) throws TypeLinkingException {
+		this.left.linkTypes(types);
+		this.right.linkTypes(types);
+	}
 }

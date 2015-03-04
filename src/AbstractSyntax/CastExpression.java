@@ -5,21 +5,28 @@ import Utilities.Cons;
 
 public class CastExpression extends Expression {
 	
-	protected Identifier type;
+	protected Identifier typeName;
+	protected Type type;
 	protected Expression expression;
 	
 	public CastExpression(ParseTree tree) {
 		super(tree);
 		assert(tree.getSymbol().equals("CastExpression"));
 		
-		this.type = new Identifier(tree.getChildren()[1]);
+		this.typeName = new Identifier(tree.getChildren()[1]);
 		this.expression = new UnaryExpression(tree.getChildren()[3]);
 	}
 	
 	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException, ImportException {
 		this.environment = parentEnvironment;
 		
-		this.type.buildEnvironment(this.environment);
+		this.typeName.buildEnvironment(this.environment);
 		this.expression.buildEnvironment(this.environment);
+	}
+
+	@Override
+	public void linkTypes(Cons<TypeDecl> types) throws TypeLinkingException {
+		this.type = this.typeName.resolveType(types, this.environment);
+		this.expression.linkTypes(types);
 	}
 }

@@ -129,11 +129,7 @@ public class Identifier extends Expression {
 	private void extractPrimitiveType(ParseTree tree) {
 		assert(tree.getSymbol().equals("PrimitiveType"));
 		
-		ParseTree firstChild = tree.getChildren()[0];
-		if (firstChild.getSymbol().equals("NumericType")) {
-			tree = firstChild.getChildren()[0];
-		}
-		components.add(0, tree.getSymbol());
+		components.add(0, tree.getToken().getLexeme());
 	}
 	
 	private void extractReferenceType(ParseTree tree) {
@@ -154,13 +150,18 @@ public class Identifier extends Expression {
 		if (firstChild.getSymbol().equals("PrimitiveType")) {
 			extractPrimitiveType(firstChild);
 		} else if (firstChild.getSymbol().equals("ReferenceTypeNonArray")) {
-			extractAmbiguousOrPackageName(firstChild);
+			extractAmbiguousOrPackageName(firstChild.getChildren()[0]);
 		}
 		components.add("[]");
 	}
 	
 	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
 		this.environment = parentEnvironment;
+	}
+	
+	@Override
+	public void linkTypes(Cons<TypeDecl> types) throws TypeLinkingException {
+		// Do nothing in this pass.
 	}
 	
 	public Type resolveType(Cons<TypeDecl> allTypes, Cons<EnvironmentDecl> localEnv) throws TypeLinkingException {
@@ -218,4 +219,5 @@ public class Identifier extends Expression {
 		assert(maybeTypeDecl.head instanceof TypeDecl);
 		return (TypeDecl)maybeTypeDecl.head;
 	}
+
 }

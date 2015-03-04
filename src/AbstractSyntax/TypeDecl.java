@@ -19,7 +19,6 @@ public class TypeDecl extends ASTNode implements EnvironmentDecl, Type {
 	protected TypeDecl.Kind kind;
 	protected Identifier name;
 	
-	// TODO Resolve these during type linking
 	protected TypeDecl superclass;
 	protected List<TypeDecl> interfaces;
 	protected Identifier superclassName;
@@ -37,9 +36,11 @@ public class TypeDecl extends ASTNode implements EnvironmentDecl, Type {
 	}
 	
 	public String getCanonicalName() {
-		return this.getPackageName().toString() + "." + this.getName().toString();
+		Identifier pkName = this.getPackageName();
+		return (pkName == null ? "" : pkName + ".") + this.getName();
 	}
 	
+	/** Can be null! */
 	public Identifier getPackageName() {
 		return this.parent.packageName;
 	}
@@ -205,9 +206,11 @@ public class TypeDecl extends ASTNode implements EnvironmentDecl, Type {
 						if (!(decl instanceof TypeDecl)) return false;
 						TypeDecl type = (TypeDecl)decl;
 						return ObjectUtils.equals(type.getPackageName(), packageName)
-						    && ObjectUtils.equals(type.getName(), typeName);
+						    && ObjectUtils.equals(type.getName(), typeName)
+						    && type != TypeDecl.this; // (<- do not want actual self!)
 					}
 			});
+		
 		if(conflicts != null) {
 			// Give up.
 			throw new NameConflictException((TypeDecl)conflicts.head, this);
@@ -218,7 +221,12 @@ public class TypeDecl extends ASTNode implements EnvironmentDecl, Type {
 		// Make sure our canonical name is not already taken.
 		checkNameConflicts(parentEnvironment);
 		
-		this.environment = new Cons<EnvironmentDecl>(this, parentEnvironment);
+		if (Cons.contains(parentEnvironment, this)) {
+			this.environment = parentEnvironment;
+		} else {
+			this.environment = new Cons<EnvironmentDecl>(this, parentEnvironment);
+			assert false;
+		}
 		
 		// For each field, build its environment, then stick its exported
 		// symbol in our environment (then move on to the next field).

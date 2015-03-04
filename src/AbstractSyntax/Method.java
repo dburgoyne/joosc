@@ -12,7 +12,7 @@ public class Method extends Decl {
 	protected List<Formal> parameters;
 	protected Identifier typeName;
 	protected Type type; // null if void !
-	protected Block block;
+	protected Block block; // null if non-concrete declaration!
 	
 	public Identifier getName() {
 		return this.name;
@@ -20,10 +20,12 @@ public class Method extends Decl {
 	
 	public Method(ParseTree tree, boolean isAbstract) {
 		super(tree);
-		assert(tree.getSymbol().equals("MethodDeclaration") || tree.getSymbol().equals("AbstractMethodDeclaration") );
+		assert(isAbstract 
+				? tree.getSymbol().equals("AbstractMethodDeclaration")
+				: tree.getSymbol().equals("MethodDeclaration")  );
 		if (tree.getSymbol().equals("MethodDeclaration")) {
 			extractMethodHeader(tree.getChildren()[0]);
-			extractMethodBody(tree.getChildren()[0]);
+			extractMethodBody(tree.getChildren()[1]);
 		} else if (tree.getSymbol().equals("AbstractMethodDeclaration")) {
 			if (tree.numChildren() == 3) {
 				this.typeName = new Identifier(tree.getChildren()[0]);
@@ -106,6 +108,8 @@ public class Method extends Decl {
 		for (Formal formal : parameters) {
 			formal.linkTypes(types);
 		}
-		block.linkTypes(types);
+		if (block != null) {
+			block.linkTypes(types);
+		}
 	}
 }

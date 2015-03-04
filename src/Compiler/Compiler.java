@@ -6,6 +6,7 @@ import java.util.List;
 import AbstractSyntax.ImportException;
 import AbstractSyntax.NameConflictException;
 import AbstractSyntax.Program;
+import AbstractSyntax.TypeLinkingException;
 import Parser.ParseException;
 import Parser.ParseTable;
 import Parser.ParseTree;
@@ -53,7 +54,9 @@ public class Compiler {
     		program.buildEnvironment(null);
     		program.linkTypes(program.getAllTypeDecls());
     	} catch (Exception e) {
-			if (e instanceof NameConflictException || e instanceof ImportException) {
+			if (e instanceof NameConflictException
+			 || e instanceof ImportException
+			 || e instanceof TypeLinkingException) {
     			System.err.println(e.getMessage());
     			failed = true;
 			} else {

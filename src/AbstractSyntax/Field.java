@@ -9,7 +9,7 @@ import Utilities.Predicate;
 public class Field extends Decl {
 
 	protected List<Modifier> modifiers;
-	protected Expression initializer;
+	protected Expression initializer; // Can be null!!
 	
 	protected Identifier typeName;
 	protected Type type;
@@ -79,6 +79,8 @@ public class Field extends Decl {
 	@Override
 	public void linkTypes(Cons<TypeDecl> types) throws TypeLinkingException {
 		this.type = this.typeName.resolveType(types, this.environment);
-		this.initializer.linkTypes(types);
+		if (this.initializer != null) {
+			this.initializer.linkTypes(types);
+		}
 	}
 }

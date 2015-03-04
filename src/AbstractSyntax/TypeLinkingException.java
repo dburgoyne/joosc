@@ -14,7 +14,7 @@ public abstract class TypeLinkingException extends Exception {
 		private static final long serialVersionUID = -7654756392748350710L;
 
 		public NoSuchType(Identifier tid) {
-			super(String.format("Cannot resolve %s to any type.\n" +
+			super(String.format("Unknown type %s.\n" +
 					" at %s.", tid, tid.getPositionalString()));
 		}
 	}
@@ -44,6 +44,16 @@ public abstract class TypeLinkingException extends Exception {
 
 		public NotRefType(Type t, String positionalString) {
 			super(String.format("Expected a reference type, found %s.\n" +
+					" at %s.", t.getCanonicalName(), positionalString));
+		}
+	}
+	
+
+	public static class InstanceofPrimitive extends TypeLinkingException {
+		private static final long serialVersionUID = -7654756392748350710L;
+
+		public InstanceofPrimitive(Type t, String positionalString) {
+			super(String.format("Expected a reference or array type, found %s.\n" +
 					" at %s.", t.getCanonicalName(), positionalString));
 		}
 	}

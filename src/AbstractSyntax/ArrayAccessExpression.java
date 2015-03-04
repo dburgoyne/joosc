@@ -28,4 +28,11 @@ public class ArrayAccessExpression extends Expression {
 		this.array.buildEnvironment(this.environment);
 		this.dimExpr.buildEnvironment(this.environment);
 	}
+
+	@Override
+	public void linkTypes(Cons<TypeDecl> types) throws TypeLinkingException {
+		assert this.array != null;
+		this.array.linkTypes(types);
+		this.dimExpr.linkTypes(types);
+	}
 }

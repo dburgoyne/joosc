@@ -51,7 +51,7 @@ public class Program extends ASTNode {
 		return null;
 	}
 	
-	public void linkTypes(Cons<TypeDecl> allTypes) {
+	public void linkTypes(Cons<TypeDecl> allTypes) throws TypeLinkingException {
 		Exception err = null;
 		for (Classfile file : files) {
 			try {
@@ -66,10 +66,8 @@ public class Program extends ASTNode {
 			}
 		}
 		if (err != null) {
-//			if (err instanceof NameConflictException)
-//				throw (NameConflictException)err;
-//			else if (err instanceof ImportException)
-//				throw (ImportException)err;
+			if (err instanceof TypeLinkingException)
+				throw (TypeLinkingException)err;
 			throw new RuntimeException(err);
 		}
 	}

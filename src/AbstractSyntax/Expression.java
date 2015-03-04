@@ -28,6 +28,9 @@ public abstract class Expression extends Statement {
 		if (tree.getSymbol().equals("FieldAccess")) {
 			return new FieldAccessExpression(tree);
 		}
+		if (tree.getSymbol().equals("ArrayAccess")) {
+			return new ArrayAccessExpression(tree);
+		}
 		if (tree.getSymbol().equals("AmbiguousName")) {
 			return new Identifier(tree);
 		}

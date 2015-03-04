@@ -36,4 +36,9 @@ public class UnaryExpression extends Expression {
 		this.environment = parentEnvironment;
 		this.expression.buildEnvironment(this.environment);
 	}
+
+	@Override
+	public void linkTypes(Cons<TypeDecl> types) throws TypeLinkingException {
+		this.expression.linkTypes(types);
+	}
 }

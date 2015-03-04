@@ -32,6 +32,7 @@ public class ClassInstanceCreationExpression extends Expression {
 		while (tree.numChildren() == 3) {
 			Expression expr = Expression.extractExpression(tree.getChildren()[2]);
 			this.arguments.add(0, expr);
+			tree = tree.getChildren()[0];
 		}
 		Expression expr = Expression.extractExpression(tree.getChildren()[0]);
 		this.arguments.add(0, expr);

@@ -8,10 +8,10 @@ import Utilities.Cons;
 
 public class MethodInvocationExpression extends Expression {
 
-	protected Expression primary;
+	protected Expression primary; // Can be null !!!
 	
 	protected Identifier methodName;
-	// TODO Fill this in during environment creation
+	// TODO Fill this in during name resolution.
 	protected Method method;
 	
 	protected List<Expression> arguments;
@@ -56,6 +56,16 @@ public class MethodInvocationExpression extends Expression {
 		this.methodName.buildEnvironment(this.environment);
 		for (Expression argument : this.arguments) {
 			argument.buildEnvironment(this.environment);
+		}
+	}
+
+	@Override
+	public void linkTypes(Cons<TypeDecl> types) throws TypeLinkingException {
+		if (this.primary != null) {
+			this.primary.linkTypes(types);
+		}
+		for (Expression arg : this.arguments) {
+			arg.linkTypes(types);
 		}
 	}
 }

@@ -8,7 +8,7 @@ public class ArrayCreationExpression extends Expression {
 	protected Identifier typeName;
 	protected ArrayType type;
 	
-	protected Expression dimExpr;
+	protected Expression dimExpr; //...can be null?
 	
 	public ArrayCreationExpression(ParseTree tree) {
 		super(tree);
@@ -28,7 +28,9 @@ public class ArrayCreationExpression extends Expression {
 		this.environment = parentEnvironment;
 		
 		this.typeName.buildEnvironment(this.environment);
-		this.dimExpr.buildEnvironment(this.environment);
+		if (this.dimExpr != null) {
+			this.dimExpr.buildEnvironment(this.environment);
+		}
 	}
 	
 	@Override public void linkTypes(Cons<TypeDecl> types) throws TypeLinkingException {

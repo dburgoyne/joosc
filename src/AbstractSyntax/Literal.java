@@ -38,4 +38,9 @@ public class Literal extends Expression {
 	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) {
 		this.environment = parentEnvironment;
 	}
+
+	@Override
+	public void linkTypes(Cons<TypeDecl> types) throws TypeLinkingException {
+		// Do nothing.
+	}
 }
