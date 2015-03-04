@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Parser.ParseTree;
+import Types.ArrayType;
+import Types.PrimitiveType;
+import Types.Type;
 import Utilities.Cons;
 import Utilities.Predicate;
 import Utilities.StringUtils;

@@ -1,6 +1,8 @@
 package AbstractSyntax;
 
 import Parser.ParseTree;
+import Types.ArrayType;
+import Types.Type;
 import Utilities.Cons;
 
 public class ArrayCreationExpression extends Expression {

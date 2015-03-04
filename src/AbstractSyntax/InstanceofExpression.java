@@ -1,6 +1,8 @@
 package AbstractSyntax;
 
 import Parser.ParseTree;
+import Types.PrimitiveType;
+import Types.Type;
 import Utilities.Cons;
 
 public class InstanceofExpression extends Expression {

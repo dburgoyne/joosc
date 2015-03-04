@@ -1,4 +1,4 @@
-package AbstractSyntax;
+package Types;
 
 public class ArrayType implements Type {
 	final Type type;

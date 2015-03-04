@@ -1,4 +1,4 @@
-package AbstractSyntax;
+package Types;
 
 public interface Type {
 	

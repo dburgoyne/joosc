@@ -1,6 +1,7 @@
 package AbstractSyntax;
 
 import Parser.ParseTree;
+import Types.Type;
 import Utilities.Cons;
 
 public class CastExpression extends Expression {

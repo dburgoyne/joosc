@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 import Parser.ParseTree;
+import Types.Type;
 import Utilities.Cons;
 
 public class ClassInstanceCreationExpression extends Expression {

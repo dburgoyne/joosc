@@ -6,12 +6,14 @@ import java.util.List;
 import AbstractSyntax.ImportException;
 import AbstractSyntax.NameConflictException;
 import AbstractSyntax.Program;
+import AbstractSyntax.TypeDecl;
 import AbstractSyntax.TypeLinkingException;
 import Parser.ParseException;
 import Parser.ParseTable;
 import Parser.ParseTree;
 import Scanner.ScanException;
 import Scanner.Token;
+import Utilities.Cons;
 import Utilities.StringUtils;
 
 // Runs the entire compilation process.
@@ -48,11 +50,19 @@ public class Compiler {
     		return 42;
     	}
     	
-        // Generate the AST
+        // Generate the AST.
 		Program program = new Program(parseTrees);
     	try {
+    		// Environment building pass
     		program.buildEnvironment(null);
-    		program.linkTypes(program.getAllTypeDecls());
+    		
+    		// Type linking pass.
+    		Cons<TypeDecl> allTypeDecls = program.getAllTypeDecls();
+    		program.linkTypes(allTypeDecls);
+    		
+    		// Hierarchy building pass.
+    		
+    		
     	} catch (Exception e) {
 			if (e instanceof NameConflictException
 			 || e instanceof ImportException

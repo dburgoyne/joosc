@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Parser.ParseTree;
+import Types.Type;
 import Utilities.Cons;
 
 public class Method extends Decl {

@@ -1,7 +1,8 @@
 package AbstractSyntax;
 
-public abstract class TypeLinkingException extends Exception {
+import Types.Type;
 
+public abstract class TypeLinkingException extends Exception {
 
 	private static final long serialVersionUID = -6674651877260880090L;
 
@@ -47,7 +48,7 @@ public abstract class TypeLinkingException extends Exception {
 					" at %s.", t.getCanonicalName(), positionalString));
 		}
 	}
-	
+
 
 	public static class InstanceofPrimitive extends TypeLinkingException {
 		private static final long serialVersionUID = -7654756392748350710L;
@@ -55,6 +56,62 @@ public abstract class TypeLinkingException extends Exception {
 		public InstanceofPrimitive(Type t, String positionalString) {
 			super(String.format("Expected a reference or array type, found %s.\n" +
 					" at %s.", t.getCanonicalName(), positionalString));
+		}
+	}
+
+	public static class BadSupertype extends TypeLinkingException {
+		private static final long serialVersionUID = -7654756392748350710L;
+
+		public BadSupertype(TypeDecl child, TypeDecl parent) {
+			super(createMessage(child, parent));
+		}
+		
+		private static String createMessage(TypeDecl child, TypeDecl parent) {
+			String childKind = 
+				child.kind == TypeDecl.Kind.CLASS ? "Class" : "Interface";
+			String parentKind =
+				parent.kind == TypeDecl.Kind.CLASS ? "class" : "interface";
+			String verb = 
+				child.kind == TypeDecl.Kind.CLASS
+				  ? parent.kind == TypeDecl.Kind.CLASS
+				      ? "implements"
+					  : "extends"
+				  : "extends";
+			return String.format("%s %s %s %s %s\n at %s.",
+					childKind, child.getCanonicalName(),
+					verb,
+					parentKind, parent.getCanonicalName(),
+					child.getPositionalString());
+		}
+	}
+
+	public static class AlreadyInherits extends TypeLinkingException {
+		private static final long serialVersionUID = -7654756392748350710L;
+
+		public AlreadyInherits(TypeDecl child, TypeDecl parent) {
+			super(createMessage(child, parent));
+		}
+		
+		private static String createMessage(TypeDecl child, TypeDecl parent) {
+			String childKind = 
+				child.kind == TypeDecl.Kind.CLASS ? "Class" : "Interface";
+			String verb = 
+				child.kind == TypeDecl.Kind.CLASS ? "implements" : "extends";
+			return String.format("%s %s already %s interface %s\n at %s.",
+					childKind, child.getCanonicalName(),
+					verb,
+					parent.getCanonicalName(),
+					child.getPositionalString());
+		}
+	}
+	
+	public static class ExtendsFinal extends TypeLinkingException {
+		private static final long serialVersionUID = -7654756392748350710L;
+
+		public ExtendsFinal(TypeDecl child, TypeDecl parent) {
+			super(String.format("Class %s extends final class %s\n at %s.",
+					child.getCanonicalName(), parent.getCanonicalName(),
+					child.getPositionalString()));
 		}
 	}
 }

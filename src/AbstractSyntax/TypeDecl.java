@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Parser.ParseTree;
+import Types.Type;
 import Utilities.Cons;
 import Utilities.ObjectUtils;
 import Utilities.Predicate;
@@ -272,6 +273,14 @@ public class TypeDecl extends ASTNode implements EnvironmentDecl, Type {
 						this.superclassName.getPositionalString());
 			}
 			this.superclass = (TypeDecl)type;
+			
+			if (this.superclass.kind == Kind.INTERFACE) {
+				throw new TypeLinkingException.BadSupertype(this, this.superclass);
+			}
+			
+			if (this.superclass.modifiers.contains(Modifier.FINAL)) {
+				throw new TypeLinkingException.ExtendsFinal(this, this.superclass);
+			}
 		}
 		
 		for (Identifier iface : this.interfacesNames) {
@@ -280,7 +289,16 @@ public class TypeDecl extends ASTNode implements EnvironmentDecl, Type {
 				throw new TypeLinkingException.NotRefType(type, 
 							iface.getPositionalString());
 			}
+			
 			this.interfaces.add((TypeDecl)type);
+			
+			if (((TypeDecl)type).kind == Kind.CLASS) {
+				throw new TypeLinkingException.BadSupertype(this, (TypeDecl)type);
+			}
+			
+			if (this.interfaces.indexOf(type) < this.interfaces.size() - 1) {
+				throw new TypeLinkingException.AlreadyInherits(this, (TypeDecl)type);
+			}
 		}
 		
 		// Class body decls: 
@@ -295,5 +313,17 @@ public class TypeDecl extends ASTNode implements EnvironmentDecl, Type {
 			m.linkTypes(allTypes);
 		}
 		
+	}
+	
+	public List<TypeDecl> getDirectSupertypes() {
+		List<TypeDecl> list = new ArrayList<TypeDecl>();
+		
+		if (superclass == null) {
+			// TODO special case for java.lang.Object or do nothing?
+		} else {
+			
+		}
+		
+		return list;
 	}
 }

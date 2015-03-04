@@ -3,6 +3,7 @@ package AbstractSyntax;
 import java.util.List;
 
 import Parser.ParseTree;
+import Types.Type;
 import Utilities.Cons;
 import Utilities.Predicate;
 
