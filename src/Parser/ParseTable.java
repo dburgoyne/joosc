@@ -44,12 +44,10 @@ public class ParseTable{
         	Token token = tokenList.get(0);
             Transition transition = transitions.get(new Pair<Integer, String>(stateStack.peek(), token.getCfgName()));
 
-    		System.out.println(stateStack.peek()+ " " + token.getCfgName());
             // Reduce as long as we are able to.
         	while (transition != null && !transition.shift) {
         		List<String> rule = rules.get(transition.target);
         		String lhs = rule.get(0);
-        		System.out.println("Reducing to " + lhs);
         		
         		List<ParseTree> children = new ArrayList<ParseTree>();
         		for (int i = 1; i < rule.size(); i++) {
@@ -77,7 +75,6 @@ public class ParseTable{
         	    throw new ParseException(error);
         	}
         	
-        	System.out.println("Shifting " + token.getCfgName());
         	stateStack.push(transition.target);
         	symbolStack.push(new Terminal(token));
         	tokenList.remove(0);

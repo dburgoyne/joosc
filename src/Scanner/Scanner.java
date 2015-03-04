@@ -140,10 +140,8 @@ public class Scanner {
 			TokenType tokenType = largestList.get(0);
 			// If the longest match was unique, we know how to consume it.
 			if (tokenType != TokenType.WhiteSpace
-			        && tokenType != TokenType.Comment
-			        && tokenType != TokenType.JavadocComment) {
-				System.out.println("Consuming \"" + lexeme + "\" as "
-						+ tokenType.name());
+			 && tokenType != TokenType.Comment
+			 && tokenType != TokenType.JavadocComment) {
 				Token token = new Token(lexeme, tokenType, joosSourceFileName, line, column);
 				tokens.add(token);
 			}
