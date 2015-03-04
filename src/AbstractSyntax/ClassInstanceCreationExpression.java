@@ -9,7 +9,6 @@ import Utilities.Cons;
 public class ClassInstanceCreationExpression extends Expression {
 
 	protected Identifier typeName;
-	// TODO Fill this in during environment creation
 	protected EnvironmentDecl type;
 	
 	protected List<Expression> arguments;
@@ -38,12 +37,19 @@ public class ClassInstanceCreationExpression extends Expression {
 		this.arguments.add(0, expr);
 	}
 	
-	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException, ImportException {
 		this.environment = parentEnvironment;
 		
 		this.typeName.buildEnvironment(this.environment);
 		for (Expression argument : this.arguments) {
 			argument.buildEnvironment(this.environment);
+		}
+	}
+
+	@Override public void linkTypes(Cons<TypeDecl> types) {
+		this.type = this.typeName.resolveType(types, this.environment);
+		for (Expression arg : this.arguments) {
+			arg.linkTypes(types);
 		}
 	}
 	

@@ -25,6 +25,7 @@ public abstract class ASTNode {
 		return info;
 	}
 	
-	public abstract void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException;
+	public abstract void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException, ImportException;
 	public abstract EnvironmentDecl exportEnvironmentDecls();
+	public abstract void linkTypes(Cons<TypeDecl> types);
 }

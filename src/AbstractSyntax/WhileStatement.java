@@ -17,9 +17,15 @@ public class WhileStatement extends Statement {
 		this.body = Statement.extractStatement(tree.getChildren()[4]);
 	}
 	
-	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException, ImportException {
 		this.environment = parentEnvironment;
 		this.condition.buildEnvironment(this.environment);
 		this.body.buildEnvironment(this.environment);
+	}
+
+	@Override
+	public void linkTypes(Cons<TypeDecl> types) {
+		this.condition.linkTypes(types);
+		this.body.linkTypes(types);
 	}
 }

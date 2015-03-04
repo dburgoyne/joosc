@@ -32,7 +32,7 @@ public class Block extends Statement {
 		statements.add(0, bs);
 	}
 	
-	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException, ImportException {
 		this.environment = parentEnvironment;
 		
 		// Build the environment for the body statements.
@@ -42,6 +42,13 @@ public class Block extends Statement {
 			if (export != null) {
 				this.environment = new Cons<EnvironmentDecl>(export, this.environment);
 			}
+		}
+	}
+
+	@Override
+	public void linkTypes(Cons<TypeDecl> types) {
+		for (BlockStatement bs : this.statements) {
+			bs.linkTypes(types);
 		}
 	}
 }

@@ -26,12 +26,20 @@ public class IfStatement extends Statement {
 		}
 	}
 	
-	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException, ImportException {
 		this.environment = parentEnvironment;
 		this.condition.buildEnvironment(this.environment);
 		this.body.buildEnvironment(this.environment);
 		if (this.elseBody != null) {
 			this.elseBody.buildEnvironment(this.environment);
 		}
+	}
+
+	@Override
+	public void linkTypes(Cons<TypeDecl> types) {
+		this.condition.linkTypes(types);
+		this.body.linkTypes(types);
+		if (this.elseBody != null)
+			this.elseBody.linkTypes(types);
 	}
 }

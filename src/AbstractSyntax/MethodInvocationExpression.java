@@ -42,12 +42,13 @@ public class MethodInvocationExpression extends Expression {
 		while (tree.numChildren() == 3) {
 			Expression expr = Expression.extractExpression(tree.getChildren()[2]);
 			this.arguments.add(0, expr);
+			tree = tree.getChildren()[0];
 		}
 		Expression expr = Expression.extractExpression(tree.getChildren()[0]);
 		this.arguments.add(0, expr);
 	}
 	
-	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException, ImportException {
 		this.environment = parentEnvironment;
 		if (this.primary != null) {
 			this.primary.buildEnvironment(this.environment);

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import AbstractSyntax.ASTNode;
+import AbstractSyntax.ImportException;
 import AbstractSyntax.NameConflictException;
 import AbstractSyntax.Program;
 import Parser.ParseException;
@@ -51,11 +52,13 @@ public class Compiler {
 		ASTNode program = new Program(parseTrees);
     	try {
     		program.buildEnvironment(null);
+    		program.linkTypes();
     	} catch (Exception e) {
-			if (e instanceof NameConflictException) {
+			if (e instanceof NameConflictException || e instanceof ImportException) {
     			System.err.println(e.getMessage());
     			failed = true;
 			} else {
+				e.printStackTrace();
 				return 1;
 			}
 		}

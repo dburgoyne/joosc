@@ -1,6 +1,7 @@
 package AbstractSyntax;
 
 import java.util.ArrayList;
+
 import java.util.List;
 
 import Parser.ParseTree;
@@ -59,32 +60,100 @@ public class Classfile extends ASTNode {
 		return identifier;
 	}
 	
-	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws ImportException, NameConflictException {
+		
+		class MatchesPackage implements Predicate<EnvironmentDecl> {
+			List<String> packageName;
+			public MatchesPackage(List<String> packageName) {
+				this.packageName = packageName;
+			}
+			public boolean test(EnvironmentDecl decl) {
+				if (!(decl instanceof TypeDecl)) return false;
+				TypeDecl type = (TypeDecl)decl;
+				Identifier typePackageName = type.getPackageName();
+				return typePackageName == null 
+					 ? packageName.isEmpty() 
+					 : typePackageName.getComponents().equals(packageName);
+			}
+		}
+		
 		// Don't inherit everything from the parent environment.
 		this.environment = null;
 		
-		for (Identifier id : imports) {			
-			final List<String> packageName = id.getPackageName();
-			if (id.isStarImport()) {
-				this.environment = Cons.filter(parentEnvironment,
-					new Predicate<EnvironmentDecl>() {
-						public boolean test(EnvironmentDecl decl) {
-							if (!(decl instanceof TypeDecl)) return false;
-							TypeDecl type = (TypeDecl)decl;
-							return type.getPackageName().getComponents().equals(packageName);
-						}
-				});
-			} else {
+		for (Identifier id : imports) {
+			if (!id.isStarImport()) {
+				final List<String> packageName = id.getPackageName();
 				final String typeName = id.getLastComponent();
-				this.environment = Cons.filter(parentEnvironment,
+				Cons<EnvironmentDecl> maybeTypeDecl = Cons.filter(parentEnvironment,
 						new Predicate<EnvironmentDecl>() {
 							public boolean test(EnvironmentDecl decl) {
 								if (!(decl instanceof TypeDecl)) return false;
 								TypeDecl type = (TypeDecl)decl;
-								return type.getPackageName().getComponents().equals(packageName)
-								    && type.getName().equals(typeName);
+								Identifier typePackageName = type.getPackageName();
+								return (typePackageName == null ? packageName.isEmpty() : typePackageName.getComponents().equals(packageName))
+									 && type.getName().getLastComponent().equals(typeName);
 							}
 					});
+				if (maybeTypeDecl == null) {
+					// Tried to import a non-existent type.
+					throw new ImportException.NonExistentType(id);
+				}
+				if (maybeTypeDecl.tail != null) {
+					// More than one type has the same canonical name.
+					throw new ImportException.DuplicateType(id);
+				}
+				Cons<EnvironmentDecl> maybeClash = Cons.filter(this.environment,
+						new Predicate<EnvironmentDecl>() {
+							public boolean test(EnvironmentDecl decl) {
+								if (!(decl instanceof TypeDecl)) return false;
+								TypeDecl type = (TypeDecl)decl;
+								Identifier typePackageName = type.getPackageName();
+								return !(typePackageName == null ? packageName.isEmpty() : typePackageName.getComponents().equals(packageName))
+									    && type.getName().getLastComponent().equals(typeName);
+							}
+					});
+				if (maybeClash != null) {
+					// We tried to import a (different) type with the same simple name already.
+					throw new ImportException.Clash(id, (Identifier)maybeClash.head);
+				}
+				
+				// Importing yourself has no effect.
+				if (!this.typeDecl.equals((TypeDecl)maybeTypeDecl.head)) {
+					// If everything is OK, add the imported type to our environment.
+					this.environment = new Cons<EnvironmentDecl>(maybeTypeDecl.head, this.environment);
+				}
+			}
+		}
+		// Don't care about clashes anymore.
+		
+		// First, process the implicit current-package star-import...
+		{
+			List<String> currentPackage = 
+				this.packageName == null ? new ArrayList<String>() : this.packageName.components;
+			Cons<EnvironmentDecl> maybeTypeDecls =
+				Cons.filter(parentEnvironment, new MatchesPackage(currentPackage));	
+			for (EnvironmentDecl decl : Cons.toList(maybeTypeDecls)) {
+				if (!Cons.contains(this.environment, decl)) {
+					this.environment = new Cons<EnvironmentDecl>(decl, this.environment);
+				}
+			}
+		}
+		
+		// ...then process the actual star imports:
+		for (Identifier id : imports) {
+			if (id.isStarImport()) {
+				Cons<EnvironmentDecl> maybeTypeDecls =
+					Cons.filter(parentEnvironment, new MatchesPackage(id.getPackageName()));
+				if (maybeTypeDecls == null) {
+					// Non-existent package.
+					throw new ImportException.NonExistentPackage(id);
+				}
+				
+				for (EnvironmentDecl decl : Cons.toList(maybeTypeDecls)) {
+					if (!Cons.contains(this.environment, decl)) {
+						this.environment = new Cons<EnvironmentDecl>(decl, this.environment);
+					}
+				}
 			}
 		}
 		
@@ -93,5 +162,9 @@ public class Classfile extends ASTNode {
 	
 	public EnvironmentDecl exportEnvironmentDecls() {
 		return this.typeDecl.exportEnvironmentDecls();
+	}
+
+	@Override public void linkTypes(Cons<TypeDecl> allTypes) {
+		typeDecl.linkTypes(allTypes);
 	}
 }

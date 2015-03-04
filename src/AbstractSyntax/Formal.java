@@ -7,7 +7,6 @@ import Utilities.Predicate;
 public class Formal extends ASTNode implements EnvironmentDecl {
 	protected Identifier name;
 	protected Identifier typeName;
-	// TODO Fill this in during type resolution
 	protected EnvironmentDecl type;
 	
 	public Identifier getName() {
@@ -52,5 +51,10 @@ public class Formal extends ASTNode implements EnvironmentDecl {
 
 	public EnvironmentDecl exportEnvironmentDecls() {
 		return this;
+	}
+
+	@Override
+	public void linkTypes(Cons<TypeDecl> types) {
+		this.type = this.typeName.resolveType(types, this.environment);
 	}
 }

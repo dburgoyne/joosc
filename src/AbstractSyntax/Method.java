@@ -11,7 +11,6 @@ public class Method extends Decl {
 	protected List<Modifier> modifiers;
 	protected List<Formal> parameters;
 	protected Identifier typeName;
-	// TODO Fill this in during type resolution
 	protected EnvironmentDecl type;
 	protected Block block;
 	
@@ -77,7 +76,7 @@ public class Method extends Decl {
 		}
 	}
 	
-	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException, ImportException {
 		this.environment = parentEnvironment;
 		
 		// Build the environment for each formal parameter
@@ -94,5 +93,14 @@ public class Method extends Decl {
 
 	public EnvironmentDecl exportEnvironmentDecls() {
 		return this;
+	}
+
+	@Override
+	public void linkTypes(Cons<TypeDecl> types) {
+		this.type = this.typeName.resolveType(types, this.environment);
+		for (Formal formal : parameters) {
+			formal.linkTypes(types);
+		}
+		block.linkTypes(types);
 	}
 }

@@ -10,8 +10,8 @@ public class Field extends Decl {
 
 	protected List<Modifier> modifiers;
 	protected Expression initializer;
+	
 	protected Identifier typeName;
-	// TODO Fill this in during type resolution
 	protected EnvironmentDecl type;
 	
 	public Identifier getName() {
@@ -61,7 +61,7 @@ public class Field extends Decl {
 		}
 	}
 
-	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException, ImportException {
 		// Make sure our name is not already taken.
 		checkNameConflicts(parentEnvironment);
 
@@ -74,5 +74,11 @@ public class Field extends Decl {
 
 	public EnvironmentDecl exportEnvironmentDecls() {
 		return this;
+	}
+
+	@Override
+	public void linkTypes(Cons<TypeDecl> types) {
+		this.type = this.typeName.resolveType(types, this.environment);
+		this.initializer.linkTypes(types);
 	}
 }

@@ -5,6 +5,7 @@ import java.util.List;
 
 import Parser.ParseTree;
 import Utilities.Cons;
+import Utilities.Predicate;
 import Utilities.StringUtils;
 
 public class Identifier extends Expression {
@@ -42,6 +43,14 @@ public class Identifier extends Expression {
 		return this.components;
 	}
 	
+	protected boolean isSimple() {
+		return this.components.size() == 1;
+	}
+	
+	protected boolean isQualified() {
+		return this.components.size() > 1;
+	}
+	
 	protected String getSingleComponent() {
 		assert(this.components.size() == 1);
 		return this.components.get(0);
@@ -56,6 +65,7 @@ public class Identifier extends Expression {
 	}
 	
 	protected String getLastComponent() {
+		assert this.components.size() >= 1;
 		return this.components.get(this.components.size() - 1);
 	}
 	
@@ -99,10 +109,10 @@ public class Identifier extends Expression {
 		assert(tree.getSymbol().equals("AmbiguousName") || tree.getSymbol().equals("PackageName"));
 		
 		while (tree.numChildren() > 1) {
-			components.add(0, tree.getChildren()[2].getSymbol());
+			components.add(0, tree.getChildren()[2].getToken().getLexeme());
 			tree = tree.getChildren()[0];
 		}
-		components.add(0, tree.getChildren()[0].getSymbol());
+		components.add(0, tree.getChildren()[0].getToken().getLexeme());
 	}
 	
 	private void extractType(ParseTree tree) {
@@ -151,5 +161,44 @@ public class Identifier extends Expression {
 	
 	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
 		this.environment = parentEnvironment;
+	}
+	
+	public TypeDecl resolveType(Cons<TypeDecl> allTypes, Cons<EnvironmentDecl> localEnv) {
+		Cons<?> maybeTypeDecl = null;
+		final List<String> packageName = this.getPackageName();
+		final String typeName = this.getLastComponent();
+		
+		if (this.isQualified()) {
+			maybeTypeDecl = Cons.filter(allTypes,
+					new Predicate<TypeDecl>() {
+						public boolean test(TypeDecl type) {
+							Identifier typePackageName = type.getPackageName();
+							return (typePackageName != null && typePackageName.getComponents().equals(packageName)
+								 && type.getName().getLastComponent().equals(typeName));
+						}
+				});
+		} else {
+			maybeTypeDecl = Cons.filter(localEnv,
+					new Predicate<EnvironmentDecl>() {
+						public boolean test(EnvironmentDecl decl) {
+							if (!(decl instanceof TypeDecl)) return false;
+							TypeDecl type = (TypeDecl)decl;
+							return type.getName().getLastComponent().equals(typeName);
+						}
+				});
+		}
+		
+		if (maybeTypeDecl == null) {
+			// Type linking failed.
+			throw new TypeLinkingException.NoSuchType(this);
+		}
+		
+		if (maybeTypeDecl.tail != null) {
+			// Ambiguous type
+			throw new TypeLinkingException.AmbiguousType(this);
+		}
+		// Everything is OK
+		assert(maybeTypeDecl.head instanceof TypeDecl);
+		return (TypeDecl)maybeTypeDecl.head;
 	}
 }

@@ -16,7 +16,7 @@ public class InstanceofExpression extends Expression {
 		this.right = new Identifier(tree.getChildren()[2]);
 	}
 	
-	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException, ImportException {
 		this.environment = parentEnvironment;
 		
 		this.left.buildEnvironment(this.environment);

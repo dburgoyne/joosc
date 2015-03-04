@@ -32,7 +32,7 @@ public class UnaryExpression extends Expression {
 		}
 	}
 	
-	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException, ImportException {
 		this.environment = parentEnvironment;
 		this.expression.buildEnvironment(this.environment);
 	}

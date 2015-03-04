@@ -16,7 +16,7 @@ public class CastExpression extends Expression {
 		this.expression = new UnaryExpression(tree.getChildren()[3]);
 	}
 	
-	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException, ImportException {
 		this.environment = parentEnvironment;
 		
 		this.type.buildEnvironment(this.environment);

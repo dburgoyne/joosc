@@ -18,19 +18,19 @@ public class Program extends ASTNode {
 		}
 	}
 	
-	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException, ImportException {
 		for (Classfile file : files) {
 			EnvironmentDecl export = file.exportEnvironmentDecls();
-			assert(export != null);
+			assert(export != null && export instanceof TypeDecl);
 			this.environment = new Cons<EnvironmentDecl>(export, this.environment);
 		}
 		// If environment generation fails for one file, continue with the others,
 		// then throw the original exception.
-		NameConflictException err = null;
+		Exception err = null;
 		for (Classfile file : files) {
 			try {
 				file.buildEnvironment(this.environment);
-			} catch (NameConflictException caught) {
+			} catch (Exception caught) {
 				if (err != null) {
 					System.err.println(err);
 				}
@@ -38,12 +38,39 @@ public class Program extends ASTNode {
 			}
 		}
 		if (err != null) {
-			throw err;
+			if (err instanceof NameConflictException)
+				throw (NameConflictException)err;
+			else if (err instanceof ImportException)
+				throw (ImportException)err;
+			throw new RuntimeException(err);
 		}
 	}
 
 	public EnvironmentDecl exportEnvironmentDecls() {
 		// Do nothing.
 		return null;
+	}
+	
+	public void linkTypes(Cons<TypeDecl> allTypes) {
+		Exception err = null;
+		for (Classfile file : files) {
+			try {
+				
+				file.linkTypes(allTypes);
+				
+			} catch (Exception caught) {
+				if (err != null) {
+					System.err.println(err);
+				}
+				err = caught;
+			}
+		}
+		if (err != null) {
+//			if (err instanceof NameConflictException)
+//				throw (NameConflictException)err;
+//			else if (err instanceof ImportException)
+//				throw (ImportException)err;
+			throw new RuntimeException(err);
+		}
 	}
 }

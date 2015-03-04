@@ -5,6 +5,7 @@ import java.util.List;
 
 import Parser.ParseTree;
 import Utilities.Cons;
+import Utilities.ObjectUtils;
 import Utilities.Predicate;
 
 public class TypeDecl extends ASTNode implements EnvironmentDecl {
@@ -18,7 +19,7 @@ public class TypeDecl extends ASTNode implements EnvironmentDecl {
 	protected TypeDecl.Kind kind;
 	protected Identifier name;
 	
-	// TODO Resolve these during environment building
+	// TODO Resolve these during type linking
 	protected TypeDecl superclass;
 	protected List<TypeDecl> interfaces;
 	protected Identifier superclassName;
@@ -203,8 +204,8 @@ public class TypeDecl extends ASTNode implements EnvironmentDecl {
 					public boolean test(EnvironmentDecl decl) {
 						if (!(decl instanceof TypeDecl)) return false;
 						TypeDecl type = (TypeDecl)decl;
-						return type.getPackageName().equals(packageName)
-						    && type.getName().equals(typeName);
+						return ObjectUtils.equals(type.getPackageName(), packageName)
+						    && ObjectUtils.equals(type.getName(), typeName);
 					}
 			});
 		if(conflicts != null) {
@@ -213,7 +214,7 @@ public class TypeDecl extends ASTNode implements EnvironmentDecl {
 		}
 	}
 	
-	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException, ImportException {
 		// Make sure our canonical name is not already taken.
 		checkNameConflicts(parentEnvironment);
 		
@@ -250,5 +251,31 @@ public class TypeDecl extends ASTNode implements EnvironmentDecl {
 	
 	public EnvironmentDecl exportEnvironmentDecls() {
 		return this;
+	}
+
+	@Override public void linkTypes(Cons<TypeDecl> allTypes) {
+		
+		// Hierarchy decls:
+		
+		if (this.superclassName != null) {
+			this.superclass = this.superclassName.resolveType(allTypes, this.environment);
+		}
+		
+		for (Identifier iface : this.interfacesNames) {
+			this.interfaces.add(iface.resolveType(allTypes, this.environment));
+		}
+		
+		// Class body decls: 
+		
+		for (Constructor ctor : constructors) {
+			ctor.linkTypes(allTypes);
+		}
+		for (Field f : fields) {
+			f.linkTypes(allTypes);
+		}
+		for (Method m : methods) {
+			m.linkTypes(allTypes);
+		}
+		
 	}
 }

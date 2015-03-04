@@ -13,5 +13,7 @@ public class EmptyStatement extends Statement {
 	
 	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) {
 		this.environment = parentEnvironment;
-	}	
+	}
+
+	@Override public void linkTypes(Cons<TypeDecl> types) { }	
 }

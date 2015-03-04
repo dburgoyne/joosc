@@ -8,7 +8,7 @@ public class FieldAccessExpression extends Expression {
 	protected Expression primary;
 	
 	protected Identifier fieldName;
-	// TODO Fill this in during environment creation
+	// TODO Fill this in during name linking
 	protected Field field;
 	
 	public FieldAccessExpression(ParseTree tree) {
@@ -19,9 +19,13 @@ public class FieldAccessExpression extends Expression {
 		this.fieldName = new Identifier(tree.getChildren()[2]);
 	}
 	
-	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException, ImportException {
 		this.environment = parentEnvironment;
 		this.fieldName.buildEnvironment(this.environment);
 		this.primary.buildEnvironment(this.environment);
+	}
+
+	@Override public void linkTypes(Cons<TypeDecl> types) {
+		this.primary.linkTypes(types);
 	}
 }

@@ -22,7 +22,7 @@ public class ArrayAccessExpression extends Expression {
 		this.dimExpr = Expression.extractExpression(tree.getChildren()[2]);
 	}
 	
-	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException, ImportException {
 		this.environment = parentEnvironment;
 		
 		this.array.buildEnvironment(this.environment);

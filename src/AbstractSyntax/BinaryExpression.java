@@ -56,7 +56,7 @@ public class BinaryExpression extends Expression {
 		this.right = Expression.extractExpression(tree.getChildren()[2]);
 	}
 	
-	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException, ImportException {
 		this.environment = parentEnvironment;
 		
 		this.left.buildEnvironment(this.environment);

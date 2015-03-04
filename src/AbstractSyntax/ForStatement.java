@@ -33,7 +33,7 @@ public class ForStatement extends Statement {
 		}
 	}
 	
-	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException, ImportException {
 		this.environment = parentEnvironment;
 		
 		if (this.initializer != null) {
@@ -49,8 +49,20 @@ public class ForStatement extends Statement {
 		if (this.postExpression != null) {
 			this.postExpression.buildEnvironment(this.environment);
 		}
-		if (this.body != null) {
-			this.body.buildEnvironment(this.environment);
+		assert(this.body != null);
+		this.body.buildEnvironment(this.environment);
+	}
+
+	@Override public void linkTypes(Cons<TypeDecl> types) {
+		if (this.initializer != null) {
+			this.initializer.linkTypes(types);
 		}
+		if (this.condition != null) {
+			this.condition.linkTypes(types);
+		}
+		if (this.postExpression != null) {
+			this.postExpression.linkTypes(types);
+		}
+		this.body.linkTypes(types);
 	}
 }

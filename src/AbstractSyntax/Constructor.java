@@ -12,7 +12,7 @@ public class Constructor extends ASTNode implements EnvironmentDecl {
 	protected Identifier name;
 	protected List<Modifier> modifiers;
 	protected List<Formal> parameters;
-	protected Block block;
+	protected Block block; // is not null.
 	
 	public Identifier getName() {
 		return this.name;
@@ -31,6 +31,8 @@ public class Constructor extends ASTNode implements EnvironmentDecl {
 			extractConstructorDeclarator(tree.getChildren()[1]);
 			this.block = new Block(tree.getChildren()[2]);
 		}
+		
+		assert this.block != null;
 	}
 	
 	private void extractConstructorDeclarator(ParseTree tree) {
@@ -45,7 +47,7 @@ public class Constructor extends ASTNode implements EnvironmentDecl {
 		}
 	}
 
-	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
+	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException, ImportException {
 		this.environment = parentEnvironment;
 		
 		this.name.buildEnvironment(this.environment);
@@ -61,5 +63,12 @@ public class Constructor extends ASTNode implements EnvironmentDecl {
 
 	public EnvironmentDecl exportEnvironmentDecls() {
 		return this;
+	}
+
+	@Override public void linkTypes(Cons<TypeDecl> types) {
+		for (Formal formal : parameters) {
+			formal.linkTypes(types);
+		}
+		block.linkTypes(types);
 	}
 }
