@@ -1,5 +1,9 @@
 package AbstractSyntax;
 
+import java.util.List;
+
+import Utilities.StringUtils;
+
 public abstract class ImportException extends Exception {
 	
 	/**
@@ -20,7 +24,7 @@ public abstract class ImportException extends Exception {
 		public NonExistentPackage(Identifier id) {
 			super(String.format("The package %s does not exist.\n"
 					+ " at %s\n",
-					id.getPackageName(),
+					StringUtils.join(id.getPackageName(), "."),
 					id.getPositionalString()));
 		}
 	}

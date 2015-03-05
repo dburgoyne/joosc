@@ -85,7 +85,7 @@ public class Classfile extends ASTNode {
 			}
 			private boolean matchesPrefix(List<String> prefix, List<String> packageName) {
 				if (prefix.size() > packageName.size()) return false;
-				for (int i = 0; i < prefix.size() - 2; i++) {
+				for (int i = 0; i < prefix.size(); i++) {
 					if (!prefix.get(i).equals(packageName.get(i))) return false;
 				}
 				return true;
