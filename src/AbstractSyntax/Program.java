@@ -9,6 +9,9 @@ import Utilities.Cons;
 public class Program extends ASTNode {
 	protected List<Classfile> files;
 	
+	// TODO Ew.
+	public static TypeDecl javaLangObject;
+	
 	public Program(ParseTree... trees) {
 		super(null);
 		files = new ArrayList<Classfile>();
@@ -22,6 +25,13 @@ public class Program extends ASTNode {
 		for (Classfile file : files) {
 			EnvironmentDecl export = file.exportEnvironmentDecls();
 			assert(export != null && export instanceof TypeDecl);
+			
+			// If we see java.lang.Object, remember where it is.
+			TypeDecl type = (TypeDecl)export;
+			if(type.getCanonicalName().equals("java.lang.Object")) {
+				Program.javaLangObject = type;
+			}
+			
 			this.environment = new Cons<EnvironmentDecl>(export, this.environment);
 		}
 		// If environment generation fails for one file, continue with the others,
@@ -37,6 +47,10 @@ public class Program extends ASTNode {
 				err = caught;
 			}
 		}
+		
+		// Set java.lang.Object back to null to prevent explosion
+		Program.javaLangObject = null;
+		
 		if (err != null) {
 			if (err instanceof NameConflictException)
 				throw (NameConflictException)err;

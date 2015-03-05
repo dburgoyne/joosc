@@ -28,7 +28,6 @@ public class MemberSet {
 		assert ms.inheritedFields == null;
 		assert ms.declaredFields == null;
 		assert ms.declaredCtors == null;
-		assert ms.inheritedConcreteMethods == null;
 		assert ms.declaredConcreteMethods == null;
 		
 		this.inheritedAbstractMethods = 
@@ -94,33 +93,33 @@ public class MemberSet {
 				
 		if (Cons.contains(allDeclaredMethods, method,
 					new Method.SameSignaturePredicate())) {
-			new Exception.MethodSignatureClash(method);
+			throw new Exception.MethodSignatureClash(method);
 		}
 		
 		if (Cons.contains(allMethods, method,
 				new Method.SameSignatureDifferentReturnTypePredicate())) {
-			new Exception.InvalidReplacement(method);
+			throw new Exception.InvalidReplacement(method);
 		}
 		
 		// Cannot replace a static method with a non-static one.
 		if (method.isStatic()) {
 			if (Cons.contains(allInheritedMethods, method,
 					new Method.SameSignatureNonStaticPredicate())) {
-				new Exception.InvalidReplacement(method);
+				throw new Exception.InvalidReplacement(method);
 			}
 		}
 		
 		// Cannot replace a final method.
 		if (Cons.contains(allInheritedMethods, method,
 				new Method.SameSignatureFinalPredicate())) {
-			new Exception.InvalidReplacement(method);
+			throw new Exception.InvalidReplacement(method);
 		}
 		
 		// A protected method must not replace a public method.
 		if (method.isProtected()) {
 			if (Cons.contains(allInheritedMethods, method,
 					new Method.SameSignaturePublicPredicate())) {
-				new Exception.InvalidReplacement(method);
+				throw new Exception.InvalidReplacement(method);
 			}
 		}
 		
@@ -147,7 +146,7 @@ public class MemberSet {
 				toCheck = toCheck.tail;
 				if (!Cons.contains(allConcreteMethods, inherited,
 						new Method.SameSignatureSameReturnTypePredicate())) {
-					new Exception.UnimplementedMethod(this.type, inherited);
+					throw new Exception.UnimplementedMethod(this.type, inherited);
 				}
 			}
 		}

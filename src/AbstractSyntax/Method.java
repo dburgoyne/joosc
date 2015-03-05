@@ -13,7 +13,6 @@ public class Method extends Decl {
 
 	protected List<Modifier> modifiers;
 	protected List<Formal> parameters;
-	protected Identifier typeName;
 	protected Type type; // null if void !
 	protected Block block; // null if non-concrete declaration!
 	protected boolean isGramaticallyAbstract = false;

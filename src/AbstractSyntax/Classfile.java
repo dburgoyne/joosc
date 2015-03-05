@@ -179,6 +179,7 @@ public class Classfile extends ASTNode {
 		// Don't care about clashes anymore.
 		
 		// First, process the implicit current-package star-import...
+		Cons<EnvironmentDecl> currentPackageDecls = null;
 		{
 			List<String> currentPackage = 
 				this.packageName == null ? new ArrayList<String>() : this.packageName.components;
@@ -198,6 +199,7 @@ public class Classfile extends ASTNode {
 						Cons.filter(this.environment, new MatchesSimpleName(decl.getName().getSingleComponent()));
 				if (declsMatchingSimpleName == null && !Cons.contains(this.environment, decl)) {
 					this.environment = new Cons<EnvironmentDecl>(decl, this.environment);
+					currentPackageDecls = new Cons<EnvironmentDecl>(decl, currentPackageDecls);
 				}
 			}
 		}
@@ -213,10 +215,9 @@ public class Classfile extends ASTNode {
 				}
 				
 				for (EnvironmentDecl decl : Cons.toList(maybeTypeDecls)) {
-					// Only import decl if its simple name is not taken.
-					Cons<EnvironmentDecl> declsMatchingSimpleName =
-							Cons.filter(this.environment, new MatchesSimpleName(decl.getName().getSingleComponent()));
-					if (declsMatchingSimpleName == null && !Cons.contains(this.environment, decl)) {
+					Cons<EnvironmentDecl> wouldHide =
+							Cons.filter(currentPackageDecls, new MatchesSimpleName(decl.getName().getLastComponent()));
+					if (!Cons.contains(this.environment, decl) && wouldHide == null) {
 						this.environment = new Cons<EnvironmentDecl>(decl, this.environment);
 					}
 				}
@@ -229,10 +230,9 @@ public class Classfile extends ASTNode {
 			Cons<EnvironmentDecl> javaLangDecls =
 				Cons.filter(parentEnvironment, new MatchesPackage(javaDotLang));
 			for (EnvironmentDecl decl : Cons.toList(javaLangDecls)) {
-				// Only import decl if its simple name is not taken.
-				Cons<EnvironmentDecl> declsMatchingSimpleName =
-						Cons.filter(this.environment, new MatchesSimpleName(decl.getName().getSingleComponent()));
-				if (declsMatchingSimpleName == null && !Cons.contains(this.environment, decl)) {
+				Cons<EnvironmentDecl> wouldHide =
+						Cons.filter(currentPackageDecls, new MatchesSimpleName(decl.getName().getLastComponent()));
+				if (!Cons.contains(this.environment, decl) && wouldHide == null) {
 					this.environment = new Cons<EnvironmentDecl>(decl, this.environment);
 				}
 			}

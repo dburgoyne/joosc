@@ -150,10 +150,15 @@ public class Scanner {
 			int numberOfNewlines = StringUtils.countNewlines(lexeme);
 			int indexOfLastNewline = Math.max(lexeme.lastIndexOf("\r"),
 					lexeme.lastIndexOf("\n"));
+			int tabsSinceLastNewline = (indexOfLastNewline < 0)
+					? 0
+					: StringUtils.countTabs(lexeme.substring(indexOfLastNewline));
 			// TODO This counts tabs as a single column.
 			line += numberOfNewlines;
-			column = (numberOfNewlines == 0) ? column + longestMatchLength
+			column = (numberOfNewlines == 0)
+					? column + longestMatchLength
 					: longestMatchLength - indexOfLastNewline;
+			column += 3*tabsSinceLastNewline;
 
 			// Strip the token off the input and continue.
 			joosSource = joosSource.substring(longestMatchLength);

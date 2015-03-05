@@ -271,6 +271,11 @@ public class TypeDecl extends ASTNode implements EnvironmentDecl, Type {
 		for (Method method : methods) {
 			method.buildEnvironment(this.environment);
 		}
+		
+		// Set the superclass to java.lang.Object if no superclass was defined.
+		if (this != Program.javaLangObject) {
+			this.superclass = Program.javaLangObject;
+		}
 	}
 	
 	public EnvironmentDecl exportEnvironmentDecls() {
