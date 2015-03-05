@@ -99,7 +99,7 @@ public class Hierarchy {
 				}
 				
 				marks[toVisit] = PERM_MARK;
-				sorted.addFirst(toVisit);
+				sorted.add(toVisit);
 			}
 		}
 	}

@@ -58,6 +58,7 @@ public class Cons<T> {
 	public static <T> boolean contains(Cons<T> cons, T target, BiPredicate<T> cmp) {
 		while (cons != null) {
 			if (cmp.test(target, cons.head)) return true;
+			cons = cons.tail;
 		}
 		return false;
 	}
@@ -81,5 +82,9 @@ public class Cons<T> {
 		}
 		
 		return list2;
+	}
+	
+	public static <T> Cons<T> union(Cons<T> list1, Cons<T> list2) {
+		return union(list1, list2, new BiPredicate.Equality<T>());
 	}
 }

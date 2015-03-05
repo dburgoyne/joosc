@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Parser.ParseTree;
+import Types.MemberSet;
 import Types.Type;
 import Utilities.Cons;
 import Utilities.ObjectUtils;
@@ -29,11 +30,25 @@ public class TypeDecl extends ASTNode implements EnvironmentDecl, Type {
 	protected List<Field> fields;
 	protected List<Method> methods;
 	
+	protected MemberSet memberSet;
+	
 	// Back reference to the parent Classfile node.
 	protected Classfile parent;
 	
 	public Identifier getName() {
 		return this.name;
+	}
+	
+	public boolean isAbstract() {
+		return this.modifiers.contains(Modifier.ABSTRACT);
+	}
+	
+	public boolean isClass() {
+		return this.kind == Kind.CLASS;
+	}
+	
+	public boolean isInterface() {
+		return this.kind == Kind.INTERFACE;
 	}
 	
 	public String getCanonicalName() {
@@ -332,7 +347,24 @@ public class TypeDecl extends ASTNode implements EnvironmentDecl, Type {
 	}
 
 	
-	public void buildMemberSet() {
+	public void buildMemberSet() throws MemberSet.Exception {
+		this.memberSet = new MemberSet(this);
+		if (this.superclass != null) {
+			this.memberSet.inheritClass(this.superclass.memberSet);
+		}
+		for (TypeDecl iface : this.interfaces) {
+			this.memberSet.inheritInterface(iface.memberSet);
+		}
 		
+		for (Field field : this.fields) {
+			this.memberSet.declareField(field);
+		}
+		for (Method method : this.methods) {
+			this.memberSet.declareMethod(method);
+		}
+		for (Constructor ctor : this.constructors) {
+			this.memberSet.declareConstructor(ctor);
+		}
+		this.memberSet.validate();
 	}
 }

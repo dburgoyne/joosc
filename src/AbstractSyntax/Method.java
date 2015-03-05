@@ -7,6 +7,7 @@ import Parser.ParseTree;
 import Types.Type;
 import Utilities.BiPredicate;
 import Utilities.Cons;
+import Utilities.StringUtils;
 
 public class Method extends Decl {
 
@@ -15,9 +16,31 @@ public class Method extends Decl {
 	protected Identifier typeName;
 	protected Type type; // null if void !
 	protected Block block; // null if non-concrete declaration!
+	protected boolean isGramaticallyAbstract = false;
 	
 	public Identifier getName() {
 		return this.name;
+	}
+	
+	public boolean isAbstract() {
+		return isGramaticallyAbstract || modifiers.contains(Modifier.ABSTRACT);
+	}
+	
+	public boolean isStatic() {
+		return modifiers.contains(Modifier.STATIC);
+	}
+	
+	public boolean isFinal() {
+		return modifiers.contains(Modifier.FINAL);
+	}
+	
+	public boolean isProtected() {
+		return modifiers.contains(Modifier.PROTECTED);
+	}
+	
+	public boolean isPublic() {
+		// Interface methods are default public.
+		return isGramaticallyAbstract || modifiers.contains(Modifier.PUBLIC);
 	}
 	
 	public Method(ParseTree tree, boolean isAbstract) {
@@ -25,6 +48,7 @@ public class Method extends Decl {
 		assert(isAbstract 
 				? tree.getSymbol().equals("AbstractMethodDeclaration")
 				: tree.getSymbol().equals("MethodDeclaration")  );
+		this.isGramaticallyAbstract = isAbstract;
 		if (tree.getSymbol().equals("MethodDeclaration")) {
 			extractMethodHeader(tree.getChildren()[0]);
 			extractMethodBody(tree.getChildren()[1]);
@@ -129,4 +153,52 @@ public class Method extends Decl {
 			return true;
 		}
 	}
+	
+	public static class SameReturnTypePredicate implements BiPredicate<Method> {
+		public boolean test(Method m1, Method m2) {
+			return new Equality().test(m1.type, m2.type);
+		}
+	}
+	
+	public static class SameSignatureSameReturnTypePredicate implements BiPredicate<Method> {
+		public boolean test(Method m1, Method m2) {
+			return new SameSignaturePredicate().test(m1, m2)
+			    && new SameReturnTypePredicate().test(m1, m2);
+		}
+	}
+	
+	public static class SameSignatureDifferentReturnTypePredicate implements BiPredicate<Method> {
+		public boolean test(Method m1, Method m2) {
+			return  new SameSignaturePredicate().test(m1, m2)
+			    && !new SameReturnTypePredicate().test(m1, m2);
+		}
+	}
+	
+	public static class SameSignatureNonStaticPredicate implements BiPredicate<Method> {
+		public boolean test(Method m1, Method m2) {
+			return  new SameSignaturePredicate().test(m1, m2)
+			    && !m2.isStatic();
+		}
+	}
+	
+	public static class SameSignatureFinalPredicate implements BiPredicate<Method> {
+		public boolean test(Method m1, Method m2) {
+			return new SameSignaturePredicate().test(m1, m2)
+			    && m2.isFinal();
+		}
+	}
+	
+	public static class SameSignaturePublicPredicate implements BiPredicate<Method> {
+		public boolean test(Method m1, Method m2) {
+			return new SameSignaturePredicate().test(m1, m2)
+			    && m2.isPublic();
+		}
+	}
+	
+	public String toString() {
+		return this.type + " "
+				+ this.getName() + "("
+				+ StringUtils.join(this.parameters, ", ")
+				+ ")";
+		}
 }

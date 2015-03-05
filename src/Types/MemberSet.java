@@ -6,6 +6,8 @@ import AbstractSyntax.*;
 
 public class MemberSet {
 	
+	protected TypeDecl type;
+	
 	protected Cons<Field> inheritedFields;
 	protected Cons<Field> declaredFields;
 	
@@ -16,6 +18,10 @@ public class MemberSet {
 	
 	protected Cons<Method> inheritedAbstractMethods;
 	protected Cons<Method> declaredAbstractMethods;
+	
+	public MemberSet(TypeDecl type) {
+		this.type = type;
+	}
 
 	public void inheritInterface(MemberSet ms) {
 
@@ -29,8 +35,20 @@ public class MemberSet {
 			Cons.union(ms.declaredAbstractMethods,
 				       Cons.union(ms.inheritedAbstractMethods,
 						          this.inheritedAbstractMethods,
-						          new Method.SameSignaturePredicate()),
-					   new Method.SameSignaturePredicate());
+						          new Method.SameSignatureSameReturnTypePredicate()),
+					   new Method.SameSignatureSameReturnTypePredicate());
+		
+		// A class or interface must not contain (declare or inherit) two methods with the same signature but different return types.
+		Cons<Method> toCheck = this.inheritedAbstractMethods;
+		while (toCheck != null) {
+			Method method = toCheck.head;
+			toCheck = toCheck.tail;
+			if (Cons.contains(toCheck, method,
+					new Method.SameSignatureDifferentReturnTypePredicate())) {
+				new Exception.MethodSignatureClash(method);
+			}
+		}
+		
 	}
 	
 	public void inheritClass(MemberSet ms) {
@@ -65,7 +83,76 @@ public class MemberSet {
 				new Constructor.SameSignaturePredicate())) {
 			new Exception.ConstructorSignatureClash(ctor);
 		}
+		
+		this.declaredCtors = new Cons<Constructor>(ctor, this.declaredCtors);
 	}
+	
+	public void declareMethod(Method method) throws Exception {
+		Cons<Method> allInheritedMethods = Cons.union(this.inheritedAbstractMethods, this.inheritedConcreteMethods);
+		Cons<Method> allDeclaredMethods = Cons.union(this.declaredAbstractMethods, this.declaredConcreteMethods);
+		Cons<Method> allMethods = Cons.union(allInheritedMethods, allDeclaredMethods);
+				
+		if (Cons.contains(allDeclaredMethods, method,
+					new Method.SameSignaturePredicate())) {
+			new Exception.MethodSignatureClash(method);
+		}
+		
+		if (Cons.contains(allMethods, method,
+				new Method.SameSignatureDifferentReturnTypePredicate())) {
+			new Exception.InvalidReplacement(method);
+		}
+		
+		// Cannot replace a static method with a non-static one.
+		if (method.isStatic()) {
+			if (Cons.contains(allInheritedMethods, method,
+					new Method.SameSignatureNonStaticPredicate())) {
+				new Exception.InvalidReplacement(method);
+			}
+		}
+		
+		// Cannot replace a final method.
+		if (Cons.contains(allInheritedMethods, method,
+				new Method.SameSignatureFinalPredicate())) {
+			new Exception.InvalidReplacement(method);
+		}
+		
+		// A protected method must not replace a public method.
+		if (method.isProtected()) {
+			if (Cons.contains(allInheritedMethods, method,
+					new Method.SameSignaturePublicPredicate())) {
+				new Exception.InvalidReplacement(method);
+			}
+		}
+		
+		if (method.isAbstract()) {
+			this.declaredAbstractMethods = new Cons<Method>(method, this.declaredAbstractMethods);
+		} else {
+			this.declaredConcreteMethods = new Cons<Method>(method, this.declaredConcreteMethods);
+		}
+		
+	}
+	
+	public void validate() throws Exception {
+		if (this.type.isClass() && !this.type.isAbstract()) {
+			// Cannot declare or inherit any abstract methods
+			Cons<Method> allConcreteMethods = Cons.union(this.inheritedConcreteMethods, this.declaredConcreteMethods);
+			
+			if (this.declaredAbstractMethods != null) {
+				throw new Exception.UnimplementedMethod(this.type, this.declaredAbstractMethods.head);
+			}
+			
+			Cons<Method> toCheck = this.inheritedAbstractMethods;
+			while (toCheck != null) {
+				Method inherited = toCheck.head;
+				toCheck = toCheck.tail;
+				if (!Cons.contains(allConcreteMethods, inherited,
+						new Method.SameSignatureSameReturnTypePredicate())) {
+					new Exception.UnimplementedMethod(this.type, inherited);
+				}
+			}
+		}
+	}
+
 	
 	public static abstract class Exception extends java.lang.Exception {
 
@@ -73,11 +160,6 @@ public class MemberSet {
 
 		public Exception() {
 			super();
-		}
-
-		public Exception(String message, Throwable cause,
-				boolean enableSuppression, boolean writableStackTrace) {
-			super(message, cause, enableSuppression, writableStackTrace);
 		}
 
 		public Exception(String message, Throwable cause) {
@@ -95,6 +177,11 @@ public class MemberSet {
 		public static class InvalidReplacement extends Exception {
 			private static final long serialVersionUID = -3706871865093487975L;
 			
+			public InvalidReplacement(Method method) {
+				super(String.format("Method with signature %s " +
+						"illegally replaces another.\n at %s",
+						method, method.getPositionalString()));
+			}
 		}
 
 		public static class ConstructorSignatureClash extends Exception {
@@ -108,12 +195,24 @@ public class MemberSet {
 		}
 
 		public static class MethodSignatureClash extends Exception {
+			public MethodSignatureClash(Method method) {
+				super(String.format("Method with signature %s " +
+						"clashes with another.\n at %s",
+						method, method.getPositionalString()));
+			}
+
 			private static final long serialVersionUID = 5532698722460233633L;
 			
 		}
 		
 		public static class UnimplementedMethod extends Exception {
 			private static final long serialVersionUID = -4927799588585145353L;
+			
+			public UnimplementedMethod(TypeDecl type, Method method) {
+				super(String.format("Non-abstract class %s does not implement %s.\n"
+						+ "at %s",
+						type, method, type.getPositionalString()));
+			}
 			
 		}
 	}

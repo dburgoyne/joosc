@@ -14,6 +14,7 @@ import Parser.ParseTree;
 import Scanner.ScanException;
 import Scanner.Token;
 import Types.Hierarchy;
+import Types.MemberSet;
 import Utilities.Cons;
 import Utilities.StringUtils;
 
@@ -75,7 +76,8 @@ public class Compiler {
 			if (e instanceof NameConflictException
 			 || e instanceof ImportException
 			 || e instanceof TypeLinkingException
-			 || e instanceof Hierarchy.CycleDetected) {
+			 || e instanceof Hierarchy.CycleDetected
+			 || e instanceof MemberSet.Exception) {
     			System.err.println(e.getMessage());
     			failed = true;
 			} else {
