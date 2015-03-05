@@ -4,6 +4,17 @@ import Types.Type;
 
 public abstract class TypeLinkingException extends Exception {
 
+	public static class PrefixMatchesType extends TypeLinkingException {
+
+		private static final long serialVersionUID = 816989693605296449L;
+
+		public PrefixMatchesType(Identifier id, TypeDecl type) {
+			super(String.format("A prefix of %s matches the type %s.\n" +
+					" at %s.", id, type.getName(), id.getPositionalString()));
+		}
+	
+	}
+
 	private static final long serialVersionUID = -6674651877260880090L;
 
 	public TypeLinkingException(String msg) {

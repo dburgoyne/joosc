@@ -190,6 +190,31 @@ public class Identifier extends Expression {
 		final String typeName = this.getLastComponent();
 		
 		if (this.isQualified()) {
+			// No prefix of our name may match a type.
+			for (int i = 1; i < this.components.size(); i++) {
+				final List<String> prefix = this.components.subList(0, i);
+				Cons<?> typesMatchingPrefix =
+					(i == 1)  // Is the prefix simple or qualified?
+					? Cons.filter(this.environment,
+						 new Predicate<EnvironmentDecl>() {
+							 public boolean test(EnvironmentDecl decl) {
+								 if (!(decl instanceof TypeDecl)) return false;
+								 TypeDecl type = (TypeDecl)decl;
+							 	 return type.getName().getComponents().equals(prefix);
+							 }})
+					: Cons.filter(allTypes,
+						 new Predicate<TypeDecl>() {
+							 public boolean test(TypeDecl type) {
+								 return type.getName().getComponents().equals(prefix);
+					 }});
+				if (typesMatchingPrefix != null) {
+					throw new TypeLinkingException.PrefixMatchesType(this, (TypeDecl)typesMatchingPrefix.head);
+				}
+			}
+		}
+		
+		
+		if (this.isQualified()) {
 			maybeTypeDecl = Cons.filter(allTypes,
 					new Predicate<TypeDecl>() {
 						public boolean test(TypeDecl type) {
