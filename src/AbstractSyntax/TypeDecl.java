@@ -321,9 +321,17 @@ public class TypeDecl extends ASTNode implements EnvironmentDecl, Type {
 		if (superclass == null) {
 			// TODO special case for java.lang.Object or do nothing?
 		} else {
-			
+			list.add(this.superclass);
+		}
+		
+		for (TypeDecl iface : this.interfaces) {
+			list.add(iface);
 		}
 		
 		return list;
+	}
+
+	public void buildMemberSets() {
+		
 	}
 }

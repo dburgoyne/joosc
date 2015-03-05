@@ -13,6 +13,7 @@ import Parser.ParseTable;
 import Parser.ParseTree;
 import Scanner.ScanException;
 import Scanner.Token;
+import Types.Hierarchy;
 import Utilities.Cons;
 import Utilities.StringUtils;
 
@@ -61,12 +62,20 @@ public class Compiler {
     		program.linkTypes(allTypeDecls);
     		
     		// Hierarchy building pass.
+    		Hierarchy h = new Hierarchy(allTypeDecls);
+    		List<TypeDecl> sortedTypes = h.topologicalSort();
+    		
+    		// Build method/field/ctor/ancestor sets in topological order.
+    		for (TypeDecl ty : sortedTypes) {
+    			ty.buildMemberSets();
+    		}
     		
     		
     	} catch (Exception e) {
 			if (e instanceof NameConflictException
 			 || e instanceof ImportException
-			 || e instanceof TypeLinkingException) {
+			 || e instanceof TypeLinkingException
+			 || e instanceof Hierarchy.CycleDetected) {
     			System.err.println(e.getMessage());
     			failed = true;
 			} else {
