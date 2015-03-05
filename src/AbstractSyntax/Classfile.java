@@ -115,7 +115,7 @@ public class Classfile extends ASTNode {
 		}
 		
 		// Don't inherit everything from the parent environment.
-		this.environment = null;
+		this.environment = new Cons<EnvironmentDecl>(this.typeDecl, null);
 		
 		for (Identifier id : imports) {
 			if (!id.isStarImport()) {

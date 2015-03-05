@@ -60,7 +60,7 @@ public abstract class ImportException extends Exception {
 		private static final long serialVersionUID = 1L;
 
 		public Clash(Identifier id, TypeDecl decl) {
-			super(String.format("The import %s clashes with the already-imported type %s.\n"
+			super(String.format("The import %s clashes with the already-defined type %s.\n"
 					+ " at %s\n",
 					id.toString(),
 					decl.getName().toString(),
