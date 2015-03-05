@@ -1,7 +1,5 @@
 package AbstractSyntax;
 
-import java.util.List;
-
 import Utilities.StringUtils;
 
 public abstract class ImportException extends Exception {

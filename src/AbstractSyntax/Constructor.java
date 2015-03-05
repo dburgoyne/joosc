@@ -39,11 +39,11 @@ public class Constructor extends ASTNode implements EnvironmentDecl {
 		assert(tree.getSymbol().equals("ConstructorDeclarator"));
 
 		this.name = new Identifier(tree.getChildren()[0]);
-		parameters = new ArrayList<Formal>();
+		this.parameters = new ArrayList<Formal>();
 		if (tree.numChildren() == 3) {
 			// Do nothing
 		} else if (tree.numChildren() == 4) {
-			Method.extractFormalParameterList(tree.getChildren()[2]);
+			this.parameters = Method.extractFormalParameterList(tree.getChildren()[2]);
 		}
 	}
 
