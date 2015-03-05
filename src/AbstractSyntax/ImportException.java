@@ -4,6 +4,21 @@ import Utilities.StringUtils;
 
 public abstract class ImportException extends Exception {
 	
+	public static class DuplicateTypeDefinition extends ImportException {
+
+		private static final long serialVersionUID = -673645760020688692L;
+
+		public DuplicateTypeDefinition(TypeDecl type1, TypeDecl type2) {
+			super(String.format("The type %s is defined multiple times.\n"
+					+ " at %s\n"
+					+ "First defined at %s\n",
+					type1.getCanonicalName(),
+					type1.getPositionalString(),
+					type2.getPositionalString()));
+		}
+
+	}
+
 	/**
 	 * 
 	 */

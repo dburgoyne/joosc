@@ -114,6 +114,20 @@ public class Classfile extends ASTNode {
 			}
 		}
 		
+		class MatchesQualifiedName implements Predicate<EnvironmentDecl> {
+			String qualifiedName;
+			public MatchesQualifiedName(String qualifiedName) {
+				this.qualifiedName = qualifiedName;
+			}
+
+			public boolean test(EnvironmentDecl decl) {
+				if (!(decl instanceof TypeDecl)) return false;
+				TypeDecl type = (TypeDecl)decl;
+				String typeName = type.getCanonicalName();
+				return this.qualifiedName.equals(typeName);
+			}
+		}
+		
 		// Don't inherit everything from the parent environment.
 		this.environment = new Cons<EnvironmentDecl>(this.typeDecl, null);
 		
@@ -170,7 +184,16 @@ public class Classfile extends ASTNode {
 				this.packageName == null ? new ArrayList<String>() : this.packageName.components;
 			Cons<EnvironmentDecl> maybeTypeDecls =
 				Cons.filter(parentEnvironment, new MatchesPackage(currentPackage));	
-			for (EnvironmentDecl decl : Cons.toList(maybeTypeDecls)) {// Only import decl if its simple name is not taken.
+			for (EnvironmentDecl decl : Cons.toList(maybeTypeDecls)) {
+				// decl's qualified name must not already be taken.
+				// Checking that decl's simple name is not equal to the current file's is sufficient.
+				assert(decl instanceof TypeDecl);
+
+				if (decl.getName().equals(this.typeDecl.getName()) && decl != this.typeDecl) {
+					throw new ImportException.DuplicateTypeDefinition(this.typeDecl, (TypeDecl)decl);
+				}
+				
+				// Only import decl if its simple name is not taken.
 				Cons<EnvironmentDecl> declsMatchingSimpleName =
 						Cons.filter(this.environment, new MatchesSimpleName(decl.getName().getSingleComponent()));
 				if (declsMatchingSimpleName == null && !Cons.contains(this.environment, decl)) {
