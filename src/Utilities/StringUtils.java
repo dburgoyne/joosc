@@ -83,10 +83,10 @@ public class StringUtils {
 	}
 	
 	// Joins the components of a list of strings, inserting a delimiter between consecutive components.
-	public static String join(List<String> list, String delimiter) {
+	public static String join(List<?> list, String delimiter) {
 	    StringBuilder sb = new StringBuilder();
 	    String realDelimiter = "";
-	    for (String s : list) {
+	    for (Object s : list) {
 	        sb.append(realDelimiter).append(s);            
 	        realDelimiter = delimiter;
 	    }

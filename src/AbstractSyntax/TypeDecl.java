@@ -331,7 +331,8 @@ public class TypeDecl extends ASTNode implements EnvironmentDecl, Type {
 		return list;
 	}
 
-	public void buildMemberSets() {
+	
+	public void buildMemberSet() {
 		
 	}
 }

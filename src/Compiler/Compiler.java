@@ -67,7 +67,7 @@ public class Compiler {
     		
     		// Build method/field/ctor/ancestor sets in topological order.
     		for (TypeDecl ty : sortedTypes) {
-    			ty.buildMemberSets();
+    			ty.buildMemberSet();
     		}
     		
     		

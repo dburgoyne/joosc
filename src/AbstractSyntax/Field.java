@@ -4,10 +4,12 @@ import java.util.List;
 
 import Parser.ParseTree;
 import Types.Type;
+import Utilities.BiPredicate;
 import Utilities.Cons;
 import Utilities.Predicate;
 
 public class Field extends Decl {
+
 
 	protected List<Modifier> modifiers;
 	protected Expression initializer; // Can be null!!
@@ -83,5 +85,13 @@ public class Field extends Decl {
 		if (this.initializer != null) {
 			this.initializer.linkTypes(types);
 		}
+	}
+	
+
+	public final static class SameNamePredicate implements BiPredicate<Field> {
+		public boolean test(Field t1, Field t2) {
+			return t1.name.equals(t2.name);
+		}
+
 	}
 }

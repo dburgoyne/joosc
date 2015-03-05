@@ -5,6 +5,7 @@ import java.util.List;
 
 import Parser.ParseTree;
 import Types.Type;
+import Utilities.BiPredicate;
 import Utilities.Cons;
 
 public class Method extends Decl {
@@ -111,6 +112,21 @@ public class Method extends Decl {
 		}
 		if (block != null) {
 			block.linkTypes(types);
+		}
+	}
+	
+	public static class SameSignaturePredicate implements BiPredicate<Method> {
+		public boolean test(Method m1, Method m2) {
+			if (!new Equality().test(m1.name, m2.name)) return false;
+			if (m1.parameters.size() != m2.parameters.size()) return false;
+			
+			for (int i = 0; i < m1.parameters.size(); i++) {
+				if (!       m1.parameters.get(i).type
+				    .equals(m2.parameters.get(i).type))
+					return false;
+			}
+			
+			return true;
 		}
 	}
 }

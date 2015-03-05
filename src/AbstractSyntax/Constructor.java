@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Parser.ParseTree;
+import Utilities.BiPredicate;
 import Utilities.Cons;
+import Utilities.StringUtils;
 
 public class Constructor extends ASTNode implements EnvironmentDecl {
+
 	// The class this constructor belongs to.
 	protected TypeDecl parent;
 	protected Identifier name;
@@ -70,5 +73,23 @@ public class Constructor extends ASTNode implements EnvironmentDecl {
 			formal.linkTypes(types);
 		}
 		block.linkTypes(types);
+	}
+	
+	public static class SameSignaturePredicate implements BiPredicate<Constructor> {
+		public boolean test(Constructor m1, Constructor m2) {
+			if (m1.parameters.size() != m2.parameters.size()) return false;
+			for (int i = 0; i < m1.parameters.size(); i++) {
+				if (!       m1.parameters.get(i).type
+				    .equals(m2.parameters.get(i).type))
+					return false;
+			}
+			return true;
+		}
+	}
+	
+	public String toString() {
+		return this.getName() + "("
+				+ StringUtils.join(this.parameters, ", ")
+				+ ")";
 	}
 }

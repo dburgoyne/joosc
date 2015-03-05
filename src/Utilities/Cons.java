@@ -3,6 +3,7 @@ package Utilities;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class Cons<T> {
 
 	public T head;
@@ -44,7 +45,7 @@ public class Cons<T> {
 		return cons;
 	}
 	
-	public static<T> boolean contains(Cons<T> cons, T target) {
+	public static <T> boolean contains(Cons<T> cons, T target) {
 		if (cons == null) {
 			return false;
 		}
@@ -52,5 +53,33 @@ public class Cons<T> {
 			return true;
 		}
 		return contains(cons.tail, target);
+	}
+	
+	public static <T> boolean contains(Cons<T> cons, T target, BiPredicate<T> cmp) {
+		while (cons != null) {
+			if (cmp.test(target, cons.head)) return true;
+		}
+		return false;
+	}
+	
+	/** Takes two assumed-duplicate-free lists, and produces their concatenation
+	 *  in order, with the elements of the first removed if they occur in the
+	 *  second list. Duplicates are detected using the given comparator. */
+	public static <T> Cons<T> union(Cons<T> list1, Cons<T> list2, BiPredicate<T> cmp) {
+		Cons<T> rflist1 = null;
+		
+		while (list1 != null) {
+			if (!contains(list2, list1.head, cmp)) {
+				rflist1 = new Cons<T>(list1.head, rflist1);
+			}
+			list1 = list1.tail;
+		}
+		
+		while (rflist1 != null) {
+			list2 = new Cons<T>(rflist1.head, list2);
+			rflist1 = rflist1.tail;
+		}
+		
+		return list2;
 	}
 }
