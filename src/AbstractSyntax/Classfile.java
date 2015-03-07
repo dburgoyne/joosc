@@ -128,6 +128,25 @@ public class Classfile extends ASTNode {
 			}
 		}
 		
+		// Make sure the package name isn't a prefix of any qualified type name on the classpath.
+		if (this.packageName != null) {
+			final String ourPackageName = this.packageName.toString();
+			Cons<EnvironmentDecl> maybePrefix = Cons.filter(parentEnvironment,
+					new Predicate<EnvironmentDecl>() {
+						public boolean test(EnvironmentDecl decl) {
+							if (!(decl instanceof TypeDecl)) return false;
+							TypeDecl type = (TypeDecl)decl;
+							if (type.getPackageName() == null) return false;  // Don't care about types in default package.
+							String qualifiedName = type.getCanonicalName();
+							return ourPackageName.startsWith(qualifiedName);
+						}
+				});
+			
+			if (maybePrefix != null) {
+				throw new ImportException.PackagePrefix(this.packageName, (TypeDecl)maybePrefix.head);
+			}
+		}
+		
 		// Don't inherit everything from the parent environment.
 		this.environment = new Cons<EnvironmentDecl>(this.typeDecl, null);
 		
@@ -179,7 +198,6 @@ public class Classfile extends ASTNode {
 		// Don't care about clashes anymore.
 		
 		// First, process the implicit current-package star-import...
-		Cons<EnvironmentDecl> currentPackageDecls = null;
 		{
 			List<String> currentPackage = 
 				this.packageName == null ? new ArrayList<String>() : this.packageName.components;
@@ -199,10 +217,11 @@ public class Classfile extends ASTNode {
 						Cons.filter(this.environment, new MatchesSimpleName(decl.getName().getSingleComponent()));
 				if (declsMatchingSimpleName == null && !Cons.contains(this.environment, decl)) {
 					this.environment = new Cons<EnvironmentDecl>(decl, this.environment);
-					currentPackageDecls = new Cons<EnvironmentDecl>(decl, currentPackageDecls);
 				}
 			}
 		}
+		
+		Cons<EnvironmentDecl> explicitOrSamePackage = this.environment;
 		
 		// ...then process the actual star imports...
 		for (Identifier id : imports) {
@@ -216,7 +235,7 @@ public class Classfile extends ASTNode {
 				
 				for (EnvironmentDecl decl : Cons.toList(maybeTypeDecls)) {
 					Cons<EnvironmentDecl> wouldHide =
-							Cons.filter(currentPackageDecls, new MatchesSimpleName(decl.getName().getLastComponent()));
+							Cons.filter(explicitOrSamePackage, new MatchesSimpleName(decl.getName().getLastComponent()));
 					if (!Cons.contains(this.environment, decl) && wouldHide == null) {
 						this.environment = new Cons<EnvironmentDecl>(decl, this.environment);
 					}
@@ -231,7 +250,7 @@ public class Classfile extends ASTNode {
 				Cons.filter(parentEnvironment, new MatchesPackage(javaDotLang));
 			for (EnvironmentDecl decl : Cons.toList(javaLangDecls)) {
 				Cons<EnvironmentDecl> wouldHide =
-						Cons.filter(currentPackageDecls, new MatchesSimpleName(decl.getName().getLastComponent()));
+						Cons.filter(explicitOrSamePackage, new MatchesSimpleName(decl.getName().getLastComponent()));
 				if (!Cons.contains(this.environment, decl) && wouldHide == null) {
 					this.environment = new Cons<EnvironmentDecl>(decl, this.environment);
 				}

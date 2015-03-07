@@ -173,6 +173,13 @@ public class Method extends Decl {
 		}
 	}
 	
+	public static class SameSignatureStaticPredicate implements BiPredicate<Method> {
+		public boolean test(Method m1, Method m2) {
+			return  new SameSignaturePredicate().test(m1, m2)
+			    && m2.isStatic();
+		}
+	}
+	
 	public static class SameSignatureNonStaticPredicate implements BiPredicate<Method> {
 		public boolean test(Method m1, Method m2) {
 			return  new SameSignaturePredicate().test(m1, m2)

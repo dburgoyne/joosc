@@ -35,6 +35,15 @@ public class TypeDecl extends ASTNode implements EnvironmentDecl, Type {
 	// Back reference to the parent Classfile node.
 	protected Classfile parent;
 	
+	public String toString() {
+		String toReturn = "";
+		if (parent.packageName != null) {
+			toReturn += parent.packageName.toString() + ".";
+		}
+		toReturn += name.toString();
+		return toReturn;
+	}
+	
 	public Identifier getName() {
 		return this.name;
 	}

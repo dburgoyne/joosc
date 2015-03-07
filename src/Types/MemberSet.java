@@ -1,6 +1,8 @@
 package Types;
 
+import Types.MemberSet.Exception.MethodSignatureClash;
 import Utilities.Cons;
+import Utilities.Predicate;
 import AbstractSyntax.*;
 
 
@@ -23,7 +25,7 @@ public class MemberSet {
 		this.type = type;
 	}
 
-	public void inheritInterface(MemberSet ms) {
+	public void inheritInterface(MemberSet ms) throws MethodSignatureClash {
 
 		assert ms.inheritedFields == null;
 		assert ms.declaredFields == null;
@@ -44,13 +46,13 @@ public class MemberSet {
 			toCheck = toCheck.tail;
 			if (Cons.contains(toCheck, method,
 					new Method.SameSignatureDifferentReturnTypePredicate())) {
-				new Exception.MethodSignatureClash(method);
+				throw new Exception.MethodSignatureClash(method);
 			}
 		}
 		
 	}
 	
-	public void inheritClass(MemberSet ms) {
+	public void inheritClass(MemberSet ms) throws MethodSignatureClash {
 		this.inheritedFields = 
 				Cons.union(ms.declaredFields,
 					       Cons.union(ms.inheritedFields,
@@ -80,7 +82,7 @@ public class MemberSet {
 	public void declareConstructor(Constructor ctor) throws Exception {
 		if (Cons.contains(this.declaredCtors, ctor,
 				new Constructor.SameSignaturePredicate())) {
-			new Exception.ConstructorSignatureClash(ctor);
+			throw new Exception.ConstructorSignatureClash(ctor);
 		}
 		
 		this.declaredCtors = new Cons<Constructor>(ctor, this.declaredCtors);
@@ -101,13 +103,21 @@ public class MemberSet {
 			throw new Exception.InvalidReplacement(method);
 		}
 		
-		// Cannot replace a static method with a non-static one.
+		// Cannot replace a non-static method with a static one.
 		if (method.isStatic()) {
 			if (Cons.contains(allInheritedMethods, method,
 					new Method.SameSignatureNonStaticPredicate())) {
 				throw new Exception.InvalidReplacement(method);
 			}
+		} else {
+			// Cannot replace a static method with a non-static one.
+			if (Cons.contains(allInheritedMethods, method,
+					new Method.SameSignatureStaticPredicate())) {
+				throw new Exception.InvalidReplacement(method);
+			}
 		}
+		
+		
 		
 		// Cannot replace a final method.
 		if (Cons.contains(allInheritedMethods, method,
@@ -122,6 +132,17 @@ public class MemberSet {
 				throw new Exception.InvalidReplacement(method);
 			}
 		}
+		
+		// Actually remove hidden methods from the lists.
+		final Method methodCopy = method;
+		this.inheritedAbstractMethods= Cons.filter(this.inheritedAbstractMethods, new Predicate<Method>() {
+			public boolean test(Method otherMethod) {
+				return !(new Method.SameSignaturePredicate().test(methodCopy, otherMethod));
+			}});
+		this.inheritedConcreteMethods= Cons.filter(this.inheritedConcreteMethods, new Predicate<Method>() {
+			public boolean test(Method otherMethod) {
+				return !(new Method.SameSignaturePredicate().test(methodCopy, otherMethod));
+			}});
 		
 		if (method.isAbstract()) {
 			this.declaredAbstractMethods = new Cons<Method>(method, this.declaredAbstractMethods);
@@ -148,6 +169,20 @@ public class MemberSet {
 						new Method.SameSignatureSameReturnTypePredicate())) {
 					throw new Exception.UnimplementedMethod(this.type, inherited);
 				}
+			}
+		}
+		
+		// A class or interface must not contain (declare or inherit) two methods with the same signature but different return types.
+		Cons<Method> toCheck = Cons.union(this.inheritedAbstractMethods,
+				               Cons.union(this.inheritedConcreteMethods,
+						       Cons.union(this.declaredAbstractMethods,
+								          this.declaredConcreteMethods)));
+		while (toCheck != null) {
+			Method method = toCheck.head;
+			toCheck = toCheck.tail;
+			if (Cons.contains(toCheck, method,
+					new Method.SameSignatureDifferentReturnTypePredicate())) {
+				throw new Exception.MethodSignatureClash(method);
 			}
 		}
 	}

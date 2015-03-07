@@ -41,6 +41,21 @@ public abstract class ImportException extends Exception {
 					id.getPositionalString()));
 		}
 	}
+	
+	public static class PackagePrefix extends ImportException {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		public PackagePrefix(Identifier id, TypeDecl type) {
+			super(String.format("The package %s is a prefix of the type %s.\n"
+					+ " at %s\n",
+					id.toString(),
+					type.getCanonicalName(),
+					id.getPositionalString()));
+		}
+	}
 
 	public static class NonExistentType extends ImportException {
 		/**

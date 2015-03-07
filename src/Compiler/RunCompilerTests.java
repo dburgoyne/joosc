@@ -43,7 +43,7 @@ public class RunCompilerTests {
         }
         stdout.println("=== TESTING NEGATIVES ===");
         for (List<String> filenames : negatives) {
-            stdout.printf("%-60s", "-> " + filenames.toString() + ":");
+            stdout.printf("%-60s", "-> " + filenames.toString() + ":\n");
             // Include all standard libraries in the build.
             filenames.addAll(libraries);
         	int retval = Compiler.compile(LR1_FILE, filenames.toArray(new String[0]));
