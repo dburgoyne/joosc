@@ -25,7 +25,7 @@ public class MemberSet {
 		this.type = type;
 	}
 
-	public void inheritInterface(MemberSet ms) throws MethodSignatureClash {
+	public void inheritInterface(MemberSet ms) throws Exception {
 
 		assert ms.inheritedFields == null;
 		assert ms.declaredFields == null;
@@ -36,17 +36,23 @@ public class MemberSet {
 			Cons.union(ms.declaredAbstractMethods,
 				       Cons.union(ms.inheritedAbstractMethods,
 						          this.inheritedAbstractMethods,
-						          new Method.SameSignatureSameReturnTypePredicate()),
-					   new Method.SameSignatureSameReturnTypePredicate());
+						          new Method.SameSignatureSameReturnTypeSameVisibilityPredicate()),
+					   new Method.SameSignatureSameReturnTypeSameVisibilityPredicate());
 		
-		// A class or interface must not contain (declare or inherit) two methods with the same signature but different return types.
-		Cons<Method> toCheck = this.inheritedAbstractMethods;
+		Cons<Method> toCheck = Cons.union(this.inheritedAbstractMethods,
+										  this.inheritedConcreteMethods);
 		while (toCheck != null) {
 			Method method = toCheck.head;
 			toCheck = toCheck.tail;
+			// A class or interface must not contain (declare or inherit) two methods with the same signature but different return types.
 			if (Cons.contains(toCheck, method,
 					new Method.SameSignatureDifferentReturnTypePredicate())) {
 				throw new Exception.MethodSignatureClash(method);
+			}
+			// A protected method must not replace a public method.
+			if (Cons.contains(toCheck, method,
+					new Method.SameSignatureDifferentVisibilityPredicate())) {
+				throw new Exception.InvalidReplacement(method);
 			}
 		}
 		
@@ -172,7 +178,6 @@ public class MemberSet {
 			}
 		}
 		
-		// A class or interface must not contain (declare or inherit) two methods with the same signature but different return types.
 		Cons<Method> toCheck = Cons.union(this.inheritedAbstractMethods,
 				               Cons.union(this.inheritedConcreteMethods,
 						       Cons.union(this.declaredAbstractMethods,
@@ -180,9 +185,15 @@ public class MemberSet {
 		while (toCheck != null) {
 			Method method = toCheck.head;
 			toCheck = toCheck.tail;
+			// A class or interface must not contain (declare or inherit) two methods with the same signature but different return types.
 			if (Cons.contains(toCheck, method,
 					new Method.SameSignatureDifferentReturnTypePredicate())) {
 				throw new Exception.MethodSignatureClash(method);
+			}
+			// A protected method must not replace a public method.
+			if (Cons.contains(toCheck, method,
+					new Method.SameSignatureDifferentVisibilityPredicate())) {
+				throw new Exception.InvalidReplacement(method);
 			}
 		}
 	}

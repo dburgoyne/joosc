@@ -140,7 +140,7 @@ public class Method extends Decl {
 	
 	public static class SameSignaturePredicate implements BiPredicate<Method> {
 		public boolean test(Method m1, Method m2) {
-			if (!new Equality().test(m1.name, m2.name)) return false;
+			if (!new Equality<Identifier>().test(m1.name, m2.name)) return false;
 			if (m1.parameters.size() != m2.parameters.size()) return false;
 			
 			for (int i = 0; i < m1.parameters.size(); i++) {
@@ -153,9 +153,16 @@ public class Method extends Decl {
 		}
 	}
 	
+	public static class SameVisibilityPredicate implements BiPredicate<Method> {
+		public boolean test(Method m1, Method m2) {
+			return m1.isProtected() && m2.isProtected()
+				|| m1.isPublic()    && m2.isPublic();
+		}
+	}
+	
 	public static class SameReturnTypePredicate implements BiPredicate<Method> {
 		public boolean test(Method m1, Method m2) {
-			return new Equality().test(m1.type, m2.type);
+			return new Equality<Type>().test(m1.type, m2.type);
 		}
 	}
 	
@@ -166,10 +173,25 @@ public class Method extends Decl {
 		}
 	}
 	
+	public static class SameSignatureSameReturnTypeSameVisibilityPredicate implements BiPredicate<Method> {
+		public boolean test(Method m1, Method m2) {
+			return new SameSignaturePredicate().test(m1, m2)
+				&& new SameReturnTypePredicate().test(m1, m2)
+		    	&& new SameVisibilityPredicate().test(m1, m2);
+		}
+	}
+
 	public static class SameSignatureDifferentReturnTypePredicate implements BiPredicate<Method> {
 		public boolean test(Method m1, Method m2) {
 			return  new SameSignaturePredicate().test(m1, m2)
 			    && !new SameReturnTypePredicate().test(m1, m2);
+		}
+	}
+	
+	public static class SameSignatureDifferentVisibilityPredicate implements BiPredicate<Method> {
+		public boolean test(Method m1, Method m2) {
+			return  new SameSignaturePredicate().test(m1, m2)
+			    && !new SameVisibilityPredicate().test(m1, m2);
 		}
 	}
 	
@@ -202,7 +224,7 @@ public class Method extends Decl {
 	}
 	
 	public String toString() {
-		return this.type + " "
+		return (this.type == null ? "void" : this.type) + " "
 				+ this.getName() + "("
 				+ StringUtils.join(this.parameters, ", ")
 				+ ")";
