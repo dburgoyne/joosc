@@ -58,6 +58,8 @@ public class Formal extends ASTNode implements EnvironmentDecl {
 	public void linkTypes(Cons<TypeDecl> types) throws TypeLinkingException {
 		this.type = this.typeName.resolveType(types, this.environment);
 	}
+
+	@Override public void linkNames() { }
 	
 	public String toString() {
 		return type + " " + name;

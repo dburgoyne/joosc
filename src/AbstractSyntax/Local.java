@@ -78,5 +78,10 @@ public class Local extends BlockStatement implements EnvironmentDecl {
 		this.type = this.typeName.resolveType(types, this.environment);
 		this.initializer.linkTypes(types);
 	}
+	
+	@Override
+	public void linkNames() throws NameLinkingException {
+		this.initializer.linkNames();
+	}
 
 }

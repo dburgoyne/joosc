@@ -68,4 +68,10 @@ public class BinaryExpression extends Expression {
 		this.left.linkTypes(types);
 		this.right.linkTypes(types);
 	}
+
+	@Override
+	public void linkNames() throws NameLinkingException {
+		this.left.linkNames();
+		this.right.linkNames();
+	}
 }

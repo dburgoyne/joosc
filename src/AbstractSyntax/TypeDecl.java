@@ -343,6 +343,18 @@ public class TypeDecl extends ASTNode implements EnvironmentDecl, Type {
 		}
 		
 	}
+
+	@Override public void linkNames() throws NameLinkingException {
+		for (Field f : fields) {
+			f.linkNames();
+		}
+		for (Constructor ctor : constructors) {
+			ctor.linkNames();
+		}
+		for (Method m : methods) {
+			m.linkNames();
+		}
+	}
 	
 	public List<TypeDecl> getDirectSupertypes() {
 		List<TypeDecl> list = new ArrayList<TypeDecl>();

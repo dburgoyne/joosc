@@ -4,14 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Parser.ParseTree;
+import Types.Type;
 import Utilities.Cons;
 
 public class MethodInvocationExpression extends Expression {
 
-	protected Expression primary; // Can be null !!!
-	
+	// Pre-name resolution:
+	protected Expression primary;    // Can be null !!!
 	protected Identifier methodName; // can be multi-part if primary is null.
-	// TODO Fill this in during name resolution.
+	
+	// Post-name resolution:
+	protected Expression receivingExpr; // receiver if non-static method call
+	protected TypeDecl   receivingType; // receiver if static method call
+	protected String     message;       // the last component of methodName
+	
+	// Post-type checking:
 	protected Method method;
 	
 	protected List<Expression> arguments;
@@ -66,6 +73,39 @@ public class MethodInvocationExpression extends Expression {
 		}
 		for (Expression arg : this.arguments) {
 			arg.linkTypes(types);
+		}
+		
+		this.allTypes = types;
+	}
+	
+	private Cons<TypeDecl> allTypes;
+	@Override
+	public void linkNames() throws NameLinkingException {
+		
+		this.message = methodName.getLastComponent();
+		
+		if (this.primary == null) { 
+			if (!this.methodName.isSimple())  {
+				Identifier prefix = methodName.withoutLastComponent();
+				try {
+					// if this is a static call to a named type...
+					Type t = prefix.resolveType(this.allTypes, this.environment);
+					if (!(t instanceof TypeDecl))
+						throw new NameLinkingException.NonexistentMethod(this.methodName);
+					this.receivingType = (TypeDecl)t;
+				} catch (TypeLinkingException e) {
+					// if this is not a static call to a named type...
+					this.receivingExpr = prefix;
+					this.receivingExpr.linkNames();
+				}
+			}
+		} else {
+			this.primary.linkNames();
+			this.receivingExpr = this.primary;
+		}
+		
+		for (Expression arg : this.arguments) {
+			arg.linkNames();
 		}
 	}
 }

@@ -16,4 +16,6 @@ public class EmptyStatement extends Statement {
 	}
 
 	@Override public void linkTypes(Cons<TypeDecl> types) { }	
+
+	@Override public void linkNames() { }
 }

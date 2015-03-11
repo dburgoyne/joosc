@@ -137,6 +137,17 @@ public class Method extends Decl {
 			block.linkTypes(types);
 		}
 	}
+
+	@Override
+	public void linkNames() throws NameLinkingException {
+		
+		for (Formal formal : parameters) {
+			formal.linkNames();
+		}
+		if (block != null) {
+			block.linkNames();
+		}
+	}
 	
 	public static class SameSignaturePredicate implements BiPredicate<Method> {
 		public boolean test(Method m1, Method m2) {

@@ -28,4 +28,8 @@ public class FieldAccessExpression extends Expression {
 	@Override public void linkTypes(Cons<TypeDecl> types) throws TypeLinkingException {
 		this.primary.linkTypes(types);
 	}
+
+	@Override public void linkNames() throws NameLinkingException {
+		this.primary.linkNames();
+	}
 }

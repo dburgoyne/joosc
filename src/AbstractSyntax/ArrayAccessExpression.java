@@ -35,4 +35,11 @@ public class ArrayAccessExpression extends Expression {
 		this.array.linkTypes(types);
 		this.dimExpr.linkTypes(types);
 	}
+	
+	@Override
+	public void linkNames() throws NameLinkingException {
+		assert this.array != null;
+		this.array.linkNames();
+		this.dimExpr.linkNames();
+	}
 }

@@ -35,4 +35,9 @@ public class InstanceofExpression extends Expression {
 		}
 		this.left.linkTypes(types);
 	}
+
+	@Override
+	public void linkNames() throws NameLinkingException {
+		this.left.linkNames();
+	}
 }

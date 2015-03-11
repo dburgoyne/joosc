@@ -28,4 +28,10 @@ public class WhileStatement extends Statement {
 		this.condition.linkTypes(types);
 		this.body.linkTypes(types);
 	}
+	
+	@Override
+	public void linkNames() throws NameLinkingException {
+		this.condition.linkNames();
+		this.body.linkNames();
+	}
 }

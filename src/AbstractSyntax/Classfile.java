@@ -2,7 +2,6 @@ package AbstractSyntax;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-
 import java.util.List;
 
 import Parser.ParseTree;
@@ -252,5 +251,9 @@ public class Classfile extends ASTNode {
 
 	@Override public void linkTypes(Cons<TypeDecl> allTypes) throws TypeLinkingException {
 		typeDecl.linkTypes(allTypes);
+	}
+	
+	@Override public void linkNames() throws NameLinkingException {
+		typeDecl.linkNames();
 	}
 }

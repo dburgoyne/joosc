@@ -51,4 +51,11 @@ public class Block extends Statement {
 			bs.linkTypes(types);
 		}
 	}
+	
+	@Override
+	public void linkNames() throws NameLinkingException {
+		for (BlockStatement bs : this.statements) {
+			bs.linkNames();
+		}
+	}
 }

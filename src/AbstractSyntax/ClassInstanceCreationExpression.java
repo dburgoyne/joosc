@@ -59,5 +59,11 @@ public class ClassInstanceCreationExpression extends Expression {
 			arg.linkTypes(types);
 		}
 	}
+
+	@Override public void linkNames() throws NameLinkingException {
+		for (Expression arg : this.arguments) {
+			arg.linkNames();
+		}
+	}
 	
 }

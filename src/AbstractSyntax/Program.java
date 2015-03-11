@@ -64,7 +64,7 @@ public class Program extends ASTNode {
 		// Do nothing.
 		return null;
 	}
-	
+
 	public void linkTypes(Cons<TypeDecl> allTypes) throws TypeLinkingException {
 		Exception err = null;
 		for (Classfile file : files) {
@@ -82,6 +82,27 @@ public class Program extends ASTNode {
 		if (err != null) {
 			if (err instanceof TypeLinkingException)
 				throw (TypeLinkingException)err;
+			throw new RuntimeException(err);
+		}
+	}
+	
+	public void linkNames() {
+		Exception err = null;
+		for (Classfile file : files) {
+			try {
+				
+				file.linkNames();
+				
+			} catch (Exception caught) {
+				if (err != null) {
+					System.err.println(err);
+				}
+				err = caught;
+			}
+		}
+		if (err != null) {
+			//if (err instanceof TypeLinkingException)
+			//	throw (TypeLinkingException)err;
 			throw new RuntimeException(err);
 		}
 	}

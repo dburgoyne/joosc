@@ -41,4 +41,9 @@ public class UnaryExpression extends Expression {
 	public void linkTypes(Cons<TypeDecl> types) throws TypeLinkingException {
 		this.expression.linkTypes(types);
 	}
+
+	@Override
+	public void linkNames() throws NameLinkingException {
+		this.expression.linkNames();
+	}
 }

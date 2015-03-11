@@ -86,6 +86,13 @@ public class Field extends Decl {
 			this.initializer.linkTypes(types);
 		}
 	}
+
+	@Override
+	public void linkNames() throws NameLinkingException {
+		if (this.initializer != null) {
+			this.initializer.linkNames();
+		}
+	}
 	
 
 	public final static class SameNamePredicate implements BiPredicate<Field> {

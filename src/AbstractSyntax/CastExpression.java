@@ -30,4 +30,9 @@ public class CastExpression extends Expression {
 		this.type = this.typeName.resolveType(types, this.environment);
 		this.expression.linkTypes(types);
 	}
+	
+	@Override
+	public void linkNames() throws NameLinkingException {
+		this.expression.linkNames();
+	}
 }

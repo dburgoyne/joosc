@@ -72,6 +72,20 @@ public class Identifier extends Expression {
 		return this.components.get(this.components.size() - 1);
 	}
 	
+	private ParseTree treeWithoutLastComponent = null;
+	public Identifier withoutLastComponent() {
+		if (treeWithoutLastComponent == null) {
+			String msg = "Identifier.withoutLastComponent called on "
+					   + "simple Identifier " + this;
+			throw new IllegalStateException(msg);
+		}
+		
+		assert this.isSimple();
+		Identifier id = new Identifier(this.treeWithoutLastComponent);
+		id.environment = this.environment;
+		return id;
+	}
+	
 	// Flattens almost anything.
 	public Identifier(ParseTree tree) {
 		super(tree);
@@ -83,7 +97,7 @@ public class Identifier extends Expression {
 			|| tree.getSymbol().equals("PrimitiveType")
 			|| tree.getSymbol().equals("Expression")
 			|| tree.isTerminal());
-		components = new ArrayList<String>();
+		this.components = new ArrayList<String>();
 		
 		// For Expressions, walk down the left spine until we hit the AmbiguousName.
 		if (tree.getSymbol().equals("Expression")) {
@@ -104,7 +118,7 @@ public class Identifier extends Expression {
 		} else if (tree.getSymbol().equals("AmbiguousName") || tree.getSymbol().equals("PackageName")) {
 			extractAmbiguousOrPackageName(tree);
 		} else if (tree.isTerminal()) {
-			components.add(0, tree.getToken().getLexeme());
+			this.components.add(0, tree.getToken().getLexeme());
 		}
 	}
 	
@@ -112,10 +126,13 @@ public class Identifier extends Expression {
 		assert(tree.getSymbol().equals("AmbiguousName") || tree.getSymbol().equals("PackageName"));
 		
 		while (tree.numChildren() > 1) {
-			components.add(0, tree.getChildren()[2].getToken().getLexeme());
+			this.components.add(0, tree.getChildren()[2].getToken().getLexeme());
 			tree = tree.getChildren()[0];
+			
+			if (this.treeWithoutLastComponent == null)
+				this.treeWithoutLastComponent = tree;
 		}
-		components.add(0, tree.getChildren()[0].getToken().getLexeme());
+		this.components.add(0, tree.getChildren()[0].getToken().getLexeme());
 	}
 	
 	private void extractType(ParseTree tree) {
@@ -152,8 +169,12 @@ public class Identifier extends Expression {
 		ParseTree firstChild = tree.getChildren()[0];
 		if (firstChild.getSymbol().equals("PrimitiveType")) {
 			extractPrimitiveType(firstChild);
+			if (this.treeWithoutLastComponent == null)
+				this.treeWithoutLastComponent = firstChild;
 		} else if (firstChild.getSymbol().equals("ReferenceTypeNonArray")) {
 			extractAmbiguousOrPackageName(firstChild.getChildren()[0]);
+			if (this.treeWithoutLastComponent == null)
+				this.treeWithoutLastComponent = firstChild.getChildren()[0];
 		}
 		components.add("[]");
 	}
@@ -161,10 +182,15 @@ public class Identifier extends Expression {
 	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException {
 		this.environment = parentEnvironment;
 	}
-	
+
 	@Override
 	public void linkTypes(Cons<TypeDecl> types) throws TypeLinkingException {
 		// Do nothing in this pass.
+	}
+	
+	@Override
+	public void linkNames() {
+		// TODO do name resolution as seen in class.
 	}
 	
 	public Type resolveType(Cons<TypeDecl> allTypes, Cons<EnvironmentDecl> localEnv) throws TypeLinkingException {

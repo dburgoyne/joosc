@@ -43,4 +43,10 @@ public class ArrayCreationExpression extends Expression {
 		}
 	}
 	
+	@Override public void linkNames() throws NameLinkingException {
+		if (this.dimExpr != null) {
+			this.dimExpr.linkNames();
+		}
+	}
+	
 }

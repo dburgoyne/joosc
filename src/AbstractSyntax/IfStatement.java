@@ -42,4 +42,12 @@ public class IfStatement extends Statement {
 		if (this.elseBody != null)
 			this.elseBody.linkTypes(types);
 	}
+	
+	@Override
+	public void linkNames() throws NameLinkingException {
+		this.condition.linkNames();
+		this.body.linkNames();
+		if (this.elseBody != null)
+			this.elseBody.linkNames();
+	}
 }

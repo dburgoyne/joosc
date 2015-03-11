@@ -65,4 +65,17 @@ public class ForStatement extends Statement {
 		}
 		this.body.linkTypes(types);
 	}
+
+	@Override public void linkNames() throws NameLinkingException {
+		if (this.initializer != null) {
+			this.initializer.linkNames();
+		}
+		if (this.condition != null) {
+			this.condition.linkNames();
+		}
+		if (this.postExpression != null) {
+			this.postExpression.linkNames();
+		}
+		this.body.linkNames();
+	}
 }

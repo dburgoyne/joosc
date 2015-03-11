@@ -28,4 +28,11 @@ public class ReturnStatement extends Statement {
 			this.expression.linkTypes(types);
 		}
 	}
+	
+	@Override
+	public void linkNames() throws NameLinkingException {
+		if (this.expression != null) {
+			this.expression.linkNames();
+		}
+	}
 }

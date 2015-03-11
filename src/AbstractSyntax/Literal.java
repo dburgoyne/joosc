@@ -43,4 +43,9 @@ public class Literal extends Expression {
 	public void linkTypes(Cons<TypeDecl> types) throws TypeLinkingException {
 		// Do nothing.
 	}
+
+	@Override
+	public void linkNames() {
+		// Do nothing.
+	}
 }
