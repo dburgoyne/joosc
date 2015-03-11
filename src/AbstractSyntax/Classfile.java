@@ -114,20 +114,6 @@ public class Classfile extends ASTNode {
 			}
 		}
 		
-		class MatchesQualifiedName implements Predicate<EnvironmentDecl> {
-			String qualifiedName;
-			public MatchesQualifiedName(String qualifiedName) {
-				this.qualifiedName = qualifiedName;
-			}
-
-			public boolean test(EnvironmentDecl decl) {
-				if (!(decl instanceof TypeDecl)) return false;
-				TypeDecl type = (TypeDecl)decl;
-				String typeName = type.getCanonicalName();
-				return this.qualifiedName.equals(typeName);
-			}
-		}
-		
 		// Make sure the package name isn't a prefix of any qualified type name on the classpath.
 		if (this.packageName != null) {
 			final String ourPackageName = this.packageName.toString();

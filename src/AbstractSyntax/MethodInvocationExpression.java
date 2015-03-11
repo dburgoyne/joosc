@@ -10,7 +10,7 @@ public class MethodInvocationExpression extends Expression {
 
 	protected Expression primary; // Can be null !!!
 	
-	protected Identifier methodName;
+	protected Identifier methodName; // can be multi-part if primary is null.
 	// TODO Fill this in during name resolution.
 	protected Method method;
 	
