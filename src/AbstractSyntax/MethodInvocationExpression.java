@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Parser.ParseTree;
-import Types.Type;
 import Utilities.Cons;
 
 public class MethodInvocationExpression extends Expression {
@@ -75,31 +74,42 @@ public class MethodInvocationExpression extends Expression {
 		for (Expression arg : this.arguments) {
 			arg.linkTypes(types);
 		}
-		
-		this.allTypes = types;
 	}
 	
-	private Cons<TypeDecl> allTypes;
 	@Override
 	public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
 		
 		this.message = methodName.getLastComponent();
 		
 		if (this.primary == null) { 
-			if (!this.methodName.isSimple())  {
-				// TODO can probably just use linkNames instead of resolveType...
+			if (this.methodName.isSimple()) {
+				// The existence of this non-static method is checked at
+				// type checking time.
+			} else {
 				
 				Identifier prefix = methodName.withoutLastComponent();
-				try {
-					// if this is a static call to a named type...
-					Type t = prefix.resolveType(this.allTypes, this.environment);
-					if (!(t instanceof TypeDecl))
-						throw new NameLinkingException.NonexistentMethod(this.methodName);
-					this.receivingType = (TypeDecl)t;
-				} catch (TypeLinkingException e) {
-					// if this is not a static call to a named type...
-					this.receivingExpr = prefix;
+				prefix.linkNames(curType, staticCtx);
+				Identifier.Interpretation interp = prefix.getInterpretation();
+				
+				if (interp instanceof TypeDecl) {
+					this.receivingType = (TypeDecl)interp;
+					// The existence of this static method is checked at
+					// type checking time, since overloading requires knowing
+					// types of arguments. 
+				} else if (interp instanceof Expression) {
+					this.receivingExpr = (Expression)interp;
 					this.receivingExpr.linkNames(curType, staticCtx);
+					// The existence of this non-static method is checked at
+					// type checking time.
+				} else if (interp instanceof Local
+						|| interp instanceof Formal
+						|| interp instanceof Field
+						|| interp instanceof Identifier.This) {
+					this.receivingExpr = prefix;
+					// The existence of this non-static method is checked at
+					// type checking time.
+				} else {
+					throw new NameLinkingException.NonexistentMethod(this.methodName);
 				}
 			}
 		} else {

@@ -27,6 +27,15 @@ public class MemberSet {
 		return Cons.union(inheritedFields, declaredFields,
 						  new Decl.SameNamePredicate());
 	}
+	public Cons<Method> getMethods() { 
+		return Cons.union(inheritedAbstractMethods, 
+			   Cons.union(declaredAbstractMethods,
+			   Cons.union(inheritedConcreteMethods,
+					      declaredConcreteMethods,
+				  new Method.SameSignaturePredicate()),
+				  new Method.SameSignaturePredicate()),
+				  new Method.SameSignaturePredicate());
+	}
 	
 	
 	public MemberSet(TypeDecl type) {
