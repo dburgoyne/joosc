@@ -19,6 +19,11 @@ public abstract class Expression extends Statement {
 			tree = tree.getChildren()[0];
 		}
 		
+		if (tree.getSymbol().equals("PrimaryNoNewArray")) {
+			// ( Expression ) is the only non-unary PrimaryNoNewArray
+			// Exists: ArrayAccess -> PrimaryNoNewArray [ Expression ]
+			return Expression.extractExpression(tree.getChildren()[1]);
+		}
 		if (tree.getSymbol().equals("MethodInvocation")) {
 			return new MethodInvocationExpression(tree);
 		}

@@ -19,7 +19,9 @@ public class ReturnStatement extends Statement {
 	
 	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException, ImportException {
 		this.environment = parentEnvironment;
-		this.expression.buildEnvironment(this.environment);
+		if (this.expression != null) {
+			this.expression.buildEnvironment(this.environment);
+		}
 	}
 
 	@Override

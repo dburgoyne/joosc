@@ -66,9 +66,9 @@ public class MemberSet {
 					new Method.SameSignatureDifferentReturnTypePredicate())) {
 				throw new Exception.MethodSignatureClash(method);
 			}
-			// A protected method must not replace a public method.
+			// A (concrete) protected method must not replace a public method.
 			if (Cons.contains(toCheck, method,
-					new Method.SameSignatureDifferentVisibilityPredicate())) {
+					new Method.SameSignatureDifferentVisibilityDifferentAbstractnessPredicate())) {
 				throw new Exception.InvalidReplacement(method);
 			}
 		}
@@ -209,7 +209,7 @@ public class MemberSet {
 			}
 			// A protected method must not replace a public method.
 			if (Cons.contains(toCheck, method,
-					new Method.SameSignatureDifferentVisibilityPredicate())) {
+					new Method.SameSignatureDifferentVisibilityDifferentAbstractnessPredicate())) {
 				throw new Exception.InvalidReplacement(method);
 			}
 		}

@@ -163,11 +163,17 @@ public class Method extends Decl {
 			return true;
 		}
 	}
-	
+
 	public static class SameVisibilityPredicate implements BiPredicate<Method> {
 		public boolean test(Method m1, Method m2) {
 			return m1.isProtected() && m2.isProtected()
 				|| m1.isPublic()    && m2.isPublic();
+		}
+	}
+	
+	public static class SameAbstractnessPredicate implements BiPredicate<Method> {
+		public boolean test(Method m1, Method m2) {
+			return m1.isAbstract() == m2.isAbstract();
 		}
 	}
 	
@@ -203,6 +209,14 @@ public class Method extends Decl {
 		public boolean test(Method m1, Method m2) {
 			return  new SameSignaturePredicate().test(m1, m2)
 			    && !new SameVisibilityPredicate().test(m1, m2);
+		}
+	}
+	
+	public static class SameSignatureDifferentVisibilityDifferentAbstractnessPredicate implements BiPredicate<Method> {
+		public boolean test(Method m1, Method m2) {
+			return  new SameSignaturePredicate().test(m1, m2)
+			    && !new SameVisibilityPredicate().test(m1, m2)
+			    && !new SameAbstractnessPredicate().test(m1, m2);
 		}
 	}
 	
