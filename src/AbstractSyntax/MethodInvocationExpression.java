@@ -71,6 +71,7 @@ public class MethodInvocationExpression extends Expression {
 		if (this.primary != null) {
 			this.primary.linkTypes(types);
 		}
+		this.methodName.linkTypes(types);
 		for (Expression arg : this.arguments) {
 			arg.linkTypes(types);
 		}

@@ -88,6 +88,7 @@ public class Identifier extends Expression {
 		assert !this.isSimple();
 		Identifier id = new Identifier(this.treeWithoutLastComponent);
 		id.environment = this.environment;
+		id.emptyPackagePrefix = this.emptyPackagePrefix;
 		return id;
 	}
 	
@@ -310,8 +311,7 @@ public class Identifier extends Expression {
 				
 				if (typesNamedThis == null) {
 					// This does not name a type, so it may name a package.
-					Package newPkg =
-						pkg.withComponent(this.getSingleComponent());
+					Package newPkg = pkg.withComponent(last);
 					if (newPkg.types == null) {
 						// Does not name a package
 						throw new NameLinkingException.NotFound(this);
