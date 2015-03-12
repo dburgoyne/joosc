@@ -5,7 +5,8 @@ import Types.Type;
 import Utilities.Cons;
 import Utilities.Predicate;
 
-public class Formal extends ASTNode implements EnvironmentDecl {
+public class Formal extends ASTNode 
+		implements EnvironmentDecl, Identifier.Interpretation {
 	protected Identifier name;
 	protected Identifier typeName;
 	protected Type type;
@@ -59,7 +60,7 @@ public class Formal extends ASTNode implements EnvironmentDecl {
 		this.type = this.typeName.resolveType(types, this.environment);
 	}
 
-	@Override public void linkNames() { }
+	@Override public void linkNames(TypeDecl curType, boolean staticCtx) { }
 	
 	public String toString() {
 		return type + " " + name;

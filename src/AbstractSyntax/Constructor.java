@@ -75,11 +75,11 @@ public class Constructor extends ASTNode implements EnvironmentDecl {
 		block.linkTypes(types);
 	}
 
-	@Override public void linkNames() throws NameLinkingException {
+	@Override public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
 		for (Formal formal : parameters) {
-			formal.linkNames();
+			formal.linkNames(curType, staticCtx);
 		}
-		block.linkNames();
+		block.linkNames(curType, staticCtx);
 	}
 	
 	public static class SameSignaturePredicate implements BiPredicate<Constructor> {

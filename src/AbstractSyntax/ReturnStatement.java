@@ -30,9 +30,9 @@ public class ReturnStatement extends Statement {
 	}
 	
 	@Override
-	public void linkNames() throws NameLinkingException {
+	public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
 		if (this.expression != null) {
-			this.expression.linkNames();
+			this.expression.linkNames(curType, staticCtx);
 		}
 	}
 }

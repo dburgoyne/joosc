@@ -60,9 +60,9 @@ public class ClassInstanceCreationExpression extends Expression {
 		}
 	}
 
-	@Override public void linkNames() throws NameLinkingException {
+	@Override public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
 		for (Expression arg : this.arguments) {
-			arg.linkNames();
+			arg.linkNames(curType, staticCtx);
 		}
 	}
 	

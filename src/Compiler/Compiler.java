@@ -5,6 +5,7 @@ import java.util.List;
 
 import AbstractSyntax.ImportException;
 import AbstractSyntax.NameConflictException;
+import AbstractSyntax.NameLinkingException;
 import AbstractSyntax.Program;
 import AbstractSyntax.TypeDecl;
 import AbstractSyntax.TypeLinkingException;
@@ -71,13 +72,17 @@ public class Compiler {
     			ty.buildMemberSet();
     		}
     		
+    		// Name resolution pass.
+    		program.linkNames(null, false);
+    		
     		
     	} catch (Exception e) {
 			if (e instanceof NameConflictException
 			 || e instanceof ImportException
 			 || e instanceof TypeLinkingException
 			 || e instanceof Hierarchy.CycleDetected
-			 || e instanceof MemberSet.Exception) {
+			 || e instanceof MemberSet.Exception
+			 || e instanceof NameLinkingException) {
     			System.err.println(e.getMessage());
     			failed = true;
 			} else {

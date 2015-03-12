@@ -30,8 +30,8 @@ public class WhileStatement extends Statement {
 	}
 	
 	@Override
-	public void linkNames() throws NameLinkingException {
-		this.condition.linkNames();
-		this.body.linkNames();
+	public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
+		this.condition.linkNames(curType, staticCtx);
+		this.body.linkNames(curType, staticCtx);
 	}
 }

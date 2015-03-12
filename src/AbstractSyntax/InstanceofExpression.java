@@ -37,7 +37,7 @@ public class InstanceofExpression extends Expression {
 	}
 
 	@Override
-	public void linkNames() throws NameLinkingException {
-		this.left.linkNames();
+	public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
+		this.left.linkNames(curType, staticCtx);
 	}
 }

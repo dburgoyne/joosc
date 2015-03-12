@@ -37,9 +37,9 @@ public class ArrayAccessExpression extends Expression {
 	}
 	
 	@Override
-	public void linkNames() throws NameLinkingException {
+	public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
 		assert this.array != null;
-		this.array.linkNames();
-		this.dimExpr.linkNames();
+		this.array.linkNames(curType, staticCtx);
+		this.dimExpr.linkNames(curType, staticCtx);
 	}
 }

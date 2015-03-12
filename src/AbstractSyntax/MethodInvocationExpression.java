@@ -80,12 +80,14 @@ public class MethodInvocationExpression extends Expression {
 	
 	private Cons<TypeDecl> allTypes;
 	@Override
-	public void linkNames() throws NameLinkingException {
+	public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
 		
 		this.message = methodName.getLastComponent();
 		
 		if (this.primary == null) { 
 			if (!this.methodName.isSimple())  {
+				// TODO can probably just use linkNames instead of resolveType...
+				
 				Identifier prefix = methodName.withoutLastComponent();
 				try {
 					// if this is a static call to a named type...
@@ -96,16 +98,16 @@ public class MethodInvocationExpression extends Expression {
 				} catch (TypeLinkingException e) {
 					// if this is not a static call to a named type...
 					this.receivingExpr = prefix;
-					this.receivingExpr.linkNames();
+					this.receivingExpr.linkNames(curType, staticCtx);
 				}
 			}
 		} else {
-			this.primary.linkNames();
+			this.primary.linkNames(curType, staticCtx);
 			this.receivingExpr = this.primary;
 		}
 		
 		for (Expression arg : this.arguments) {
-			arg.linkNames();
+			arg.linkNames(curType, staticCtx);
 		}
 	}
 }

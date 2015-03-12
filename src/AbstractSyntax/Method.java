@@ -139,13 +139,13 @@ public class Method extends Decl {
 	}
 
 	@Override
-	public void linkNames() throws NameLinkingException {
+	public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
 		
 		for (Formal formal : parameters) {
-			formal.linkNames();
+			formal.linkNames(curType, staticCtx);
 		}
 		if (block != null) {
-			block.linkNames();
+			block.linkNames(curType, staticCtx);
 		}
 	}
 	

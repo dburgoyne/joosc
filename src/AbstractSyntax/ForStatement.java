@@ -66,16 +66,16 @@ public class ForStatement extends Statement {
 		this.body.linkTypes(types);
 	}
 
-	@Override public void linkNames() throws NameLinkingException {
+	@Override public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
 		if (this.initializer != null) {
-			this.initializer.linkNames();
+			this.initializer.linkNames(curType, staticCtx);
 		}
 		if (this.condition != null) {
-			this.condition.linkNames();
+			this.condition.linkNames(curType, staticCtx);
 		}
 		if (this.postExpression != null) {
-			this.postExpression.linkNames();
+			this.postExpression.linkNames(curType, staticCtx);
 		}
-		this.body.linkNames();
+		this.body.linkNames(curType, staticCtx);
 	}
 }

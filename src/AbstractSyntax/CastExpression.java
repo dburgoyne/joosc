@@ -32,7 +32,7 @@ public class CastExpression extends Expression {
 	}
 	
 	@Override
-	public void linkNames() throws NameLinkingException {
-		this.expression.linkNames();
+	public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
+		this.expression.linkNames(curType, staticCtx);
 	}
 }

@@ -70,8 +70,8 @@ public class BinaryExpression extends Expression {
 	}
 
 	@Override
-	public void linkNames() throws NameLinkingException {
-		this.left.linkNames();
-		this.right.linkNames();
+	public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
+		this.left.linkNames(curType, staticCtx);
+		this.right.linkNames(curType, staticCtx);
 	}
 }

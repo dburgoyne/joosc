@@ -5,7 +5,8 @@ import Types.Type;
 import Utilities.Cons;
 import Utilities.Predicate;
 
-public class Local extends BlockStatement implements EnvironmentDecl {
+public class Local extends BlockStatement
+		implements EnvironmentDecl, Identifier.Interpretation {
 	
 	protected Identifier typeName;
 	protected Type type;
@@ -80,8 +81,8 @@ public class Local extends BlockStatement implements EnvironmentDecl {
 	}
 	
 	@Override
-	public void linkNames() throws NameLinkingException {
-		this.initializer.linkNames();
+	public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
+		this.initializer.linkNames(curType, staticCtx);
 	}
 
 }

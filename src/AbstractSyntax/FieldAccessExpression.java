@@ -1,27 +1,36 @@
 package AbstractSyntax;
 
+import AbstractSyntax.Identifier.Interpretation;
 import Parser.ParseTree;
 import Utilities.Cons;
 
-public class FieldAccessExpression extends Expression {
+public class FieldAccessExpression extends Expression implements Interpretation {
 
 	protected Expression primary;
+	protected String fieldName;
 	
-	protected Identifier fieldName;
-	// TODO Fill this in during name linking
+	// TODO Fill this in during type checking.
 	protected Field field;
-	
+
 	public FieldAccessExpression(ParseTree tree) {
 		super(tree);
 		assert(tree.getSymbol().equals("FieldAccess"));
 		
 		this.primary = Expression.extractPrimary(tree.getChildren()[0]);
-		this.fieldName = new Identifier(tree.getChildren()[2]);
+		this.fieldName = new Identifier(tree.getChildren()[2]).getSingleComponent();
+	}
+	
+	// Construct from an Identifier interpreted as a non-static field access.
+	public FieldAccessExpression(Identifier id, Expression expr, String fieldName) {
+		super(id.parseTree);
+		
+		this.primary = expr;
+		this.fieldName = fieldName;
+		this.environment = id.environment;
 	}
 	
 	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException, ImportException {
 		this.environment = parentEnvironment;
-		this.fieldName.buildEnvironment(this.environment);
 		this.primary.buildEnvironment(this.environment);
 	}
 
@@ -29,7 +38,7 @@ public class FieldAccessExpression extends Expression {
 		this.primary.linkTypes(types);
 	}
 
-	@Override public void linkNames() throws NameLinkingException {
-		this.primary.linkNames();
+	@Override public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
+		this.primary.linkNames(curType, staticCtx);
 	}
 }

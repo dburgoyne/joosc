@@ -86,12 +86,12 @@ public class Program extends ASTNode {
 		}
 	}
 	
-	public void linkNames() {
+	public void linkNames(TypeDecl curType, boolean staticCtx) {
 		Exception err = null;
 		for (Classfile file : files) {
 			try {
 				
-				file.linkNames();
+				file.linkNames(curType, staticCtx);
 				
 			} catch (Exception caught) {
 				if (err != null) {

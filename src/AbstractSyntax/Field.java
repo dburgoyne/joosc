@@ -8,7 +8,7 @@ import Utilities.BiPredicate;
 import Utilities.Cons;
 import Utilities.Predicate;
 
-public class Field extends Decl {
+public class Field extends Decl implements Identifier.Interpretation {
 
 
 	protected List<Modifier> modifiers;
@@ -88,9 +88,9 @@ public class Field extends Decl {
 	}
 
 	@Override
-	public void linkNames() throws NameLinkingException {
+	public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
 		if (this.initializer != null) {
-			this.initializer.linkNames();
+			this.initializer.linkNames(curType, staticCtx);
 		}
 	}
 	

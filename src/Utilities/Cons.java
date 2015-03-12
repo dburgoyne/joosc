@@ -14,7 +14,7 @@ public class Cons<T> {
 		this.tail = tail;
 	}
 	
-	public static<T> Cons<T> filter(Cons<T> toFilter, Predicate<T> p) {
+	public static<U, T extends U> Cons<T> filter(Cons<T> toFilter, Predicate<U> p) {
 		if (toFilter == null) {
 			return null;
 		}
@@ -55,7 +55,8 @@ public class Cons<T> {
 		return contains(cons.tail, target);
 	}
 	
-	public static <T> boolean contains(Cons<T> cons, T target, BiPredicate<T> cmp) {
+	public static <U, S extends U, T extends U>
+			boolean contains(Cons<S> cons, T target, BiPredicate<U> cmp) {
 		while (cons != null) {
 			if (cmp.test(target, cons.head)) return true;
 			cons = cons.tail;
@@ -66,7 +67,7 @@ public class Cons<T> {
 	/** Takes two assumed-duplicate-free lists, and produces their concatenation
 	 *  in order, with the elements of the first removed if they occur in the
 	 *  second list. Duplicates are detected using the given comparator. */
-	public static <T> Cons<T> union(Cons<T> list1, Cons<T> list2, BiPredicate<T> cmp) {
+	public static <U, T extends U> Cons<T> union(Cons<T> list1, Cons<T> list2, BiPredicate<U> cmp) {
 		Cons<T> rflist1 = null;
 		
 		while (list1 != null) {

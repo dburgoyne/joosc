@@ -45,7 +45,7 @@ public class Literal extends Expression {
 	}
 
 	@Override
-	public void linkNames() {
+	public void linkNames(TypeDecl curType, boolean staticCtx) {
 		// Do nothing.
 	}
 }

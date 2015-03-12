@@ -53,9 +53,9 @@ public class Block extends Statement {
 	}
 	
 	@Override
-	public void linkNames() throws NameLinkingException {
+	public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
 		for (BlockStatement bs : this.statements) {
-			bs.linkNames();
+			bs.linkNames(curType, staticCtx);
 		}
 	}
 }

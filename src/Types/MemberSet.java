@@ -20,6 +20,14 @@ public class MemberSet {
 	
 	protected Cons<Method> inheritedAbstractMethods;
 	protected Cons<Method> declaredAbstractMethods;
+
+	public Cons<Field> getInheritedFields() { return inheritedFields; }
+	public Cons<Field> getDeclaredFields() { return declaredFields; }
+	public Cons<Field> getFields() { 
+		return Cons.union(inheritedFields, declaredFields,
+						  new Decl.SameNamePredicate());
+	}
+	
 	
 	public MemberSet(TypeDecl type) {
 		this.type = type;

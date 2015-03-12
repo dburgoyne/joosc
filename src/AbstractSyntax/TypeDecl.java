@@ -10,7 +10,8 @@ import Utilities.Cons;
 import Utilities.ObjectUtils;
 import Utilities.Predicate;
 
-public class TypeDecl extends ASTNode implements EnvironmentDecl, Type {
+public class TypeDecl extends ASTNode
+		implements EnvironmentDecl, Type, Identifier.Interpretation {
 	
 	enum Kind {
 		CLASS,
@@ -344,15 +345,15 @@ public class TypeDecl extends ASTNode implements EnvironmentDecl, Type {
 		
 	}
 
-	@Override public void linkNames() throws NameLinkingException {
+	@Override public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
 		for (Field f : fields) {
-			f.linkNames();
+			f.linkNames(this, f.modifiers.contains(Modifier.STATIC));
 		}
 		for (Constructor ctor : constructors) {
-			ctor.linkNames();
+			ctor.linkNames(this, false);
 		}
 		for (Method m : methods) {
-			m.linkNames();
+			m.linkNames(this, m.isStatic());
 		}
 	}
 	
