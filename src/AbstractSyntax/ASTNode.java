@@ -29,4 +29,5 @@ public abstract class ASTNode {
 	public abstract EnvironmentDecl exportEnvironmentDecls();
 	public abstract void linkTypes(Cons<TypeDecl> types) throws TypeLinkingException;
 	public abstract void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException;
+	public abstract void checkTypes() throws TypeCheckingException;
 }

@@ -66,4 +66,20 @@ public class ClassInstanceCreationExpression extends Expression {
 		}
 	}
 	
+	@Override public void checkTypes() throws TypeCheckingException {
+		// No objects of abstract classes may be created.
+		if (this.type.isAbstract()) {
+			throw new TypeCheckingException.AbstractInstantiation(this, this.type);
+		}
+		
+		// Check that all accesses of protected fields, methods and constructors are in a
+		// subtype of the type declaring the entity being accessed, or in the same package
+		// as that type.
+		// TODO
+		
+		for (Expression expr : this.arguments) {
+			expr.checkTypes();
+		}
+	}
+	
 }

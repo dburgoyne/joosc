@@ -65,4 +65,10 @@ public class Formal extends ASTNode
 	public String toString() {
 		return type + " " + name;
 	}
+
+	@Override
+	public void checkTypes() throws TypeCheckingException {
+		// TODO Auto-generated method stub
+		
+	}
 }

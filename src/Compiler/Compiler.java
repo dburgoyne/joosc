@@ -7,6 +7,7 @@ import AbstractSyntax.ImportException;
 import AbstractSyntax.NameConflictException;
 import AbstractSyntax.NameLinkingException;
 import AbstractSyntax.Program;
+import AbstractSyntax.TypeCheckingException;
 import AbstractSyntax.TypeDecl;
 import AbstractSyntax.TypeLinkingException;
 import Parser.ParseException;
@@ -75,6 +76,9 @@ public class Compiler {
     		// Name resolution pass.
     		program.linkNames(null, false);
     		
+    		// Type checking pass.
+    		program.checkTypes();
+    		
     		
     	} catch (Exception e) {
 			if (e instanceof NameConflictException
@@ -82,7 +86,8 @@ public class Compiler {
 			 || e instanceof TypeLinkingException
 			 || e instanceof Hierarchy.CycleDetected
 			 || e instanceof MemberSet.Exception
-			 || e instanceof NameLinkingException) {
+			 || e instanceof NameLinkingException
+			 || e instanceof TypeCheckingException) {
     			System.err.println(e.getMessage());
     			failed = true;
 			} else {

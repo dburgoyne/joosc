@@ -74,4 +74,16 @@ public class BinaryExpression extends Expression {
 		this.left.linkNames(curType, staticCtx);
 		this.right.linkNames(curType, staticCtx);
 	}
+	
+	@Override public void checkTypes() throws TypeCheckingException {
+		// No bitwise operations may occur. 
+		switch (this.operator) {
+		  case AND:
+		  case OR:
+		  case XOR:
+			throw new TypeCheckingException.BitwiseOperator(this);
+	      default:
+	    	// Do nothing
+		}
+	}
 }

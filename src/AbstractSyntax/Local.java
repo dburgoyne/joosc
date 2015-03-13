@@ -85,4 +85,10 @@ public class Local extends BlockStatement
 		this.initializer.linkNames(curType, staticCtx);
 	}
 
+	@Override
+	public void checkTypes() throws TypeCheckingException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

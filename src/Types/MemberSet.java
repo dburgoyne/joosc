@@ -1,5 +1,7 @@
 package Types;
 
+import java.util.List;
+
 import Types.MemberSet.Exception.MethodSignatureClash;
 import Utilities.Cons;
 import Utilities.Predicate;
@@ -9,6 +11,7 @@ import AbstractSyntax.*;
 public class MemberSet {
 	
 	protected TypeDecl type;
+	protected Cons<TypeDecl> supertypes;
 	
 	protected Cons<Field> inheritedFields;
 	protected Cons<Field> declaredFields;
@@ -35,6 +38,10 @@ public class MemberSet {
 				  new Method.SameSignaturePredicate()),
 				  new Method.SameSignaturePredicate()),
 				  new Method.SameSignaturePredicate());
+	}
+	
+	public List<TypeDecl> getSupertypes() {
+		return Cons.toList(this.supertypes);
 	}
 	
 	
@@ -73,6 +80,8 @@ public class MemberSet {
 			}
 		}
 		
+		this.supertypes = Cons.union(new Cons<TypeDecl>(ms.type, null), this.supertypes);
+		
 	}
 	
 	public void inheritClass(MemberSet ms) throws MethodSignatureClash {
@@ -96,6 +105,8 @@ public class MemberSet {
 							          this.inheritedAbstractMethods,
 							          new Method.SameSignaturePredicate()),
 						   new Method.SameSignaturePredicate());
+		
+		this.supertypes = Cons.union(new Cons<TypeDecl>(ms.type, null), this.supertypes);
 	}
 	
 	public void declareField(Field f) {

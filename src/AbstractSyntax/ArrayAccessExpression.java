@@ -1,12 +1,16 @@
 package AbstractSyntax;
 
 import Parser.ParseTree;
+import Types.ArrayType;
+import Types.PrimitiveType;
+import Types.Type;
 import Utilities.Cons;
 
 public class ArrayAccessExpression extends Expression {
 
 	protected Expression array;
 	protected Expression dimExpr;
+	protected Type type;
 	
 	public ArrayAccessExpression(ParseTree tree) {
 		super(tree);
@@ -42,4 +46,22 @@ public class ArrayAccessExpression extends Expression {
 		this.array.linkNames(curType, staticCtx);
 		this.dimExpr.linkNames(curType, staticCtx);
 	}
+
+	@Override public void checkTypes() throws TypeCheckingException {
+		this.array.checkTypes();
+		this.dimExpr.checkTypes();
+		
+		// array should be an ArrayType
+		if (!(this.array.getType() instanceof ArrayType)) {
+			throw new TypeCheckingException.TypeMismatch(this.array, "an array type");
+		}
+		
+		// dimExpr should be an integral type.
+		if (!(this.dimExpr.getType() instanceof PrimitiveType)
+		 || ((PrimitiveType)this.dimExpr.getType()).isIntegral()) {
+			throw new TypeCheckingException.TypeMismatch(this.dimExpr, "an integral type");
+		}
+		
+		this.exprType = ((ArrayType)this.array.getType()).getInnerType();
+	}	
 }

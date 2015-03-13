@@ -148,9 +148,9 @@ Modifiers Modifiers Modifier
 // TODO in weeder: interface cannot be final
 // TODO in weeder: field cannot be abstract or final
 // constructor can only be public or protected
-// abstract method can only be public or abstract
+// abstract method can only be public, protected or abstract
 // constant can only be public, static or final
-// only `static int m(int x);' abstractmethoddecls can be native.
+// only `static int m(int x);' can be native.
 Modifier public
 Modifier protected
 Modifier abstract

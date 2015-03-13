@@ -256,4 +256,8 @@ public class Classfile extends ASTNode {
 	@Override public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
 		typeDecl.linkNames(curType, staticCtx);
 	}
+
+	@Override public void checkTypes() throws TypeCheckingException {
+		this.typeDecl.checkTypes();
+	}
 }

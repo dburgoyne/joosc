@@ -18,6 +18,13 @@ public class ArrayType implements Type {
 		return this.type.getCanonicalName() + "[]";
 	}
 	
+	@Override public boolean canCastTo(Type t) {
+		return (t.getCanonicalName().equals("java.lang.Object")
+			 || t.getCanonicalName().equals("java.io.Serializable")
+			 || t.getCanonicalName().equals("java.lang.Cloneable")
+			 || (t instanceof ArrayType && (this.getInnerType().canCastTo(((ArrayType)t).getInnerType()))));
+	}
+	
 	public int hashCode() {
 		return type.hashCode();
 	}

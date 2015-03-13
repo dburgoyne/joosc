@@ -101,4 +101,14 @@ public class Field extends Decl implements Identifier.Interpretation {
 		}
 
 	}
+
+	@Override public void checkTypes() throws TypeCheckingException {
+		if (this.initializer != null) {
+			this.initializer.checkTypes();
+			
+			if (!this.initializer.getType().equals(this.type)) {
+				throw new TypeCheckingException.TypeMismatch(this.initializer, this.type.getCanonicalName());
+			}
+		}
+	}
 }

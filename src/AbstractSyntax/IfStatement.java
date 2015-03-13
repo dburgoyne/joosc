@@ -50,4 +50,10 @@ public class IfStatement extends Statement {
 		if (this.elseBody != null)
 			this.elseBody.linkNames(curType, staticCtx);
 	}
+
+	@Override
+	public void checkTypes() throws TypeCheckingException {
+		// TODO Auto-generated method stub
+		
+	}
 }

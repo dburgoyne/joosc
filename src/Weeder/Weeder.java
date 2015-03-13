@@ -1,6 +1,7 @@
 package Weeder;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import Parser.ParseException;
 import Parser.ParseTree;
@@ -68,6 +69,33 @@ class ClassWeeder extends Weeder{
 class InterfaceWeeder extends Weeder{
 	public void visit(String lhs,ParseTree... children) throws ParseException{
 		assert(lhs.equals("InterfaceDeclaration"));
+		ListWeeder lw = new ListWeeder();
+		children[0].visit(lw);
+		LeftmostTokenExtractor lte = new LeftmostTokenExtractor();
+		children[2].visit(lte);
+		
+		// Cannot have repeated modifiers.
+		HashSet<String> set = new HashSet<String>();
+		set.addAll(lw.list);
+		if (set.size() < lw.list.size()) {
+			String error = String.format(
+					"Error: Repeated modifiers are not allowed.\n"
+				  + "Line: %d Column: %d",
+				    lte.token.getLine(),
+				    lte.token.getColumn());
+			throw new ParseException(error);
+		}
+		
+		if(lw.list.contains("final")){
+			String error = String.format(
+					"Error: Interrface %s cannot be final.\n"
+				  + "Line: %d Column: %d",
+				    lte.token.getLexeme(),
+				    lte.token.getLine(),
+				    lte.token.getColumn());
+			throw new ParseException(error);
+		}
+		
 		children[2].visit(new NameWeeder());
 		children[children.length-1].visit(new InterfaceBodyWeeder(children[1].getToken()));
 	}
@@ -165,10 +193,23 @@ class FieldWeeder extends Weeder{
 		children[0].visit(lw);
 		VariableDeclaratorWeeder vdw=new VariableDeclaratorWeeder();
 		children[2].visit(vdw);
-		if(lw.list.contains("final")){
+		
+		// Cannot have repeated modifiers.
+		HashSet<String> set = new HashSet<String>();
+		set.addAll(lw.list);
+		if (set.size() < lw.list.size()) {
+			String error = String.format(
+					"Error: Repeated modifiers are not allowed.\n"
+				  + "Line: %d Column: %d",
+				    vdw.token.getLine(),
+				    vdw.token.getColumn());
+			throw new ParseException(error);
+		}
+		
+		if(lw.list.contains("final") || lw.list.contains("abstract") ){
 			Token token=vdw.token;
 			String error = String.format(
-					"Error: Field %s cannot be final.\n"
+					"Error: Illegal modifier on field %s.\n"
 				  + "Line: %d Column: %d",
 				    token.getLexeme(),
 				    token.getLine(),
@@ -192,6 +233,37 @@ class VariableDeclaratorWeeder extends Weeder{
 class ConstructorWeeder extends Weeder{
 	public void visit(String lhs,ParseTree... children) throws ParseException{
 		assert(lhs.equals("ConstructorDeclaration"));
+		if (children.length == 3) {
+			ListWeeder lw = new ListWeeder();
+			children[0].visit(lw);
+			LeftmostTokenExtractor lte = new LeftmostTokenExtractor();
+			children[1].visit(lte);
+			
+			// Cannot have repeated modifiers.
+			HashSet<String> set = new HashSet<String>();
+			set.addAll(lw.list);
+			if (set.size() < lw.list.size()) {
+				String error = String.format(
+						"Error: Repeated modifiers are not allowed.\n"
+					  + "Line: %d Column: %d",
+					    lte.token.getLine(),
+					    lte.token.getColumn());
+				throw new ParseException(error);
+			}
+			
+			if (lw.list.contains("abstract")
+			 || lw.list.contains("static")
+			 || lw.list.contains("final")
+			 || lw.list.contains("native")) {
+				String error = String.format(
+						"Error: Illegal constructor modifier %s.\n"
+					  + "Line: %d Column: %d",
+					    lte.token.getLexeme(),
+					    lte.token.getLine(),
+					    lte.token.getColumn());
+				throw new ParseException(error);
+			}
+		}
 	}
 }
 
@@ -255,8 +327,23 @@ class AbstractMethodWeeder extends Weeder{
 			ListWeeder lw=new ListWeeder();
 			children[0].visit(lw);
 			children[2].visit(mdw);
+			
+			// Cannot have repeated modifiers.
+			HashSet<String> set = new HashSet<String>();
+			set.addAll(lw.list);
+			if (set.size() < lw.list.size()) {
+				String error = String.format(
+						"Error: Repeated modifiers are not allowed.\n"
+					  + "Line: %d Column: %d",
+					    mdw.token.getLine(),
+					    mdw.token.getColumn());
+				throw new ParseException(error);
+			}
+			
 			// An interface method cannot be static, final, or native
-			if(lw.list.contains("static")||lw.list.contains("final")||lw.list.contains("native")){
+			if(lw.list.contains("static")
+			|| lw.list.contains("final")
+			|| lw.list.contains("native")){
 				String error = String.format(
 						"Error: Interface method %s cannot be static, final, or native.\n"
 					  + "Line: %d Column: %d",
@@ -302,6 +389,19 @@ class MethodHeaderWeeder extends MethodWeeder{
 		MethodDeclaratorWeeder mdw=new MethodDeclaratorWeeder(canHaveBody);
 		children[2].visit(mdw);
 		token=mdw.token;
+		
+		// Cannot have repeated modifiers.
+		HashSet<String> set = new HashSet<String>();
+		set.addAll(lw.list);
+		if (set.size() < lw.list.size()) {
+			String error = String.format(
+					"Error: Repeated modifiers are not allowed.\n"
+				  + "Line: %d Column: %d",
+				    token.getLine(),
+				    token.getColumn());
+			throw new ParseException(error);
+		}
+		
 		if(lw.list.contains("abstract")){
 			canHaveBody=false;
 			// An abstract method cannot be static or final

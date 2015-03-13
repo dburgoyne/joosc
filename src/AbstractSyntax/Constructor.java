@@ -99,4 +99,16 @@ public class Constructor extends ASTNode implements EnvironmentDecl {
 				+ StringUtils.join(this.parameters, ", ")
 				+ ")";
 	}
+
+	@Override public void checkTypes() throws TypeCheckingException {
+		// The name of a constructor must be the same as the name of its enclosing class. 
+		if (!this.parent.getName().equals(this.getName())) {
+			throw new TypeCheckingException.BadCtorName(this, this.parent);
+		}
+		
+		for (Formal param : this.parameters) {
+			param.checkTypes();
+		}
+		this.block.checkTypes();
+	}
 }

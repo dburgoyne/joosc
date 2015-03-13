@@ -35,4 +35,17 @@ public class CastExpression extends Expression {
 	public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
 		this.expression.linkNames(curType, staticCtx);
 	}
+
+	@Override
+	public void checkTypes() throws TypeCheckingException {
+	
+		this.expression.checkTypes();
+		Type sourceType = this.expression.getType();
+		
+		if (!sourceType.canCastTo(this.type)) {
+			throw new TypeCheckingException.IllegalCast(sourceType, this.typeName);
+		}
+
+		this.exprType = this.type;
+	}
 }

@@ -472,4 +472,10 @@ public class Identifier extends Expression {
 		return (TypeDecl)maybeTypeDecl.head;
 	}
 
+	@Override
+	public void checkTypes() throws TypeCheckingException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

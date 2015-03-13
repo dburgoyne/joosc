@@ -254,4 +254,10 @@ public class Method extends Decl {
 				+ StringUtils.join(this.parameters, ", ")
 				+ ")";
 		}
+
+	@Override
+	public void checkTypes() throws TypeCheckingException {
+		// TODO Auto-generated method stub
+		
+	}
 }

@@ -48,4 +48,10 @@ public class Literal extends Expression {
 	public void linkNames(TypeDecl curType, boolean staticCtx) {
 		// Do nothing.
 	}
+
+	@Override
+	public void checkTypes() throws TypeCheckingException {
+		// TODO Auto-generated method stub
+		
+	}
 }

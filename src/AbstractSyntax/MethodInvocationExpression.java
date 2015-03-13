@@ -121,4 +121,10 @@ public class MethodInvocationExpression extends Expression {
 			arg.linkNames(curType, staticCtx);
 		}
 	}
+
+	@Override
+	public void checkTypes() throws TypeCheckingException {
+		// TODO Auto-generated method stub
+		
+	}
 }

@@ -34,4 +34,10 @@ public class WhileStatement extends Statement {
 		this.condition.linkNames(curType, staticCtx);
 		this.body.linkNames(curType, staticCtx);
 	}
+
+	@Override
+	public void checkTypes() throws TypeCheckingException {
+		this.condition.checkTypes();
+		this.body.checkTypes();
+	}
 }

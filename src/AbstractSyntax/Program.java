@@ -9,7 +9,6 @@ import Utilities.Cons;
 public class Program extends ASTNode {
 	protected List<Classfile> files;
 	
-	// TODO Ew.
 	public static TypeDecl javaLangObject;
 	
 	public Program(ParseTree... trees) {
@@ -86,7 +85,7 @@ public class Program extends ASTNode {
 		}
 	}
 	
-	public void linkNames(TypeDecl curType, boolean staticCtx) {
+	public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
 		Exception err = null;
 		for (Classfile file : files) {
 			try {
@@ -101,8 +100,29 @@ public class Program extends ASTNode {
 			}
 		}
 		if (err != null) {
-			//if (err instanceof TypeLinkingException)
-			//	throw (TypeLinkingException)err;
+			if (err instanceof NameLinkingException)
+				throw (NameLinkingException)err;
+			throw new RuntimeException(err);
+		}
+	}
+	
+	public void checkTypes() throws TypeCheckingException {
+		Exception err = null;
+		for (Classfile file : files) {
+			try {
+				
+				file.checkTypes();
+				
+			} catch (Exception caught) {
+				if (err != null) {
+					System.err.println(err);
+				}
+				err = caught;
+			}
+		}
+		if (err != null) {
+			if (err instanceof TypeCheckingException)
+				throw (TypeCheckingException)err;
 			throw new RuntimeException(err);
 		}
 	}

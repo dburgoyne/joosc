@@ -1,12 +1,20 @@
 package AbstractSyntax;
 
 import Parser.ParseTree;
+import Types.Type;
 
 public abstract class Expression extends Statement {
+	
+	protected Type exprType;
 	
 	public Expression(ParseTree tree) {
 		super(tree);
 		// Do nothing.
+	}
+	
+	public Type getType() {
+		assert(this.exprType != null);
+		return this.exprType;
 	}
 
 	public static Expression extractExpression(ParseTree tree) {

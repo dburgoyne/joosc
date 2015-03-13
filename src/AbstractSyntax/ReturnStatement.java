@@ -37,4 +37,12 @@ public class ReturnStatement extends Statement {
 			this.expression.linkNames(curType, staticCtx);
 		}
 	}
+
+	@Override
+	public void checkTypes() throws TypeCheckingException {
+		this.expression.checkTypes();
+		if (!this.expression.getType().equals(____)) {
+			//TODO
+		}
+	}
 }

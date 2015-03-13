@@ -2,6 +2,7 @@ package AbstractSyntax;
 
 import Parser.ParseTree;
 import Types.ArrayType;
+import Types.PrimitiveType;
 import Types.Type;
 import Utilities.Cons;
 
@@ -47,6 +48,23 @@ public class ArrayCreationExpression extends Expression {
 		if (this.dimExpr != null) {
 			this.dimExpr.linkNames(curType, staticCtx);
 		}
+	}
+
+	@Override
+	public void checkTypes() throws TypeCheckingException {
+		
+		// TODO This should probably be fixed in the grammar.
+		if (this.dimExpr == null) {
+			throw new TypeCheckingException.TypeMismatch(this, "an integral type");
+		}
+		
+		this.dimExpr.checkTypes();
+		if (!(this.dimExpr.getType() instanceof PrimitiveType)
+		 || ((PrimitiveType)this.dimExpr.getType()).isIntegral()) {
+			throw new TypeCheckingException.TypeMismatch(this.dimExpr, "an integral type");
+		}
+		
+		this.exprType = this.type;
 	}
 	
 }

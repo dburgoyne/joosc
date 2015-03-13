@@ -5,12 +5,19 @@ public enum PrimitiveType implements Type {
 	BYTE("byte"),
 	INT("int"),
 	SHORT("short"),
-	CHAR("char"),
-	;
+	CHAR("char");
 
 	final String canonicalName;
 	private PrimitiveType(String canonicalName) {
 		this.canonicalName = canonicalName;
+	}
+	
+	public boolean isIntegral() {
+		return (this != BOOLEAN);
+	}
+	
+	@Override public boolean canCastTo(Type t) {
+		return (t instanceof PrimitiveType && (this.isIntegral() == ((PrimitiveType)t).isIntegral()));
 	}
 	
 	@Override public String getCanonicalName() {

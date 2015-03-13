@@ -58,4 +58,11 @@ public class Block extends Statement {
 			bs.linkNames(curType, staticCtx);
 		}
 	}
+
+	@Override
+	public void checkTypes() throws TypeCheckingException {
+		for (BlockStatement bs : this.statements) {
+			bs.checkTypes();
+		}
+	}
 }

@@ -2,14 +2,17 @@ package AbstractSyntax;
 
 import AbstractSyntax.Identifier.Interpretation;
 import Parser.ParseTree;
+import Types.ArrayType;
+import Types.PrimitiveType;
 import Utilities.Cons;
+import Utilities.Predicate;
 
 public class FieldAccessExpression extends Expression implements Interpretation {
 
 	protected Expression primary;
 	protected String fieldName;
+	protected TypeDecl containingType;
 	
-	// TODO Fill this in during type checking.
 	protected Field field;
 
 	public FieldAccessExpression(ParseTree tree) {
@@ -39,6 +42,48 @@ public class FieldAccessExpression extends Expression implements Interpretation 
 	}
 
 	@Override public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
+		this.containingType = curType;
 		this.primary.linkNames(curType, staticCtx);
+	}
+
+	@Override
+	public void checkTypes() throws TypeCheckingException {
+		this.primary.checkTypes();
+				
+		if (this.primary.getType() instanceof PrimitiveType) {
+			throw new TypeCheckingException.IllegalFieldAccess(this);
+		}
+		if (this.primary.getType() instanceof ArrayType && !this.fieldName.equals("length")) {
+			throw new TypeCheckingException.IllegalFieldAccess(this);
+		}
+		if (this.primary.getType() instanceof TypeDecl) {
+			// Get all non-static fields matching this.fieldName.
+			TypeDecl primaryType = (TypeDecl)this.primary.getType();
+			Cons<Field> matches = Cons.filter(primaryType.memberSet.getFields(), new Predicate<Field>() {
+				public boolean test(Field f) {
+					return (f.name.toString().equals(FieldAccessExpression.this.fieldName)
+						 && !f.modifiers.contains(Modifier.STATIC));
+				}
+			});
+			
+			// If !(we share the same package as, or are a subtype of, the class containing the field), then filter
+			// out protected fields.
+			if (!(primaryType.getPackageName().equals(this.containingType.getPackageName())
+					|| this.containingType.isSubtypeOf(primaryType))) {
+				matches = Cons.filter(matches, new Predicate<Field>() {
+					public boolean test(Field f) {
+						return !f.modifiers.contains(Modifier.PROTECTED);
+					}
+				});
+			}
+			
+			// There must be exactly one match.
+			if (matches == null || matches.tail != null) {
+				throw new TypeCheckingException.IllegalFieldAccess(this);
+			}
+			
+			this.field = matches.head;
+			this.exprType = this.field.type;
+		}
 	}
 }

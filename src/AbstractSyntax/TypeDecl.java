@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Parser.ParseTree;
+import Types.ArrayType;
 import Types.MemberSet;
 import Types.Type;
 import Utilities.Cons;
@@ -361,7 +362,7 @@ public class TypeDecl extends ASTNode
 		List<TypeDecl> list = new ArrayList<TypeDecl>();
 		
 		if (superclass == null) {
-			// TODO special case for java.lang.Object or do nothing?
+			// Only for java.lang.Object; leave the list empty.
 		} else {
 			list.add(this.superclass);
 		}
@@ -393,5 +394,43 @@ public class TypeDecl extends ASTNode
 			this.memberSet.declareConstructor(ctor);
 		}
 		this.memberSet.validate();
+	}
+	
+	public boolean hasZeroArgumentCtor() {
+		for (Constructor ctor : this.constructors) {
+			if (ctor.parameters.isEmpty()) return true;
+		}
+		return false;
+	}
+	
+	@Override public boolean canCastTo(Type t) {
+		// Either t == this, or t is a superclass of this, or this is a superclass of t.
+		return (t instanceof TypeDecl) && (((TypeDecl)t).isSubtypeOf(this) || this.isSubtypeOf(((TypeDecl)t)));
+	}
+	
+	public boolean isSubtypeOf(TypeDecl t) {
+		return (t.equals(this) || this.memberSet.getSupertypes().contains(t));
+	}
+
+	@Override public void checkTypes() throws TypeCheckingException {
+		
+		// A constructor in a class other than java.lang.Object implicitly calls the
+		// zero-argument constructor of its superclass. Check that this zero-argument
+		// constructor exists. 
+		if (!this.constructors.isEmpty() && this.superclass != null) {
+			if (!this.superclass.hasZeroArgumentCtor()) {
+				throw new TypeCheckingException.MissingDefaultCtor(this);
+			}
+		}
+		
+		for (Constructor ctor : this.constructors) {
+			ctor.checkTypes();
+		}
+		for (Field field : this.fields) {
+			field.checkTypes();
+		}
+		for (Method method : this.methods) {
+			method.checkTypes();
+		}
 	}
 }

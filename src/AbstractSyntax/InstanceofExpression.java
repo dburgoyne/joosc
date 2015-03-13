@@ -40,4 +40,10 @@ public class InstanceofExpression extends Expression {
 	public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
 		this.left.linkNames(curType, staticCtx);
 	}
+
+	@Override
+	public void checkTypes() throws TypeCheckingException {
+		// TODO Auto-generated method stub
+		
+	}
 }

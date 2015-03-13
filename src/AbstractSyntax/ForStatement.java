@@ -78,4 +78,10 @@ public class ForStatement extends Statement {
 		}
 		this.body.linkNames(curType, staticCtx);
 	}
+
+	@Override
+	public void checkTypes() throws TypeCheckingException {
+		// TODO Auto-generated method stub
+		
+	}
 }
