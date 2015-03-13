@@ -80,9 +80,16 @@ public class ForStatement extends Statement {
 	}
 
 	@Override public void checkTypes() throws TypeCheckingException {
-		this.initializer.checkTypes();
-		this.condition.checkTypes();
-		this.postExpression.checkTypes();
+		if (this.initializer != null) {
+			this.initializer.checkTypes();
+		}
+		if (this.condition != null) {
+			this.condition.checkTypes();
+			this.condition.assertNonVoid();
+		}
+		if (this.postExpression != null) {
+			this.postExpression.checkTypes();
+		}
 		this.body.checkTypes();
 	}
 }

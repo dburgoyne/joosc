@@ -1,6 +1,8 @@
 package AbstractSyntax;
 
 import Parser.ParseTree;
+import Types.PrimitiveType;
+import Types.Type;
 import Utilities.Cons;
 
 public class BinaryExpression extends Expression {
@@ -85,6 +87,92 @@ public class BinaryExpression extends Expression {
 	      default:
 	    	// Do nothing
 		}
-		// TODO Make sure the operands have the same type, and set exprType
+
+		this.left.checkTypes();
+		this.left.assertNonVoid();
+		this.right.checkTypes();
+		this.right.assertNonVoid();
+		
+		Type leftType = this.left.getType(),
+			 rightType = this.right.getType();
+
+		// Check operand types
+		switch (this.operator) {
+		  case PLUS:
+			if (leftType == Program.javaLangString
+					|| rightType == Program.javaLangString) break;
+			// Else, fall through...
+		  case MINUS:
+		  case STAR:
+		  case SLASH:
+		  case MOD:
+		  case GT:
+		  case LT:
+		  case GE:
+		  case LE:
+		  	if (!(leftType instanceof PrimitiveType
+					&& ((PrimitiveType)leftType).isIntegral()))
+				throw new TypeCheckingException.TypeMismatch(this.left, "an integral type");
+			if (!leftType.canCastTo(rightType))
+				throw new TypeCheckingException.TypeMismatch(this.right, leftType.getCanonicalName());
+			break;
+
+		  case LAND:
+		  case LOR:
+			if (leftType != PrimitiveType.BOOLEAN)
+				throw new TypeCheckingException.TypeMismatch(this.left, "boolean");
+			if (rightType != PrimitiveType.BOOLEAN)
+				throw new TypeCheckingException.TypeMismatch(this.right, "boolean");
+			break;
+
+		  case EQ:
+		  case NE:
+			if (leftType instanceof PrimitiveType) {
+				if (leftType == PrimitiveType.BOOLEAN) {
+					if (rightType != PrimitiveType.BOOLEAN)
+						throw new TypeCheckingException.TypeMismatch(this.right, "boolean");
+				} else {
+					if (!(rightType instanceof PrimitiveType
+							&& rightType != PrimitiveType.BOOLEAN))
+						throw new TypeCheckingException.TypeMismatch(this.right, "an integral type");
+				}
+			} else {
+				if (rightType instanceof PrimitiveType)
+					throw new TypeCheckingException.TypeMismatch(this.right, "a reference type");
+			}
+			break;
+
+		  case ASSIGN:
+			if (!rightType.canAssignTo(leftType))
+				throw new TypeCheckingException.TypeMismatch(this.right,leftType.getCanonicalName());
+			break;
+
+		  default: break;
+		}
+		
+		// Calculate result type
+		switch (this.operator) {
+		  case PLUS:
+			if (leftType == Program.javaLangString
+					|| rightType == Program.javaLangString) {
+				this.exprType = Program.javaLangString;
+				break;
+			}
+			// Else, fall through...
+		  case MINUS:
+		  case STAR:
+		  case SLASH:
+		  case MOD:
+			this.exprType = PrimitiveType.INT; // Integral types are promoted to int.
+			break;
+			
+		  case ASSIGN:
+			this.exprType = leftType;
+			break;
+			
+		  default:
+			this.exprType = PrimitiveType.BOOLEAN;
+			break;
+		}
 	}
 }

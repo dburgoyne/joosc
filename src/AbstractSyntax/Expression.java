@@ -13,9 +13,14 @@ public abstract class Expression extends Statement {
 	}
 	
 	public Type getType() {
-		// Could return null now!
-		//assert(this.exprType != null);
+		// Could return null! N.B.: we use null Type to mean void!
+		// NullType is the type of the null literal.
 		return this.exprType;
+	}
+	
+	public void assertNonVoid() throws TypeCheckingException {
+		if (this.exprType == null)
+			throw new TypeCheckingException.TypeMismatch(this, "non-void");
 	}
 
 	public static Expression extractExpression(ParseTree tree) {

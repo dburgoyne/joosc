@@ -3,6 +3,7 @@ package AbstractSyntax;
 import AbstractSyntax.Identifier.Interpretation;
 import Parser.ParseTree;
 import Types.ArrayType;
+import Types.NullType;
 import Types.PrimitiveType;
 import Utilities.Cons;
 import Utilities.Predicate;
@@ -13,7 +14,7 @@ public class FieldAccessExpression extends Expression implements Interpretation 
 	protected String fieldName;
 	protected TypeDecl containingType;
 	
-	protected Field field;
+	protected Field field; // Resolved in type check. null iff accessing <array>.length
 
 	public FieldAccessExpression(ParseTree tree) {
 		super(tree);
@@ -49,13 +50,21 @@ public class FieldAccessExpression extends Expression implements Interpretation 
 	@Override
 	public void checkTypes() throws TypeCheckingException {
 		this.primary.checkTypes();
-				
-		if (this.primary.getType() instanceof PrimitiveType) {
+		this.primary.assertNonVoid();
+
+		if (this.primary.getType() instanceof PrimitiveType
+				|| this.primary.getType() instanceof NullType) {
 			throw new TypeCheckingException.IllegalFieldAccess(this);
 		}
-		if (this.primary.getType() instanceof ArrayType && !this.fieldName.equals("length")) {
-			throw new TypeCheckingException.IllegalFieldAccess(this);
+		
+		if (this.primary.getType() instanceof ArrayType) {
+			if (this.fieldName.equals("length")) {
+				this.exprType = PrimitiveType.INT;
+			} else {
+				throw new TypeCheckingException.IllegalFieldAccess(this);
+			}
 		}
+
 		if (this.primary.getType() instanceof TypeDecl) {
 			// Get all non-static fields matching this.fieldName.
 			TypeDecl primaryType = (TypeDecl)this.primary.getType();

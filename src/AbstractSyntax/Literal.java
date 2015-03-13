@@ -1,6 +1,7 @@
 package AbstractSyntax;
 
 import Parser.ParseTree;
+import Types.NullType;
 import Types.PrimitiveType;
 import Types.Type;
 import Utilities.Cons;
@@ -28,7 +29,7 @@ public class Literal extends Expression {
 				 : (this == BOOLEAN) ? PrimitiveType.BOOLEAN
 				 : (this == CHARACTER) ? PrimitiveType.CHAR
 				 : (this == STRING) ? Program.javaLangString
-				 : null;  // TODO Since a type can be null, we need to null-check in a lot of places now!
+				 : NullType.INSTANCE; 
 		}
 	};
 	

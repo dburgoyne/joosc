@@ -57,10 +57,12 @@ public class ArrayCreationExpression extends Expression {
 		if (this.dimExpr == null) {
 			throw new TypeCheckingException.TypeMismatch(this, "an integral type");
 		}
-		
+
 		this.dimExpr.checkTypes();
-		if (!(this.dimExpr.getType() instanceof PrimitiveType)
-		 || ((PrimitiveType)this.dimExpr.getType()).isIntegral()) {
+		this.dimExpr.assertNonVoid();
+		
+		if (!(this.dimExpr.getType() instanceof PrimitiveType
+				&& ((PrimitiveType)this.dimExpr.getType()).isIntegral())) {
 			throw new TypeCheckingException.TypeMismatch(this.dimExpr, "an integral type");
 		}
 		

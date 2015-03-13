@@ -1,7 +1,5 @@
 package AbstractSyntax;
 
-import com.sun.org.apache.xalan.internal.xsltc.compiler.util.TypeCheckError;
-
 import Parser.ParseTree;
 import Utilities.Cons;
 
@@ -42,11 +40,11 @@ public class ReturnStatement extends Statement {
 
 	@Override
 	public void checkTypes() throws TypeCheckingException {
-		this.expression.checkTypes();
-		// Expression type must match the method return type.
-		// TODO
-		/*if (!this.expression.getType().equals(____)) {
-			throw new TypeCheckingException.TypeMismatch(this.expression, ____);
-		}*/
+		if (this.expression == null) {
+			// TODO current method must return void, or we're in ctor.
+		} else {
+			this.expression.checkTypes();
+			// TODO we're in method returning supertype of this.expression.getType()
+		}
 	}
 }

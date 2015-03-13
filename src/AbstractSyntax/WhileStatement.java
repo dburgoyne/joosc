@@ -1,6 +1,7 @@
 package AbstractSyntax;
 
 import Parser.ParseTree;
+import Types.PrimitiveType;
 import Utilities.Cons;
 
 public class WhileStatement extends Statement {
@@ -38,6 +39,12 @@ public class WhileStatement extends Statement {
 	@Override
 	public void checkTypes() throws TypeCheckingException {
 		this.condition.checkTypes();
+		this.condition.assertNonVoid();
+		
+		if (this.condition.getType() != PrimitiveType.BOOLEAN) {
+			throw new TypeCheckingException.TypeMismatch(this.condition, "boolean");
+		}
+		
 		this.body.checkTypes();
 	}
 }

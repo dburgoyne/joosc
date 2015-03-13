@@ -9,7 +9,8 @@
  *
  * AUTHORS:
  *   Danny Burgoyne UWID# 20411624 <secure@dburgoyne.ca>
- *   TODO add other contributors
+ *   Uros Dimitrijevic UWID# 20373732 <udimitri@uwaterloo.ca>
+ *   Xiang Fang <x2fang@uwaterloo.ca>
  *   
  */
  

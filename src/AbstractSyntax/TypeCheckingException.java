@@ -65,7 +65,7 @@ public abstract class TypeCheckingException extends Exception {
 		public TypeMismatch(Expression expr, String expected) {
 			super(String.format("Expression has type %s; expected %s.\n"
 					+ " at %s\n",
-					expr.getType().getCanonicalName(),
+					expr.getType() == null ? "void" : expr.getType().getCanonicalName(),
 					expected,
 					expr.getPositionalString()));
 		}

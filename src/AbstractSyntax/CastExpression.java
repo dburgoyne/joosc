@@ -38,8 +38,9 @@ public class CastExpression extends Expression {
 
 	@Override
 	public void checkTypes() throws TypeCheckingException {
-	
+
 		this.expression.checkTypes();
+		this.expression.assertNonVoid();
 		Type sourceType = this.expression.getType();
 		
 		if (!sourceType.canCastTo(this.type)) {

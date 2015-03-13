@@ -49,7 +49,9 @@ public class ArrayAccessExpression extends Expression {
 
 	@Override public void checkTypes() throws TypeCheckingException {
 		this.array.checkTypes();
+		this.array.assertNonVoid();
 		this.dimExpr.checkTypes();
+		this.dimExpr.assertNonVoid();
 		
 		// array should be an ArrayType
 		if (!(this.array.getType() instanceof ArrayType)) {
@@ -57,8 +59,8 @@ public class ArrayAccessExpression extends Expression {
 		}
 		
 		// dimExpr should be an integral type.
-		if (!(this.dimExpr.getType() instanceof PrimitiveType)
-		 || ((PrimitiveType)this.dimExpr.getType()).isIntegral()) {
+		if (!(this.dimExpr.getType() instanceof PrimitiveType
+		      && ((PrimitiveType)this.dimExpr.getType()).isIntegral())) {
 			throw new TypeCheckingException.TypeMismatch(this.dimExpr, "an integral type");
 		}
 		

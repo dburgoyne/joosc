@@ -51,6 +51,7 @@ public class UnaryExpression extends Expression {
 
 	@Override public void checkTypes() throws TypeCheckingException {
 		this.expression.checkTypes();
+		this.expression.assertNonVoid();
 		Type eType = this.expression.getType();
 		if (this.operator == UnaryOperator.NOT
 				&& !eType.equals(PrimitiveType.BOOLEAN)) {

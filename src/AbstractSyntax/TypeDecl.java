@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Parser.ParseTree;
-import Types.ArrayType;
 import Types.MemberSet;
 import Types.Type;
 import Utilities.Cons;

@@ -12,6 +12,8 @@ public class ClassInstanceCreationExpression extends Expression {
 	protected Identifier typeName;
 	protected TypeDecl type;
 	
+	protected Constructor ctorCalled; // resolved during type checking.
+	
 	protected List<Expression> arguments;
 	
 	public ClassInstanceCreationExpression(ParseTree tree) {
@@ -75,11 +77,14 @@ public class ClassInstanceCreationExpression extends Expression {
 		// Check that all accesses of protected fields, methods and constructors are in a
 		// subtype of the type declaring the entity being accessed, or in the same package
 		// as that type.
-		// TODO
+		// TODO Resolve this.ctorCalled
 		
 		for (Expression expr : this.arguments) {
 			expr.checkTypes();
+			expr.assertNonVoid();
 		}
+		
+		this.exprType = this.type;
 	}
 	
 }

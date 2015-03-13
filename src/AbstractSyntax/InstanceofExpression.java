@@ -44,6 +44,13 @@ public class InstanceofExpression extends Expression {
 	@Override
 	public void checkTypes() throws TypeCheckingException {
 		this.left.checkTypes();
+		this.left.assertNonVoid();
+		Type leftType = this.left.getType();
+		
+		if (!leftType.canCastTo(this.type)) {
+			throw new TypeCheckingException.IllegalCast(leftType, this.right);
+		}
+		
 		this.exprType = PrimitiveType.BOOLEAN;
 	}
 }

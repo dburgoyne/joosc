@@ -474,8 +474,38 @@ public class Identifier extends Expression {
 
 	@Override
 	public void checkTypes() throws TypeCheckingException {
-		// TODO Auto-generated method stub
+
+		Interpretation interp = this.getInterpretation();
 		
+		if (interp instanceof This) {
+			this.exprType = ((This)interp).type;
+			return;
+		}
+		
+		if (interp instanceof Local) {
+			this.exprType = ((Local)interp).type;
+			return;
+		}
+		
+		if (interp instanceof Formal) {
+			this.exprType = ((Formal)interp).type;
+			return;
+		}
+		
+		if (interp instanceof Field) {
+			this.exprType = ((Field)interp).type;
+			return;
+		}
+		
+		if (interp instanceof FieldAccessExpression) {
+			FieldAccessExpression expr = (FieldAccessExpression)interp;
+			expr.checkTypes();
+			expr.assertNonVoid();
+			this.exprType = expr.getType();
+			return;
+		}
+
+		assert false;
 	}
 
 }
