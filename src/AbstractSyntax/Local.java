@@ -87,8 +87,11 @@ public class Local extends BlockStatement
 
 	@Override
 	public void checkTypes() throws TypeCheckingException {
-		// TODO Auto-generated method stub
-		
+		this.initializer.checkTypes();
+		// Initializer must be assignable to the variable type.
+		if (!this.initializer.getType().canAssignTo(this.type)) {
+			throw new TypeCheckingException.TypeMismatch(this.initializer, this.type.getCanonicalName());
+		}
 	}
 
 }

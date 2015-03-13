@@ -153,7 +153,6 @@ public class Scanner {
 			int tabsSinceLastNewline = (indexOfLastNewline < 0)
 					? 0
 					: StringUtils.countTabs(lexeme.substring(indexOfLastNewline));
-			// TODO This counts tabs as a single column.
 			line += numberOfNewlines;
 			column = (numberOfNewlines == 0)
 					? column + longestMatchLength

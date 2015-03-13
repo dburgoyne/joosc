@@ -13,7 +13,8 @@ public abstract class Expression extends Statement {
 	}
 	
 	public Type getType() {
-		assert(this.exprType != null);
+		// Could return null now!
+		//assert(this.exprType != null);
 		return this.exprType;
 	}
 

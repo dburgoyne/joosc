@@ -405,7 +405,12 @@ public class TypeDecl extends ASTNode
 	
 	@Override public boolean canCastTo(Type t) {
 		// Either t == this, or t is a superclass of this, or this is a superclass of t.
-		return (t instanceof TypeDecl) && (((TypeDecl)t).isSubtypeOf(this) || this.isSubtypeOf(((TypeDecl)t)));
+		return (t instanceof TypeDecl) && (((TypeDecl)t).isSubtypeOf(this) || this.isSubtypeOf((TypeDecl)t));
+	}
+	
+	@Override public boolean canAssignTo(Type t) {
+		// Either t == this, or t is a superclass of this.
+		return (t instanceof TypeDecl) && this.isSubtypeOf((TypeDecl)t);
 	}
 	
 	public boolean isSubtypeOf(TypeDecl t) {

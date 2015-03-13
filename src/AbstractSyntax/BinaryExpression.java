@@ -85,5 +85,6 @@ public class BinaryExpression extends Expression {
 	      default:
 	    	// Do nothing
 		}
+		// TODO Make sure the operands have the same type, and set exprType
 	}
 }

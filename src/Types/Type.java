@@ -6,5 +6,6 @@ public interface Type {
 	public String getCanonicalName();
 	
 	public boolean canCastTo(Type t);
+	public boolean canAssignTo(Type t);
 	
 }

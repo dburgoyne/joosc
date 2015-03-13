@@ -3,9 +3,9 @@ package Types;
 public enum PrimitiveType implements Type {
 	BOOLEAN("boolean"),
 	BYTE("byte"),
-	INT("int"),
+	CHAR("char"),
 	SHORT("short"),
-	CHAR("char");
+	INT("int");
 
 	final String canonicalName;
 	private PrimitiveType(String canonicalName) {
@@ -17,7 +17,22 @@ public enum PrimitiveType implements Type {
 	}
 	
 	@Override public boolean canCastTo(Type t) {
-		return (t instanceof PrimitiveType && (this.isIntegral() == ((PrimitiveType)t).isIntegral()));
+		return t instanceof PrimitiveType
+		    && (this.isIntegral() == ((PrimitiveType)t).isIntegral());
+	}
+	
+	@Override public boolean canAssignTo(Type t) {
+		return t instanceof PrimitiveType
+			&& (this.isIntegral() == ((PrimitiveType)t).isIntegral())
+			&& (this.width() <= ((PrimitiveType)t).width());
+	}
+	
+	private int width() {
+		return this == BOOLEAN ? 1
+			 : this == BYTE ? 8
+			 : this == CHAR ? 16
+			 : this == SHORT ? 16
+			 : 32;
 	}
 	
 	@Override public String getCanonicalName() {

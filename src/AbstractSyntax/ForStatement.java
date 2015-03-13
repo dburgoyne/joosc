@@ -79,9 +79,10 @@ public class ForStatement extends Statement {
 		this.body.linkNames(curType, staticCtx);
 	}
 
-	@Override
-	public void checkTypes() throws TypeCheckingException {
-		// TODO Auto-generated method stub
-		
+	@Override public void checkTypes() throws TypeCheckingException {
+		this.initializer.checkTypes();
+		this.condition.checkTypes();
+		this.postExpression.checkTypes();
+		this.body.checkTypes();
 	}
 }

@@ -7,7 +7,6 @@ public class IfStatement extends Statement {
 	
 	protected Expression condition;
 	protected Statement body;
-	// TODO Consider whether a nullable elseBody is the best solution here.
 	protected Statement elseBody;  // Could be null!
 	
 	public IfStatement(ParseTree tree) {
@@ -53,7 +52,10 @@ public class IfStatement extends Statement {
 
 	@Override
 	public void checkTypes() throws TypeCheckingException {
-		// TODO Auto-generated method stub
-		
+		this.condition.checkTypes();
+		this.body.checkTypes();
+		if (this.elseBody != null) {
+			this.elseBody.checkTypes();
+		}
 	}
 }

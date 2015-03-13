@@ -10,6 +10,7 @@ public class Program extends ASTNode {
 	protected List<Classfile> files;
 	
 	public static TypeDecl javaLangObject;
+	public static TypeDecl javaLangString;
 	
 	public Program(ParseTree... trees) {
 		super(null);
@@ -26,9 +27,13 @@ public class Program extends ASTNode {
 			assert(export != null && export instanceof TypeDecl);
 			
 			// If we see java.lang.Object, remember where it is.
+			// Also need to remember java.lang.String to resolve types of string literals.
 			TypeDecl type = (TypeDecl)export;
 			if(type.getCanonicalName().equals("java.lang.Object")) {
 				Program.javaLangObject = type;
+			}
+			if(type.getCanonicalName().equals("java.lang.String")) {
+				Program.javaLangString = type;
 			}
 			
 			this.environment = new Cons<EnvironmentDecl>(export, this.environment);
@@ -46,9 +51,6 @@ public class Program extends ASTNode {
 				err = caught;
 			}
 		}
-		
-		// Set java.lang.Object back to null to prevent explosion
-		Program.javaLangObject = null;
 		
 		if (err != null) {
 			if (err instanceof NameConflictException)

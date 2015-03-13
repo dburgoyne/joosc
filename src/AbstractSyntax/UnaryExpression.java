@@ -1,6 +1,8 @@
 package AbstractSyntax;
 
 import Parser.ParseTree;
+import Types.PrimitiveType;
+import Types.Type;
 import Utilities.Cons;
 
 public class UnaryExpression extends Expression {
@@ -47,9 +49,18 @@ public class UnaryExpression extends Expression {
 		this.expression.linkNames(curType, staticCtx);
 	}
 
-	@Override
-	public void checkTypes() throws TypeCheckingException {
-		// TODO Auto-generated method stub
-		
+	@Override public void checkTypes() throws TypeCheckingException {
+		this.expression.checkTypes();
+		Type eType = this.expression.getType();
+		if (this.operator == UnaryOperator.NOT
+				&& !eType.equals(PrimitiveType.BOOLEAN)) {
+			throw new TypeCheckingException.TypeMismatch(this.expression, "boolean");
+		}
+		if (this.operator == UnaryOperator.MINUS
+				&& !(eType instanceof PrimitiveType
+						&& ((PrimitiveType)eType).isIntegral())) {
+			throw new TypeCheckingException.TypeMismatch(this.expression, "an integral type");
+		}
+		this.exprType = eType;
 	}
 }

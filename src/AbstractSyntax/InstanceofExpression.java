@@ -43,7 +43,7 @@ public class InstanceofExpression extends Expression {
 
 	@Override
 	public void checkTypes() throws TypeCheckingException {
-		// TODO Auto-generated method stub
-		
+		this.left.checkTypes();
+		this.exprType = PrimitiveType.BOOLEAN;
 	}
 }

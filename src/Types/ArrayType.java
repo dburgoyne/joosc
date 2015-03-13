@@ -25,6 +25,10 @@ public class ArrayType implements Type {
 			 || (t instanceof ArrayType && (this.getInnerType().canCastTo(((ArrayType)t).getInnerType()))));
 	}
 	
+	@Override public boolean canAssignTo(Type t) {
+		return t instanceof ArrayType && this.getInnerType().equals(((ArrayType)t).getInnerType());
+	}
+	
 	public int hashCode() {
 		return type.hashCode();
 	}

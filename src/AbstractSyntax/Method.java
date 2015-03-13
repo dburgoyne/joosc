@@ -257,7 +257,11 @@ public class Method extends Decl {
 
 	@Override
 	public void checkTypes() throws TypeCheckingException {
-		// TODO Auto-generated method stub
-		
+		for (Formal formal : parameters) {
+			formal.checkTypes();
+		}
+		if (block != null) {
+			block.checkTypes();
+		}
 	}
 }
