@@ -43,7 +43,7 @@ public class BinaryExpression extends Expression {
 				 : s.equals("<") ? LT
 				 : s.equals(">=") ? GE
 				 : s.equals("<=") ? LE
-				 : s.equals("=") ? ASSIGN
+				 : s.equals("AssignmentOperator") ? ASSIGN
 				 : null;
 		}
 	}

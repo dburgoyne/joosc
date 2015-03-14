@@ -5,12 +5,14 @@ import java.util.ArrayList;
 
 import Parser.ParseTree;
 import Types.Type;
+import Utilities.BiPredicate;
 import Utilities.Cons;
 
 public class ClassInstanceCreationExpression extends Expression {
 
 	protected Identifier typeName;
 	protected TypeDecl type;
+	protected TypeDecl containingType;
 	
 	protected Constructor ctorCalled; // resolved during type checking.
 	
@@ -63,6 +65,7 @@ public class ClassInstanceCreationExpression extends Expression {
 	}
 
 	@Override public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
+		this.containingType = curType;
 		for (Expression arg : this.arguments) {
 			arg.linkNames(curType, staticCtx);
 		}
@@ -73,16 +76,45 @@ public class ClassInstanceCreationExpression extends Expression {
 		if (this.type.isAbstract()) {
 			throw new TypeCheckingException.AbstractInstantiation(this, this.type);
 		}
-		
-		// Check that all accesses of protected fields, methods and constructors are in a
-		// subtype of the type declaring the entity being accessed, or in the same package
-		// as that type.
-		// TODO Resolve this.ctorCalled
-		
+
 		for (Expression expr : this.arguments) {
 			expr.checkTypes();
 			expr.assertNonVoid();
 		}
+		
+		// What constructor is being called?
+		List<Constructor> matches = new ArrayList<Constructor>();
+		for (Constructor ctor : this.type.constructors) {
+			boolean flag = true;
+			if (ctor.parameters.size() != this.arguments.size()) {
+				flag = false;
+			} else {
+				for (int i = 0; i < ctor.parameters.size(); i++) {
+					if (!ctor.parameters.get(i).type.equals(this.arguments.get(i).getType())) {
+						flag = false;
+					}
+					// All accesses of protected constructors must be in a subtype of the type declaring the
+					// constructor being accessed, or in the same package as that type.
+					if (ctor.modifiers.contains(Modifier.PROTECTED)
+							&& !(new BiPredicate.Equality<Identifier>().test(ctor.parent.getPackageName(), this.containingType.getPackageName())
+							     || this.containingType.isSubtypeOf(ctor.parent))) {
+						flag = false;
+					}
+				}
+			}
+			if (flag) {
+				matches.add(ctor);
+			}
+		}
+			
+		// Make sure there is exactly one match.
+		if (matches.size() == 0) {
+			throw new TypeCheckingException.NoConstructor(this);
+		}
+		if (matches.size() > 1) {
+			throw new TypeCheckingException.AmbiguousConstructorInvocation(this, matches);
+		}
+		this.ctorCalled = matches.get(0);
 		
 		this.exprType = this.type;
 	}

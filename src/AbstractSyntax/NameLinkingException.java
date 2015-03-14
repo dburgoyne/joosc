@@ -60,4 +60,12 @@ public abstract class NameLinkingException extends Exception {
 		}
 	}
 	
+	public static class AmbiguousName extends NameLinkingException {
+		private static final long serialVersionUID = 3944228727503523514L;
+		public AmbiguousName(Expression e) {
+			super("Name `" + e + "' is ambiguous.\n at " + 
+					e.getPositionalString());
+		}
+	}
+	
 }

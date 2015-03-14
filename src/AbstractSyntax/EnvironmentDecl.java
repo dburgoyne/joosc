@@ -4,4 +4,5 @@ package AbstractSyntax;
 // method, local variable, formal parameter).
 public interface EnvironmentDecl {
 	public Identifier getName();
+	public String getPositionalString();
 }

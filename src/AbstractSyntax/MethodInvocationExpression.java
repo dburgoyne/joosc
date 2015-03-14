@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Parser.ParseTree;
+import Utilities.BiPredicate;
 import Utilities.Cons;
 
 public class MethodInvocationExpression extends Expression {
@@ -16,7 +17,8 @@ public class MethodInvocationExpression extends Expression {
 	protected Expression receivingExpr; // receiver if non-static method call
 	protected TypeDecl   receivingType; // receiver if static method call
 	protected String     message;       // the last component of methodName
-	
+	protected TypeDecl   containingType;
+
 	// Post-type checking:
 	protected Method method;
 	
@@ -79,6 +81,7 @@ public class MethodInvocationExpression extends Expression {
 	@Override
 	public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
 		
+		this.containingType = curType;
 		this.message = methodName.getLastComponent();
 		
 		if (this.primary == null) { 
@@ -122,9 +125,58 @@ public class MethodInvocationExpression extends Expression {
 		}
 	}
 
-	@Override
-	public void checkTypes() throws TypeCheckingException {
-		// TODO Auto-generated method stub
+	@Override public void checkTypes() throws TypeCheckingException {
+		if (this.receivingExpr != null) {
+			this.receivingExpr.checkTypes();
+			this.receivingExpr.assertNonVoid();
+		}
+		for (Expression arg : this.arguments) {
+			arg.checkTypes();
+			arg.assertNonVoid();
+		}
 		
+		// What method is being called?
+		List<Method> matches = new ArrayList<Method>();
+		boolean staticCall = (this.receivingType != null);
+		boolean implicitThis = (!staticCall && (this.receivingExpr == null));
+		if (!staticCall && !implicitThis && !(this.receivingExpr.getType() instanceof TypeDecl)) {
+			throw new TypeCheckingException.NoMethod(this);
+		}
+		TypeDecl owner = staticCall   ? this.receivingType
+					   : implicitThis ? this.containingType
+					   : (TypeDecl)this.receivingExpr.getType();
+
+		loop: for (Method m : Cons.toList(owner.memberSet.getMethods())) {
+			if (!m.name.getSingleComponent().equals(this.message)) {
+				continue loop;
+			}
+			if (m.parameters.size() != this.arguments.size()) {
+				continue loop;
+			} else {
+				for (int i = 0; i < m.parameters.size(); i++) {
+					if (!m.parameters.get(i).type.equals(this.arguments.get(i).getType())) {
+						continue loop;
+					}
+					// All invocations of protected methods must be in a subtype of the type declaring the
+					// method being accessed, or in the same package as that type.
+					if (m.modifiers.contains(Modifier.PROTECTED)
+							&& !(new BiPredicate.Equality<Identifier>().test(owner.getPackageName(), this.containingType.getPackageName())
+								 || this.containingType.isSubtypeOf(owner))) {
+						continue loop;
+					}
+				}
+			}
+			matches.add(m);
+		}
+		
+		// Make sure there is exactly one match.
+		if (matches.size() == 0) {
+			throw new TypeCheckingException.NoMethod(this);
+		}
+		if (matches.size() > 1) {
+			throw new TypeCheckingException.AmbiguousMethodInvocation(this, matches);
+		}
+		this.method = matches.get(0);
+		this.exprType = this.method.type;
 	}
 }

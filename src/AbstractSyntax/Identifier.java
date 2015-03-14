@@ -9,6 +9,7 @@ import Types.PrimitiveType;
 import Types.Type;
 import Utilities.Cons;
 import static Utilities.PredUtils.*;
+import Utilities.BiPredicate;
 import Utilities.Predicate;
 import Utilities.StringUtils;
 
@@ -338,21 +339,36 @@ public class Identifier extends Expression {
 									&& t.modifiers.contains(Modifier.STATIC);
 							}
 						});
-				
-				if (matchingFields != null) {
-					this.interpretation = matchingFields.head;
-					return;
+				// Filter out protected fields if we can't see them.
+				if (!(new BiPredicate.Equality<Identifier>().test(type.getPackageName(), curType.getPackageName())
+						 || curType.isSubtypeOf(type))) {
+					matchingFields = 
+							Cons.filter(matchingFields,
+									new Predicate<Field>() {
+								@Override public boolean test(Field t) {
+									return !t.modifiers.contains(Modifier.PROTECTED);
+								}
+							});
 				}
 				
-				throw new NameLinkingException.NotFound(this);
-				
+				if (matchingFields == null) {
+					throw new NameLinkingException.NotFound(this);
+				}
+				if (matchingFields.tail != null) {
+					throw new NameLinkingException.AmbiguousName(this);
+				}
+				this.interpretation = matchingFields.head;
+				return;
+								
 			} else if (prefixI instanceof Expression) {
 				// Else, it's a non-static field lookup. Actual validity
 				// checking is postponed to type checking stage. 
 				
 				Expression expr = (Expression)prefixI;
-				this.interpretation
-					= new FieldAccessExpression(this, expr, last);
+				FieldAccessExpression fae = new FieldAccessExpression(this, expr, last);
+				fae.linkNames(curType, staticCtx);
+				this.interpretation = fae;
+				
 				return;
 				
 			} else if (prefixI instanceof Formal
@@ -361,13 +377,15 @@ public class Identifier extends Expression {
 				// Same as above, but use the prefix identifier itself as
 				// the target expression of the field access.
 
-				this.interpretation
-					= new FieldAccessExpression(this, prefix, last);
+				FieldAccessExpression fae = new FieldAccessExpression(this, prefix, last);
+				fae.linkNames(curType, staticCtx);
+				this.interpretation = fae;
 				return;
 				
 			} else if (prefixI instanceof This) {
 				
 				// Access a non-static field of the current class.
+				// Don't have to check for protected - we are accessing this.something
 				Cons<Field> matchingFields = 
 						Cons.filter(curType.memberSet.getFields(),
 								new Predicate<Field>() {
@@ -377,13 +395,14 @@ public class Identifier extends Expression {
 									&& !t.modifiers.contains(Modifier.STATIC);
 							}
 						});
-				
-				if (matchingFields != null) {
-					this.interpretation = matchingFields.head;
-					return;
+				if (matchingFields == null) {
+					throw new NameLinkingException.NotFound(this);
 				}
-				
-				throw new NameLinkingException.NotFound(this);
+				if (matchingFields.tail != null) {
+					throw new NameLinkingException.AmbiguousName(this);
+				}
+				this.interpretation = matchingFields.head;
+				return;
 			}
 			
 			throw new AssertionError(prefixI + " is an unorthodox interpretation.");	
@@ -502,6 +521,11 @@ public class Identifier extends Expression {
 			expr.checkTypes();
 			expr.assertNonVoid();
 			this.exprType = expr.getType();
+			return;
+		}
+		
+		if (interp instanceof TypeDecl) {
+			// Can't use the identifier in an expression.
 			return;
 		}
 

@@ -1,5 +1,7 @@
 package AbstractSyntax;
 
+import java.util.List;
+
 import Types.Type;
 
 public abstract class TypeCheckingException extends Exception {
@@ -92,6 +94,70 @@ public abstract class TypeCheckingException extends Exception {
 			super(String.format("Illegal field access.\n"
 					+ " at %s\n",
 					expr.getPositionalString()));
+		}
+	}
+	
+	public static class NoMethod extends TypeCheckingException {
+
+		private static final long serialVersionUID = -8156454042124170410L;
+		
+		public NoMethod(MethodInvocationExpression expr) {
+			super(String.format("No such method %s.\n"
+					+ " at %s\n",
+					expr,
+					expr.getPositionalString()));
+		}
+	}
+	
+	public static class AmbiguousMethodInvocation extends TypeCheckingException {
+
+		private static final long serialVersionUID = -8156454042124170411L;
+		
+		public AmbiguousMethodInvocation(MethodInvocationExpression expr, List<Method> matches) {
+			super(formatString(expr, matches));
+		}
+		
+		private static String formatString(MethodInvocationExpression expr, List<Method> matches) {
+			String msg = String.format("Method %s is ambiguous in this context.\n"
+					+ " at %s.\n Did you mean...", expr, expr.getPositionalString());
+			for (Method method : matches) {
+				msg += String.format("\n -> %s (declared in %s)", 
+						method, 
+						method.getPositionalString());
+			}
+			return msg;
+		}
+	}
+	
+	public static class NoConstructor extends TypeCheckingException {
+
+		private static final long serialVersionUID = -8156454042124170412L;
+		
+		public NoConstructor(ClassInstanceCreationExpression expr) {
+			super(String.format("No such constructor %s.\n"
+					+ " at %s\n",
+					expr,
+					expr.getPositionalString()));
+		}
+	}
+	
+	public static class AmbiguousConstructorInvocation extends TypeCheckingException {
+
+		private static final long serialVersionUID = -8156454042124170413L;
+		
+		public AmbiguousConstructorInvocation(ClassInstanceCreationExpression expr, List<Constructor> matches) {
+			super(formatString(expr, matches));
+		}
+		
+		private static String formatString(ClassInstanceCreationExpression expr, List<Constructor> matches) {
+			String msg = String.format("Constructor %s is ambiguous in this context.\n"
+					+ " at %s.\n Did you mean...", expr, expr.getPositionalString());
+			for (Constructor ctor : matches) {
+				msg += String.format("\n -> %s (declared in %s)", 
+						ctor,
+						ctor.getPositionalString());
+			}
+			return msg;
 		}
 	}
 	

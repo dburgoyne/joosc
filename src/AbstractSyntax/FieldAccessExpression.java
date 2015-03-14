@@ -5,6 +5,7 @@ import Parser.ParseTree;
 import Types.ArrayType;
 import Types.NullType;
 import Types.PrimitiveType;
+import Utilities.BiPredicate;
 import Utilities.Cons;
 import Utilities.Predicate;
 
@@ -77,8 +78,10 @@ public class FieldAccessExpression extends Expression implements Interpretation 
 			
 			// If !(we share the same package as, or are a subtype of, the class containing the field), then filter
 			// out protected fields.
-			if (!(primaryType.getPackageName().equals(this.containingType.getPackageName())
-					|| this.containingType.isSubtypeOf(primaryType))) {
+			Identifier ourPkg = primaryType.getPackageName();
+			Identifier theirPkg = this.containingType.getPackageName();
+			if (!(new BiPredicate.Equality<Identifier>().test(ourPkg, theirPkg) 
+			      || this.containingType.isSubtypeOf(primaryType))) {
 				matches = Cons.filter(matches, new Predicate<Field>() {
 					public boolean test(Field f) {
 						return !f.modifiers.contains(Modifier.PROTECTED);
