@@ -1,6 +1,7 @@
 package AbstractSyntax;
 
 import Parser.ParseTree;
+import Types.PrimitiveType;
 import Utilities.Cons;
 
 public class ForStatement extends Statement {	
@@ -66,17 +67,17 @@ public class ForStatement extends Statement {
 		this.body.linkTypes(types);
 	}
 
-	@Override public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
+	@Override public void linkNames(TypeDecl curType, boolean staticCtx, EnvironmentDecl curDecl, Local curLocal, boolean lValue) throws NameLinkingException {
 		if (this.initializer != null) {
-			this.initializer.linkNames(curType, staticCtx);
+			this.initializer.linkNames(curType, staticCtx, curDecl, curLocal, false);
 		}
 		if (this.condition != null) {
-			this.condition.linkNames(curType, staticCtx);
+			this.condition.linkNames(curType, staticCtx, curDecl, curLocal, false);
 		}
 		if (this.postExpression != null) {
-			this.postExpression.linkNames(curType, staticCtx);
+			this.postExpression.linkNames(curType, staticCtx, curDecl, curLocal, false);
 		}
-		this.body.linkNames(curType, staticCtx);
+		this.body.linkNames(curType, staticCtx, curDecl, curLocal, false);
 	}
 
 	@Override public void checkTypes() throws TypeCheckingException {
@@ -86,6 +87,10 @@ public class ForStatement extends Statement {
 		if (this.condition != null) {
 			this.condition.checkTypes();
 			this.condition.assertNonVoid();
+			
+			if (this.condition.getType() != PrimitiveType.BOOLEAN) {
+				throw new TypeCheckingException.TypeMismatch(this.condition, "boolean");
+			}
 		}
 		if (this.postExpression != null) {
 			this.postExpression.checkTypes();

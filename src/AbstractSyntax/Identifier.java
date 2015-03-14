@@ -234,7 +234,7 @@ public class Identifier extends Expression {
 		return interpretation;
 	}
 	
-	public void linkNames(TypeDecl curType, boolean staticCtx) 
+	public void linkNames(TypeDecl curType, boolean staticCtx, EnvironmentDecl curDecl, Local curLocal, boolean lValue) 
 			throws NameLinkingException {
 		
 		if (this.isSimple()) { // Base case, one component.
@@ -254,7 +254,11 @@ public class Identifier extends Expression {
 							   .or(isa(Formal.class))
 							 .and_(new Decl.HasNamePredicate(this)));
 			if (matchingLocals != null) {
-				this.interpretation = (Interpretation)matchingLocals.head;
+				EnvironmentDecl local = matchingLocals.head;
+				if (local == curLocal && !lValue) {
+					throw new NameLinkingException.ForwardReference(this);
+				}
+				this.interpretation = (Interpretation)local;
 				return;
 			}
 			
@@ -263,11 +267,18 @@ public class Identifier extends Expression {
 					Cons.filter(curType.memberSet.getFields(),
 								new Decl.HasNamePredicate(this));
 			if (matchingFields != null) {
+				
+				Field field = matchingFields.head;
+				if ((field == curDecl
+						|| (curDecl instanceof Field
+								&& Cons.contains(((Field)curDecl).followingFields, field))) && !lValue) {
+					throw new NameLinkingException.ForwardReference(this);
+				}
 				if (staticCtx)
 					throw new NameLinkingException.BadStatic(this);
 				if (matchingFields.head.modifiers.contains(Modifier.STATIC))
 					throw new NameLinkingException.BadNonStatic(this);
-				this.interpretation = matchingFields.head;
+				this.interpretation = (Interpretation)field;
 				return;
 			}
 			
@@ -296,7 +307,7 @@ public class Identifier extends Expression {
 			
 			final String last = this.getLastComponent();
 			Identifier prefix = this.withoutLastComponent();
-			prefix.linkNames(curType, staticCtx);
+			prefix.linkNames(curType, staticCtx, curDecl, curLocal, lValue);
 			Interpretation prefixI = prefix.getInterpretation();
 			
 			if (prefixI instanceof Package) {
@@ -366,7 +377,7 @@ public class Identifier extends Expression {
 				
 				Expression expr = (Expression)prefixI;
 				FieldAccessExpression fae = new FieldAccessExpression(this, expr, last);
-				fae.linkNames(curType, staticCtx);
+				fae.linkNames(curType, staticCtx, curDecl, curLocal, false);
 				this.interpretation = fae;
 				
 				return;
@@ -378,7 +389,7 @@ public class Identifier extends Expression {
 				// the target expression of the field access.
 
 				FieldAccessExpression fae = new FieldAccessExpression(this, prefix, last);
-				fae.linkNames(curType, staticCtx);
+				fae.linkNames(curType, staticCtx, curDecl, curLocal, false);
 				this.interpretation = fae;
 				return;
 				

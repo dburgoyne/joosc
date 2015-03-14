@@ -43,9 +43,9 @@ public class FieldAccessExpression extends Expression implements Interpretation 
 		this.primary.linkTypes(types);
 	}
 
-	@Override public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
+	@Override public void linkNames(TypeDecl curType, boolean staticCtx, EnvironmentDecl curDecl, Local curLocal, boolean lValue) throws NameLinkingException {
 		this.containingType = curType;
-		this.primary.linkNames(curType, staticCtx);
+		this.primary.linkNames(curType, staticCtx, curDecl, curLocal, false);
 	}
 
 	@Override

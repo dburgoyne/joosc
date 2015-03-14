@@ -5,7 +5,7 @@ public interface Type {
 	// Return qualified name of this type.
 	public String getCanonicalName();
 	
-	public boolean canCastTo(Type t);
-	public boolean canAssignTo(Type t);
+	public boolean canBeCastAs(Type t);
+	public boolean canBeAssignedTo(Type t);
 	
 }

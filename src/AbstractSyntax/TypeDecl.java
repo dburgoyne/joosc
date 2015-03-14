@@ -151,16 +151,16 @@ public class TypeDecl extends ASTNode
 			String grandchildName= grandchild.getSymbol();
 			if (grandchildName.equals("FieldDeclaration")) {
 				Field field = new Field(grandchild);
-				this.fields.add(field);
+				this.fields.add(0, field);
 			} else if (grandchildName.equals("MethodDeclaration")) {
 				Method method = new Method(grandchild, false);
-				this.methods.add(method);
+				this.methods.add(0, method);
 			} else {
 				return;
 			}
 		} else if (firstChildName.equals("ConstructorDeclaration")) {
 			Constructor constructor = new Constructor(firstChild, this);
-			this.constructors.add(constructor);
+			this.constructors.add(0, constructor);
 		}
 	}
 	
@@ -254,14 +254,21 @@ public class TypeDecl extends ASTNode
 			assert false;
 		}
 		
-		// For each field, build its environment, then stick its exported
-		// symbol in our environment (then move on to the next field).
+		// For each field, stick its exported symbol in our environment, 
+		// then build the environments of all fields when done.
 		for (Field field : fields) {
-			field.buildEnvironment(this.environment);
 			EnvironmentDecl export = field.exportEnvironmentDecls();
 			assert(export != null);
 			this.environment = new Cons<EnvironmentDecl>(export, this.environment);
 		}
+		Cons<Field> consFields = Cons.fromList(fields);
+		while (consFields != null) {
+			Field field = consFields.head;
+			field.buildEnvironment(this.environment);
+			consFields = consFields.tail;
+			field.followingFields = consFields;
+		}
+
 		
 		// Add all symbols exported by methods and constructors to our
 		// environment before building the environments for these nodes.
@@ -345,15 +352,15 @@ public class TypeDecl extends ASTNode
 		
 	}
 
-	@Override public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
+	@Override public void linkNames(TypeDecl curType, boolean staticCtx, EnvironmentDecl curDecl, Local curLocal, boolean lValue) throws NameLinkingException {
 		for (Field f : fields) {
-			f.linkNames(this, f.modifiers.contains(Modifier.STATIC));
+			f.linkNames(this, f.modifiers.contains(Modifier.STATIC), curDecl, curLocal, false);
 		}
 		for (Constructor ctor : constructors) {
-			ctor.linkNames(this, false);
+			ctor.linkNames(this, false, curDecl, curLocal, false);
 		}
 		for (Method m : methods) {
-			m.linkNames(this, m.isStatic());
+			m.linkNames(this, m.isStatic(), curDecl, curLocal, false);
 		}
 	}
 	
@@ -402,12 +409,11 @@ public class TypeDecl extends ASTNode
 		return false;
 	}
 	
-	@Override public boolean canCastTo(Type t) {
-		// Either t == this, or t is a superclass of this, or this is a superclass of t.
-		return (t instanceof TypeDecl) && (((TypeDecl)t).isSubtypeOf(this) || this.isSubtypeOf((TypeDecl)t));
+	@Override public boolean canBeCastAs(Type t) {
+		return t.canBeAssignedTo(this) || this.canBeAssignedTo(t);
 	}
 	
-	@Override public boolean canAssignTo(Type t) {
+	@Override public boolean canBeAssignedTo(Type t) {
 		// Either t == this, or t is a superclass of this.
 		return (t instanceof TypeDecl) && this.isSubtypeOf((TypeDecl)t);
 	}
@@ -415,6 +421,7 @@ public class TypeDecl extends ASTNode
 	public boolean isSubtypeOf(TypeDecl t) {
 		return (t.equals(this) || this.memberSet.getSupertypes().contains(t));
 	}
+	 public int f = 117 + (f=2) + 2;
 
 	@Override public void checkTypes() throws TypeCheckingException {
 		

@@ -8,11 +8,11 @@ public enum NullType implements Type {
 		return "(null)";
 	}
 
-	@Override public boolean canCastTo(Type t) {
+	@Override public boolean canBeCastAs(Type t) {
 		return !(t instanceof PrimitiveType);
 	}
 
-	@Override public boolean canAssignTo(Type t) {
+	@Override public boolean canBeAssignedTo(Type t) {
 		return !(t instanceof PrimitiveType);
 	}
 

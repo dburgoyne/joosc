@@ -1,10 +1,12 @@
 package AbstractSyntax;
 
 import Parser.ParseTree;
+import Types.Type;
 import Utilities.Cons;
 
 public class ReturnStatement extends Statement {
 	protected Expression expression;  // Could be null!
+	protected EnvironmentDecl containingDecl;
 	
 	public ReturnStatement(ParseTree tree) {
 		super(tree);
@@ -32,19 +34,40 @@ public class ReturnStatement extends Statement {
 	}
 	
 	@Override
-	public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
+	public void linkNames(TypeDecl curType, boolean staticCtx, EnvironmentDecl curDecl, Local curLocal, boolean lValue) throws NameLinkingException {
+		this.containingDecl = curDecl;
 		if (this.expression != null) {
-			this.expression.linkNames(curType, staticCtx);
+			this.expression.linkNames(curType, staticCtx, curDecl, curLocal, false);
 		}
 	}
 
 	@Override
 	public void checkTypes() throws TypeCheckingException {
-		if (this.expression == null) {
-			// TODO current method must return void, or we're in ctor.
-		} else {
+		Type eType = null;
+		if (this.expression != null) {
 			this.expression.checkTypes();
-			// TODO we're in method returning supertype of this.expression.getType()
+			this.expression.assertNonVoid();
+			eType = this.expression.getType();
+		}
+		
+		if (containingDecl instanceof Constructor) {
+			if (eType != null) {
+				throw new TypeCheckingException.ReturnTypeMismatch(this, "void");
+			}
+		} else {
+			Method m = (Method)this.containingDecl;
+			if ((eType == null) && (m.type != null)) {
+				throw new TypeCheckingException.ReturnTypeMismatch(this, m.type.getCanonicalName());
+			}
+			if ((eType != null) && (m.type == null)) {
+				throw new TypeCheckingException.ReturnTypeMismatch(this, "void");
+			}
+			if ((eType != null) && (m.type != null)) {
+				// eType must be assignable to m.type
+				if (!eType.canBeAssignedTo(m.type)) {
+					throw new TypeCheckingException.ReturnTypeMismatch(this, m.type.getCanonicalName());
+				}
+			}
 		}
 	}
 }

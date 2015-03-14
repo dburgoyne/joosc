@@ -60,7 +60,7 @@ public class Formal extends ASTNode
 		this.type = this.typeName.resolveType(types, this.environment);
 	}
 
-	@Override public void linkNames(TypeDecl curType, boolean staticCtx) { }
+	@Override public void linkNames(TypeDecl curType, boolean staticCtx, EnvironmentDecl curDecl, Local curLocal, boolean lValue) { }
 	
 	public String toString() {
 		return type + " " + name;

@@ -16,6 +16,7 @@ public class Method extends Decl {
 	protected Type type; // null if void !
 	protected Block block; // null if non-concrete declaration!
 	protected boolean isGramaticallyAbstract = false;
+	protected TypeDecl declaringType;
 	
 	public Identifier getName() {
 		return this.name;
@@ -139,13 +140,13 @@ public class Method extends Decl {
 	}
 
 	@Override
-	public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
-		
+	public void linkNames(TypeDecl curType, boolean staticCtx, EnvironmentDecl curDecl, Local curLocal, boolean lValue) throws NameLinkingException {
+		this.declaringType = curType;
 		for (Formal formal : parameters) {
-			formal.linkNames(curType, staticCtx);
+			formal.linkNames(curType, staticCtx, this, curLocal, false);
 		}
 		if (block != null) {
-			block.linkNames(curType, staticCtx);
+			block.linkNames(curType, staticCtx, this, curLocal, false);
 		}
 	}
 	

@@ -13,6 +13,7 @@ public class Field extends Decl implements Identifier.Interpretation {
 
 	protected List<Modifier> modifiers;
 	protected Expression initializer; // Can be null!!
+	protected Cons<Field> followingFields;
 	
 	protected Identifier typeName;
 	protected Type type;
@@ -58,7 +59,9 @@ public class Field extends Decl implements Identifier.Interpretation {
 						return field.getName().equals(name);
 					}
 			});
-		if(conflicts != null) {
+		// The environment includes this field; there should be exactly one "conflict".
+		assert(conflicts != null);
+		if (conflicts != null && conflicts.tail != null ) {
 			// Give up.
 			throw new NameConflictException((Field)conflicts.head, this);
 		}
@@ -71,7 +74,7 @@ public class Field extends Decl implements Identifier.Interpretation {
 		this.typeName.buildEnvironment(this.environment);
 		this.environment = parentEnvironment;
 		if (this.initializer != null) {
-			this.initializer.buildEnvironment(this.environment);
+			this.initializer.buildEnvironment(new Cons<EnvironmentDecl>(this, this.environment));
 		}
 	}
 
@@ -88,9 +91,9 @@ public class Field extends Decl implements Identifier.Interpretation {
 	}
 
 	@Override
-	public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
+	public void linkNames(TypeDecl curType, boolean staticCtx, EnvironmentDecl curDecl, Local curLocal, boolean lValue) throws NameLinkingException {
 		if (this.initializer != null) {
-			this.initializer.linkNames(curType, staticCtx);
+			this.initializer.linkNames(curType, staticCtx, this, curLocal, false);
 		}
 	}
 	
@@ -107,7 +110,7 @@ public class Field extends Decl implements Identifier.Interpretation {
 			this.initializer.checkTypes();
 			this.initializer.assertNonVoid();
 			
-			if (!this.initializer.getType().canAssignTo(this.type)) {
+			if (!this.initializer.getType().canBeAssignedTo(this.type)) {
 				throw new TypeCheckingException.TypeMismatch(this.initializer, this.type.getCanonicalName());
 			}
 		}

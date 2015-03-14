@@ -79,7 +79,7 @@ public class MethodInvocationExpression extends Expression {
 	}
 	
 	@Override
-	public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
+	public void linkNames(TypeDecl curType, boolean staticCtx, EnvironmentDecl curDecl, Local curLocal, boolean lValue) throws NameLinkingException {
 		
 		this.containingType = curType;
 		this.message = methodName.getLastComponent();
@@ -91,7 +91,7 @@ public class MethodInvocationExpression extends Expression {
 			} else {
 				
 				Identifier prefix = methodName.withoutLastComponent();
-				prefix.linkNames(curType, staticCtx);
+				prefix.linkNames(curType, staticCtx, curDecl, curLocal, false);
 				Identifier.Interpretation interp = prefix.getInterpretation();
 				
 				if (interp instanceof TypeDecl) {
@@ -101,7 +101,7 @@ public class MethodInvocationExpression extends Expression {
 					// types of arguments. 
 				} else if (interp instanceof Expression) {
 					this.receivingExpr = (Expression)interp;
-					this.receivingExpr.linkNames(curType, staticCtx);
+					this.receivingExpr.linkNames(curType, staticCtx, curDecl, curLocal, false);
 					// The existence of this non-static method is checked at
 					// type checking time.
 				} else if (interp instanceof Local
@@ -116,12 +116,12 @@ public class MethodInvocationExpression extends Expression {
 				}
 			}
 		} else {
-			this.primary.linkNames(curType, staticCtx);
+			this.primary.linkNames(curType, staticCtx, curDecl, curLocal, false);
 			this.receivingExpr = this.primary;
 		}
 		
 		for (Expression arg : this.arguments) {
-			arg.linkNames(curType, staticCtx);
+			arg.linkNames(curType, staticCtx, curDecl, curLocal, false);
 		}
 	}
 
@@ -157,13 +157,17 @@ public class MethodInvocationExpression extends Expression {
 					if (!m.parameters.get(i).type.equals(this.arguments.get(i).getType())) {
 						continue loop;
 					}
-					// All invocations of protected methods must be in a subtype of the type declaring the
-					// method being accessed, or in the same package as that type.
-					if (m.modifiers.contains(Modifier.PROTECTED)
-							&& !(new BiPredicate.Equality<Identifier>().test(owner.getPackageName(), this.containingType.getPackageName())
-								 || this.containingType.isSubtypeOf(owner))) {
-						continue loop;
-					}
+				}
+				// All invocations of protected methods must be in a subtype of the type declaring the
+				// method being accessed, or in the same package as that type.
+				if (m.modifiers.contains(Modifier.PROTECTED)
+						&& !(new BiPredicate.Equality<Identifier>().test(owner.getPackageName(), this.containingType.getPackageName())
+							 || (owner.isSubtypeOf(this.containingType) && this.containingType.isSubtypeOf(m.declaringType)))) {
+					continue loop;
+				}
+				// Can't call static methods without qualifying them.
+				if (!staticCall && m.modifiers.contains(Modifier.STATIC)) {
+					continue loop;
 				}
 			}
 			matches.add(m);
@@ -178,5 +182,9 @@ public class MethodInvocationExpression extends Expression {
 		}
 		this.method = matches.get(0);
 		this.exprType = this.method.type;
+	}
+	
+	public String toString() {
+		return message;
 	}
 }

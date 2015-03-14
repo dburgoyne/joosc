@@ -73,6 +73,18 @@ public abstract class TypeCheckingException extends Exception {
 		}
 	}
 	
+	public static class ReturnTypeMismatch extends TypeCheckingException {
+
+		private static final long serialVersionUID = -8156454042125170407L;
+		
+		public ReturnTypeMismatch(ReturnStatement stmnt, String expected) {
+			super(String.format("Return expression should have type %s.\n"
+					+ " at %s\n",
+					expected,
+					stmnt.getPositionalString()));
+		}
+	}
+	
 	public static class IllegalCast extends TypeCheckingException {
 
 		private static final long serialVersionUID = -8156454042124170408L;
@@ -159,6 +171,18 @@ public abstract class TypeCheckingException extends Exception {
 			}
 			return msg;
 		}
+	}
+	
+	public static class FinalFieldAssignment extends TypeCheckingException {
+
+		private static final long serialVersionUID = -8156434042124170413L;
+		
+		public FinalFieldAssignment(FieldAccessExpression expr) {
+			super(String.format("Assignment to final field length.\n"
+					+ " at %s\n",
+					expr.getPositionalString()));
+		}
+
 	}
 	
 }

@@ -41,10 +41,10 @@ public class ArrayAccessExpression extends Expression {
 	}
 	
 	@Override
-	public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
+	public void linkNames(TypeDecl curType, boolean staticCtx, EnvironmentDecl curDecl, Local curLocal, boolean lValue) throws NameLinkingException {
 		assert this.array != null;
-		this.array.linkNames(curType, staticCtx);
-		this.dimExpr.linkNames(curType, staticCtx);
+		this.array.linkNames(curType, staticCtx, curDecl, curLocal, false);
+		this.dimExpr.linkNames(curType, staticCtx, curDecl, curLocal, false);
 	}
 
 	@Override public void checkTypes() throws TypeCheckingException {

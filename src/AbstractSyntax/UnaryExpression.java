@@ -45,8 +45,8 @@ public class UnaryExpression extends Expression {
 	}
 
 	@Override
-	public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
-		this.expression.linkNames(curType, staticCtx);
+	public void linkNames(TypeDecl curType, boolean staticCtx, EnvironmentDecl curDecl, Local curLocal, boolean lValue) throws NameLinkingException {
+		this.expression.linkNames(curType, staticCtx, curDecl, curLocal, false);
 	}
 
 	@Override public void checkTypes() throws TypeCheckingException {

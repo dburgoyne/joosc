@@ -87,12 +87,12 @@ public class Program extends ASTNode {
 		}
 	}
 	
-	public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
+	public void linkNames(TypeDecl curType, boolean staticCtx, EnvironmentDecl curDecl, Local curLocal, boolean lValue) throws NameLinkingException {
 		Exception err = null;
 		for (Classfile file : files) {
 			try {
 				
-				file.linkNames(curType, staticCtx);
+				file.linkNames(curType, staticCtx, curDecl, curLocal, false);
 				
 			} catch (Exception caught) {
 				if (err != null) {

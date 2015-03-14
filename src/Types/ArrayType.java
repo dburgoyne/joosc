@@ -18,15 +18,22 @@ public class ArrayType implements Type {
 		return this.type.getCanonicalName() + "[]";
 	}
 	
-	@Override public boolean canCastTo(Type t) {
-		return (t.getCanonicalName().equals("java.lang.Object")
-			 || t.getCanonicalName().equals("java.io.Serializable")
-			 || t.getCanonicalName().equals("java.lang.Cloneable")
-			 || (t instanceof ArrayType && (this.getInnerType().canCastTo(((ArrayType)t).getInnerType()))));
+	@Override public boolean canBeCastAs(Type t) {
+		return t.canBeAssignedTo(this) || this.canBeAssignedTo(t);
 	}
 	
-	@Override public boolean canAssignTo(Type t) {
-		return t instanceof ArrayType && this.getInnerType().equals(((ArrayType)t).getInnerType());
+	@Override public boolean canBeAssignedTo(Type t) {
+		boolean samePrimitiveType = (t instanceof ArrayType
+				&& this.getInnerType() instanceof PrimitiveType
+				&& this.getInnerType() == ((ArrayType)t).getInnerType());
+		boolean compatibleReferenceTypes = (t instanceof ArrayType
+				&& !(this.getInnerType() instanceof PrimitiveType)
+				&& this.getInnerType().canBeAssignedTo(((ArrayType)t).getInnerType()));
+		return (t.getCanonicalName().equals("java.lang.Object")
+				 || t.getCanonicalName().equals("java.io.Serializable")
+				 || t.getCanonicalName().equals("java.lang.Cloneable")
+				 || samePrimitiveType
+				 || compatibleReferenceTypes);
 	}
 	
 	public int hashCode() {

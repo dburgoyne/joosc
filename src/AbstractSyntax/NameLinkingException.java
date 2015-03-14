@@ -68,4 +68,12 @@ public abstract class NameLinkingException extends Exception {
 		}
 	}
 	
+	public static class ForwardReference extends NameLinkingException {
+		private static final long serialVersionUID = 3944228727503523554L;
+		public ForwardReference(Expression e) {
+			super("Forward reference to " + e + ".\n at " + 
+					e.getPositionalString());
+		}
+	}
+	
 }

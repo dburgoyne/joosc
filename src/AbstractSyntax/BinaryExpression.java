@@ -72,9 +72,9 @@ public class BinaryExpression extends Expression {
 	}
 
 	@Override
-	public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
-		this.left.linkNames(curType, staticCtx);
-		this.right.linkNames(curType, staticCtx);
+	public void linkNames(TypeDecl curType, boolean staticCtx, EnvironmentDecl curDecl, Local curLocal, boolean lValue) throws NameLinkingException {
+		this.left.linkNames(curType, staticCtx, curDecl, curLocal, (this.operator == BinaryOperator.ASSIGN));
+		this.right.linkNames(curType, staticCtx, curDecl, curLocal, false);
 	}
 	
 	@Override public void checkTypes() throws TypeCheckingException {
@@ -113,7 +113,7 @@ public class BinaryExpression extends Expression {
 		  	if (!(leftType instanceof PrimitiveType
 					&& ((PrimitiveType)leftType).isIntegral()))
 				throw new TypeCheckingException.TypeMismatch(this.left, "an integral type");
-			if (!leftType.canCastTo(rightType))
+			if (!leftType.canBeCastAs(rightType))
 				throw new TypeCheckingException.TypeMismatch(this.right, leftType.getCanonicalName());
 			break;
 
@@ -139,11 +139,22 @@ public class BinaryExpression extends Expression {
 			} else {
 				if (rightType instanceof PrimitiveType)
 					throw new TypeCheckingException.TypeMismatch(this.right, "a reference type");
+				if (!rightType.canBeCastAs(leftType))
+					throw new TypeCheckingException.TypeMismatch(this.right,leftType.getCanonicalName());
 			}
 			break;
 
 		  case ASSIGN:
-			if (!rightType.canAssignTo(leftType))
+			// Array.length is the only final field in Joos.
+			FieldAccessExpression fae = null;
+			if (left instanceof FieldAccessExpression) fae = (FieldAccessExpression)left;
+			if (left instanceof Identifier
+					&& ((Identifier)left).getInterpretation() instanceof FieldAccessExpression)
+				fae = (FieldAccessExpression)((Identifier)left).getInterpretation();
+			if (fae != null && fae.field == null) {
+				throw new TypeCheckingException.FinalFieldAssignment(fae);
+			}
+			if (!rightType.canBeAssignedTo(leftType))
 				throw new TypeCheckingException.TypeMismatch(this.right,leftType.getCanonicalName());
 			break;
 

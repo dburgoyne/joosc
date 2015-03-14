@@ -16,24 +16,20 @@ public enum PrimitiveType implements Type {
 		return (this != BOOLEAN);
 	}
 	
-	@Override public boolean canCastTo(Type t) {
+	@Override public boolean canBeCastAs(Type t) {
 		return t instanceof PrimitiveType
 		    && (this.isIntegral() == ((PrimitiveType)t).isIntegral());
 	}
 	
-	@Override public boolean canAssignTo(Type t) {
+	@Override public boolean canBeAssignedTo(Type t) {
 		return t instanceof PrimitiveType
-			&& (this.isIntegral() == ((PrimitiveType)t).isIntegral())
-			&& (this.width() <= ((PrimitiveType)t).width());
+			&& (this == BOOLEAN ? t == BOOLEAN
+			: this == BYTE ? (t == BYTE || t == SHORT || t == INT)
+			: this == CHAR ? (t == CHAR || t == INT)
+			: this == SHORT ? (t == SHORT || t == INT)
+			: (t == INT));
 	}
 	
-	private int width() {
-		return this == BOOLEAN ? 1
-			 : this == BYTE ? 8
-			 : this == CHAR ? 16
-			 : this == SHORT ? 16
-			 : 32;
-	}
 	
 	@Override public String getCanonicalName() {
 		return canonicalName;

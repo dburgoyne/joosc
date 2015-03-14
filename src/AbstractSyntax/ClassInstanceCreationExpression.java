@@ -64,10 +64,10 @@ public class ClassInstanceCreationExpression extends Expression {
 		}
 	}
 
-	@Override public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
+	@Override public void linkNames(TypeDecl curType, boolean staticCtx, EnvironmentDecl curDecl, Local curLocal, boolean lValue) throws NameLinkingException {
 		this.containingType = curType;
 		for (Expression arg : this.arguments) {
-			arg.linkNames(curType, staticCtx);
+			arg.linkNames(curType, staticCtx, curDecl, curLocal, false);
 		}
 	}
 	
@@ -93,13 +93,13 @@ public class ClassInstanceCreationExpression extends Expression {
 					if (!ctor.parameters.get(i).type.equals(this.arguments.get(i).getType())) {
 						flag = false;
 					}
-					// All accesses of protected constructors must be in a subtype of the type declaring the
-					// constructor being accessed, or in the same package as that type.
-					if (ctor.modifiers.contains(Modifier.PROTECTED)
-							&& !(new BiPredicate.Equality<Identifier>().test(ctor.parent.getPackageName(), this.containingType.getPackageName())
-							     || this.containingType.isSubtypeOf(ctor.parent))) {
-						flag = false;
-					}
+				}
+				// All accesses of protected constructors must be in a subtype of the type declaring the
+				// constructor being accessed, or in the same package as that type.
+				if (ctor.modifiers.contains(Modifier.PROTECTED)
+						&& !(new BiPredicate.Equality<Identifier>().test(ctor.parent.getPackageName(), this.containingType.getPackageName())
+						     || this.containingType.isSubtypeOf(ctor.parent))) {
+					flag = false;
 				}
 			}
 			if (flag) {

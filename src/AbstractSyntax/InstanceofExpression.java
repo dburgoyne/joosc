@@ -37,8 +37,8 @@ public class InstanceofExpression extends Expression {
 	}
 
 	@Override
-	public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
-		this.left.linkNames(curType, staticCtx);
+	public void linkNames(TypeDecl curType, boolean staticCtx, EnvironmentDecl curDecl, Local curLocal, boolean lValue) throws NameLinkingException {
+		this.left.linkNames(curType, staticCtx, curDecl, curLocal, false);
 	}
 
 	@Override
@@ -47,7 +47,7 @@ public class InstanceofExpression extends Expression {
 		this.left.assertNonVoid();
 		Type leftType = this.left.getType();
 		
-		if (!leftType.canCastTo(this.type)) {
+		if (!leftType.canBeCastAs(this.type)) {
 			throw new TypeCheckingException.IllegalCast(leftType, this.right);
 		}
 		

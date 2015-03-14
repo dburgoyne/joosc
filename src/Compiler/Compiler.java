@@ -74,7 +74,7 @@ public class Compiler {
     		}
     		
     		// Name resolution pass.
-    		program.linkNames(null, false);
+    		program.linkNames(null, false, null, null, false);
     		
     		// Type checking pass.
     		program.checkTypes();

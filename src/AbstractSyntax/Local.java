@@ -67,7 +67,7 @@ public class Local extends BlockStatement
 		this.environment = parentEnvironment;
 		this.typeName.buildEnvironment(this.environment);
 		this.name.buildEnvironment(this.environment);
-		this.initializer.buildEnvironment(this.environment);
+		this.initializer.buildEnvironment(new Cons<EnvironmentDecl>(this, this.environment));
 	}
 
 	public EnvironmentDecl exportEnvironmentDecls() {
@@ -81,15 +81,15 @@ public class Local extends BlockStatement
 	}
 	
 	@Override
-	public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
-		this.initializer.linkNames(curType, staticCtx);
+	public void linkNames(TypeDecl curType, boolean staticCtx, EnvironmentDecl curDecl, Local curLocal, boolean lValue) throws NameLinkingException {
+		this.initializer.linkNames(curType, staticCtx, curDecl, this, false);
 	}
 
 	@Override
 	public void checkTypes() throws TypeCheckingException {
 		this.initializer.checkTypes();
 		// Initializer must be assignable to the variable type.
-		if (!this.initializer.getType().canAssignTo(this.type)) {
+		if (!this.initializer.getType().canBeAssignedTo(this.type)) {
 			throw new TypeCheckingException.TypeMismatch(this.initializer, this.type.getCanonicalName());
 		}
 	}

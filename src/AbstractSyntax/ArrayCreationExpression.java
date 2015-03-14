@@ -44,9 +44,9 @@ public class ArrayCreationExpression extends Expression {
 		}
 	}
 	
-	@Override public void linkNames(TypeDecl curType, boolean staticCtx) throws NameLinkingException {
+	@Override public void linkNames(TypeDecl curType, boolean staticCtx, EnvironmentDecl curDecl, Local curLocal, boolean lValue) throws NameLinkingException {
 		if (this.dimExpr != null) {
-			this.dimExpr.linkNames(curType, staticCtx);
+			this.dimExpr.linkNames(curType, staticCtx, curDecl, curLocal, false);
 		}
 	}
 

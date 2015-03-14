@@ -106,7 +106,7 @@ public class MemberSet {
 							          new Method.SameSignaturePredicate()),
 						   new Method.SameSignaturePredicate());
 		
-		this.supertypes = Cons.union(new Cons<TypeDecl>(ms.type, null), this.supertypes);
+		this.supertypes = Cons.union(new Cons<TypeDecl>(ms.type, ms.supertypes), this.supertypes);
 	}
 	
 	public void declareField(Field f) {

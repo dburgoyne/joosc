@@ -17,7 +17,7 @@ public class EmptyStatement extends Statement {
 
 	@Override public void linkTypes(Cons<TypeDecl> types) { }	
 
-	@Override public void linkNames(TypeDecl curType, boolean staticCtx) { }
+	@Override public void linkNames(TypeDecl curType, boolean staticCtx, EnvironmentDecl curDecl, Local curLocal, boolean lValue) { }
 
 	@Override public void checkTypes() throws TypeCheckingException { }
 }
