@@ -1,4 +1,6 @@
 public class Main {
+	public foo.String.bar.foo temp = null;
+	
 	public Main() {}
 	
 	public static int test() {

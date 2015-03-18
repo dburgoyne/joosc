@@ -121,7 +121,8 @@ public class Constructor extends ASTNode implements EnvironmentDecl {
 		
 	@Override
 	protected void selfGenerate() {
-		System.out.println(this.scopeIdentifier(name.toString(), parameters));
+		setLabel(this.scopeIdentifier(name.toString(), parameters));
+		setRetrun();
 	}
 		
 	@Override

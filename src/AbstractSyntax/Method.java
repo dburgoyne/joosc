@@ -275,7 +275,8 @@ public class Method extends Decl {
 		
 	@Override
 	protected void selfGenerate() {
-		System.out.println(this.scopeIdentifier(name.toString(), parameters));
+		setLabel(this.scopeIdentifier(name.toString(), parameters));
+		setRetrun();
 	}
 		
 	@Override

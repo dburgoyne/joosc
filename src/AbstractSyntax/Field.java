@@ -125,7 +125,7 @@ public class Field extends Decl implements Identifier.Interpretation {
 		
 	@Override
 	protected void selfGenerate() {
-		System.out.println(this.scopeIdentifier(name.toString()));
+		setLabel(this.scopeIdentifier(name.toString()));
 	}
 		
 	@Override

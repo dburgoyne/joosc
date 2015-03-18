@@ -1,6 +1,5 @@
 package AbstractSyntax;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import Parser.ParseTree;
@@ -50,12 +49,12 @@ public abstract class ASTNode {
 	}
 	
 	protected void selfGenerate() {
-		String info = String.format("; --- Self generate code is not implement for %s.", commentName);
+		String info = String.format("; -!- Self generate code is not implement for %s.", commentName);
 		System.out.println(info);
 	}
 	
 	protected void hierarchyGenerate() {
-		String info = String.format("; --- Hierarchy generate code is not implement for %s, subnodes will not be visited.", commentName);
+		String info = String.format("; -!- Hierarchy generate code is not implement for %s, subnodes will not be visited.", commentName);
 		System.out.println(info);
 	}
 	
@@ -68,7 +67,7 @@ public abstract class ASTNode {
 		for (Formal formal : parameters) {
 			identifier = identifier + "#" + formal.type.getCanonicalName();
 		}
-		identifier = identifier + "#:";
+		identifier = identifier + "#";
 		return identifier;
 	}
 	
@@ -77,12 +76,21 @@ public abstract class ASTNode {
 		for (int i = 1; i < scope.size(); i++) {
 			identifier = identifier + "." + scope.get(i);
 		}
-		identifier = identifier + "." + name + ":";
+		identifier = identifier + "." + name;
 		return identifier;
 	}
 	
+	protected void setLabel(String identifier) {
+		System.out.println(identifier + ":");
+	}
+	
+	protected void setRetrun() {
+		System.out.println("leave");
+		System.out.println("ret");
+	}
+	
 	private void commentGenerate(boolean upper) {
-		String info = String.format("; - %s of code for %s.", upper ? "Start" : "End", commentName);
+		String info = String.format("; %s of code for %s.", upper ? "<- Start" : "-> End", commentName);
 		System.out.println(info);
 	}
 }
