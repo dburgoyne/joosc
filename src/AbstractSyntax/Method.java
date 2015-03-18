@@ -270,7 +270,7 @@ public class Method extends Decl {
 
 	@Override
 	protected void setCommentName() {
-		this.commentName = String.format("Method %s", name.toString());
+		this.commentName = String.format("Method %s", scopeIdentifier(name.toString(), parameters));
 	}
 		
 	@Override

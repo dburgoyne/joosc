@@ -120,7 +120,7 @@ public class Field extends Decl implements Identifier.Interpretation {
 
 	@Override
 	protected void setCommentName() {
-		this.commentName = String.format("Field %s", name.toString());
+		this.commentName = String.format("Field %s", scopeIdentifier(name.toString()));
 	}
 		
 	@Override

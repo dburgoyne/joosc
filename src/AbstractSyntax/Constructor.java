@@ -116,7 +116,7 @@ public class Constructor extends ASTNode implements EnvironmentDecl {
 
 	@Override
 	protected void setCommentName() {
-		this.commentName = String.format("Constructor %s", name.toString());
+		this.commentName = String.format("Constructor %s", scopeIdentifier(name.toString(), parameters));
 	}
 		
 	@Override
