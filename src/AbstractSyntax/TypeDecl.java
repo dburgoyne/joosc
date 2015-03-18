@@ -444,4 +444,30 @@ public class TypeDecl extends ASTNode
 			method.checkTypes();
 		}
 	}
+	
+	// ---------- For code generate ----------
+
+	@Override
+	protected void setCommentName() {
+		this.commentName = String.format("Type %s", name.toString());
+	}
+		
+	@Override
+	protected void selfGenerate() {
+		scope.add(name.toString());
+	}
+		
+	@Override
+	protected void hierarchyGenerate() {
+		for (Constructor constructor : constructors) {
+			constructor.codeGenerate();
+		}
+		for (Field field : fields) {
+			field.codeGenerate();
+		}
+		for (Method method : methods) {
+			method.codeGenerate();
+		}
+	}
+
 }

@@ -79,7 +79,6 @@ public class Compiler {
     		// Type checking pass.
     		program.checkTypes();
     		
-    		
     	} catch (Exception e) {
 			if (e instanceof NameConflictException
 			 || e instanceof ImportException
@@ -104,6 +103,8 @@ public class Compiler {
         if (failed) {
     		return 42;
     	}
+        
+        program.codeGenerate();
         
         return 0;
     }

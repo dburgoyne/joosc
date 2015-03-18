@@ -111,4 +111,22 @@ public class Constructor extends ASTNode implements EnvironmentDecl {
 		}
 		this.block.checkTypes();
 	}
+	
+	// ---------- For code generate ----------
+
+	@Override
+	protected void setCommentName() {
+		this.commentName = String.format("Constructor %s", name.toString());
+	}
+		
+	@Override
+	protected void selfGenerate() {
+		System.out.println(this.scopeIdentifier(name.toString(), parameters));
+	}
+		
+	@Override
+	protected void hierarchyGenerate() {
+		// TODO
+		super.hierarchyGenerate();
+	}
 }

@@ -14,11 +14,13 @@ public class Main {
             System.out.println("Error: Please provide at least one Joos input file.");
             return;
         }
+        /*
         System.setOut(new PrintStream(new java.io.OutputStream() {
             public void write(int b) {
                 // Disable tests' output
             }
         }));
+        */
         
     	String[] filenames = new String[args.length - 1];
     	for (int i = 0; i < args.length - 1; i++) {

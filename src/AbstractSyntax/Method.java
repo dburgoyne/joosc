@@ -265,4 +265,22 @@ public class Method extends Decl {
 			block.checkTypes();
 		}
 	}
+	
+	// ---------- For code generate ----------
+
+	@Override
+	protected void setCommentName() {
+		this.commentName = String.format("Method %s", name.toString());
+	}
+		
+	@Override
+	protected void selfGenerate() {
+		System.out.println(this.scopeIdentifier(name.toString(), parameters));
+	}
+		
+	@Override
+	protected void hierarchyGenerate() {
+		// TODO
+		super.hierarchyGenerate();
+	}
 }

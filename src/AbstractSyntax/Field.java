@@ -115,4 +115,22 @@ public class Field extends Decl implements Identifier.Interpretation {
 			}
 		}
 	}
+	
+	// ---------- For code generate ----------
+
+	@Override
+	protected void setCommentName() {
+		this.commentName = String.format("Field %s", name.toString());
+	}
+		
+	@Override
+	protected void selfGenerate() {
+		System.out.println(this.scopeIdentifier(name.toString()));
+	}
+		
+	@Override
+	protected void hierarchyGenerate() {
+		// TODO
+		super.hierarchyGenerate();
+	}
 }

@@ -260,4 +260,25 @@ public class Classfile extends ASTNode {
 	@Override public void checkTypes() throws TypeCheckingException {
 		this.typeDecl.checkTypes();
 	}
+	
+	// ---------- For code generate ----------
+
+	@Override
+	protected void setCommentName() {
+		this.commentName = String.format("File %s", parseTree.getToken().getFileName());
+	}
+		
+	@Override
+	protected void selfGenerate() {
+		scope = new ArrayList<String>();
+		if (packageName != null) {
+			scope.addAll(packageName.components);
+		}
+	}
+		
+	@Override
+	protected void hierarchyGenerate() {
+		this.typeDecl.codeGenerate();
+	}
+	
 }
