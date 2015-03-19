@@ -211,7 +211,7 @@ public class MemberSet {
 						       Cons.union(this.declaredAbstractMethods,
 								          this.declaredConcreteMethods)));
 		while (toCheck != null) {
-			Method method = toCheck.head;
+			final Method method = toCheck.head;
 			toCheck = toCheck.tail;
 			// A class or interface must not contain (declare or inherit) two methods with the same signature but different return types.
 			if (Cons.contains(toCheck, method,
@@ -223,6 +223,18 @@ public class MemberSet {
 					new Method.SameSignatureDifferentVisibilityDifferentAbstractnessPredicate())) {
 				throw new Exception.InvalidReplacement(method);
 			}
+			
+			// Remove hidden methods
+			Predicate<Method> hiddenByMethod = new Predicate<Method>() {
+				public boolean test(Method otherMethod) {
+					return method == otherMethod || 
+							!new Method.SameSignaturePredicate().test(method, otherMethod);
+				}};
+			this.inheritedAbstractMethods = Cons.filter(this.inheritedAbstractMethods, hiddenByMethod);
+			this.inheritedConcreteMethods = Cons.filter(this.inheritedConcreteMethods, hiddenByMethod);
+			this.declaredAbstractMethods = Cons.filter(this.declaredAbstractMethods, hiddenByMethod);
+			this.declaredConcreteMethods = Cons.filter(this.declaredConcreteMethods, hiddenByMethod);
+			toCheck = Cons.filter(toCheck, hiddenByMethod);
 		}
 	}
 

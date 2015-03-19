@@ -350,17 +350,6 @@ public class Identifier extends Expression {
 									&& t.modifiers.contains(Modifier.STATIC);
 							}
 						});
-				// Filter out protected fields if we can't see them.
-//				if (!(new BiPredicate.Equality<Identifier>().test(type.getPackageName(), curType.getPackageName())
-//						 || curType.isSubtypeOf(type))) {
-//					matchingFields = 
-//							Cons.filter(matchingFields,
-//									new Predicate<Field>() {
-//								@Override public boolean test(Field t) {
-//									return !t.modifiers.contains(Modifier.PROTECTED);
-//								}
-//							});
-//				}
 				
 				// If X <: Y has protected field Y.f,
 				// 	We may access X.f   iff   We <: Y or pkg(We) == pkg(Y)
