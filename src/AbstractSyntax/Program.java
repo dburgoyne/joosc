@@ -138,4 +138,23 @@ public class Program extends ASTNode {
 		}
 		return typeDecls;
 	}
+	
+	// ---------- For code generate ----------
+	
+	@Override
+	protected void setCommentName() {
+		this.commentName = "Program";
+	}
+	
+	@Override
+	protected void selfGenerate() {
+		// Do nothing
+	}
+	
+	@Override
+	protected void hierarchyGenerate() {
+		for (Classfile file : files) {
+			file.codeGenerate();
+		}
+	}
 }

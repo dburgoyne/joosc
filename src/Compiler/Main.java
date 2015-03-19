@@ -14,6 +14,7 @@ public class Main {
             System.out.println("Error: Please provide at least one Joos input file.");
             return;
         }
+        
         System.setOut(new PrintStream(new java.io.OutputStream() {
             public void write(int b) {
                 // Disable tests' output
