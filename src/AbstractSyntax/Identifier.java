@@ -351,16 +351,34 @@ public class Identifier extends Expression {
 							}
 						});
 				// Filter out protected fields if we can't see them.
-				if (!(new BiPredicate.Equality<Identifier>().test(type.getPackageName(), curType.getPackageName())
-						 || curType.isSubtypeOf(type))) {
-					matchingFields = 
-							Cons.filter(matchingFields,
-									new Predicate<Field>() {
-								@Override public boolean test(Field t) {
-									return !t.modifiers.contains(Modifier.PROTECTED);
-								}
-							});
-				}
+//				if (!(new BiPredicate.Equality<Identifier>().test(type.getPackageName(), curType.getPackageName())
+//						 || curType.isSubtypeOf(type))) {
+//					matchingFields = 
+//							Cons.filter(matchingFields,
+//									new Predicate<Field>() {
+//								@Override public boolean test(Field t) {
+//									return !t.modifiers.contains(Modifier.PROTECTED);
+//								}
+//							});
+//				}
+				
+				// If X <: Y has protected field Y.f,
+				// 	We may access X.f   iff   We <: Y or pkg(We) == pkg(Y)
+				final TypeDecl We = curType;
+				final Identifier pkgWe = We.getPackageName();
+				matchingFields = Cons.filter(matchingFields, new Predicate<Field>() {
+					public boolean test(Field f) {
+						if (!f.modifiers.contains(Modifier.PROTECTED))
+							return true;
+						
+						TypeDecl Y = f.declaringType;
+						Identifier pkgY = Y.getPackageName();
+						if (new BiPredicate.Equality<Identifier>().test(pkgWe, pkgY))
+							return true;
+						
+						return We.isSubtypeOf(Y);
+					}
+				});
 				
 				if (matchingFields == null) {
 					throw new NameLinkingException.NotFound(this);

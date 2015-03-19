@@ -75,19 +75,25 @@ public class FieldAccessExpression extends Expression implements Interpretation 
 						 && !f.modifiers.contains(Modifier.STATIC));
 				}
 			});
-			
-			// If !(we share the same package as, or are a subtype of, the class containing the field), then filter
-			// out protected fields.
-			Identifier ourPkg = primaryType.getPackageName();
-			Identifier theirPkg = this.containingType.getPackageName();
-			if (!(new BiPredicate.Equality<Identifier>().test(ourPkg, theirPkg) 
-			      || this.containingType.isSubtypeOf(primaryType))) {
-				matches = Cons.filter(matches, new Predicate<Field>() {
-					public boolean test(Field f) {
-						return !f.modifiers.contains(Modifier.PROTECTED);
-					}
-				});
-			}
+
+			// If x : X <: Y has protected field Y.f,
+			// 	We may access x.f   iff   We <: Y and X <: We or pkg(We) == pkg(Y)
+			final TypeDecl We = this.containingType;
+			final Identifier pkgWe = We.getPackageName();
+			final TypeDecl X = primaryType;
+			matches = Cons.filter(matches, new Predicate<Field>() {
+				public boolean test(Field f) {
+					if (!f.modifiers.contains(Modifier.PROTECTED))
+						return true;
+					
+					TypeDecl Y = f.declaringType;
+					Identifier pkgY = Y.getPackageName();
+					if (new BiPredicate.Equality<Identifier>().test(pkgWe, pkgY))
+						return true;
+					
+					return We.isSubtypeOf(Y) && X.isSubtypeOf(We);
+				}
+			});
 			
 			// There must be exactly one match.
 			if (matches == null || matches.tail != null) {

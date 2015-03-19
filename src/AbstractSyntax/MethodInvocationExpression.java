@@ -88,6 +88,10 @@ public class MethodInvocationExpression extends Expression {
 			if (this.methodName.isSimple()) {
 				// The existence of this non-static method is checked at
 				// type checking time.
+				
+				if (staticCtx) { // Check: static context => static usage.
+					throw new NameLinkingException.BadNonStatic(this);
+				}
 			} else {
 				
 				Identifier prefix = methodName.withoutLastComponent();
@@ -111,6 +115,13 @@ public class MethodInvocationExpression extends Expression {
 					this.receivingExpr = prefix;
 					// The existence of this non-static method is checked at
 					// type checking time.
+					
+					if (staticCtx && // Check: static context => static usage.
+						(interp instanceof Identifier.This ||
+						 interp instanceof Field
+						 && !((Field)interp).modifiers.contains(Modifier.STATIC))) {
+							throw new NameLinkingException.BadNonStatic(this);
+					}
 				} else {
 					throw new NameLinkingException.NonexistentMethod(this.methodName);
 				}
@@ -161,12 +172,14 @@ public class MethodInvocationExpression extends Expression {
 				// All invocations of protected methods must be in a subtype of the type declaring the
 				// method being accessed, or in the same package as that type.
 				if (m.modifiers.contains(Modifier.PROTECTED)
-						&& !(new BiPredicate.Equality<Identifier>().test(owner.getPackageName(), this.containingType.getPackageName())
-							 || (owner.isSubtypeOf(this.containingType) && this.containingType.isSubtypeOf(m.declaringType)))) {
+						&& !(new BiPredicate.Equality<Identifier>()
+								.test(owner.getPackageName(),
+									  this.containingType.getPackageName())
+							 || ((staticCall || owner.isSubtypeOf(this.containingType)) && this.containingType.isSubtypeOf(m.declaringType)))) {
 					continue loop;
 				}
 				// Can't call static methods without qualifying them.
-				if (!staticCall && m.modifiers.contains(Modifier.STATIC)) {
+				if (staticCall != m.modifiers.contains(Modifier.STATIC)) {
 					continue loop;
 				}
 			}

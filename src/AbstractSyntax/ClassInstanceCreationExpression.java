@@ -94,11 +94,11 @@ public class ClassInstanceCreationExpression extends Expression {
 						flag = false;
 					}
 				}
-				// All accesses of protected constructors must be in a subtype of the type declaring the
-				// constructor being accessed, or in the same package as that type.
+				// All accesses of protected constructors must be in the same package as that type.
 				if (ctor.modifiers.contains(Modifier.PROTECTED)
-						&& !(new BiPredicate.Equality<Identifier>().test(ctor.parent.getPackageName(), this.containingType.getPackageName())
-						     || this.containingType.isSubtypeOf(ctor.parent))) {
+						&& !new BiPredicate.Equality<Identifier>()
+							.test(ctor.parent.getPackageName(),
+								  this.containingType.getPackageName())) {
 					flag = false;
 				}
 			}

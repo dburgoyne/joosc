@@ -18,6 +18,8 @@ public class Field extends Decl implements Identifier.Interpretation {
 	protected Identifier typeName;
 	protected Type type;
 	
+	protected TypeDecl declaringType;
+	
 	public Identifier getName() {
 		return this.name;
 	}
@@ -92,6 +94,7 @@ public class Field extends Decl implements Identifier.Interpretation {
 
 	@Override
 	public void linkNames(TypeDecl curType, boolean staticCtx, EnvironmentDecl curDecl, Local curLocal, boolean lValue) throws NameLinkingException {
+		this.declaringType = curType;
 		if (this.initializer != null) {
 			this.initializer.linkNames(curType, staticCtx, this, curLocal, false);
 		}
