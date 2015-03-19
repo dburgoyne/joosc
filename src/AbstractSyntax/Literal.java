@@ -1,5 +1,6 @@
 package AbstractSyntax;
 
+import AbstractSyntax.UnaryExpression.UnaryOperator;
 import Parser.ParseTree;
 import Types.NullType;
 import Types.PrimitiveType;
@@ -62,5 +63,23 @@ public class Literal extends Expression {
 
 	@Override public void checkTypes() throws TypeCheckingException {
 		this.exprType = this.type.getType();
+	}
+	
+	@Override
+	public boolean isAlwaysTrue() {
+		if (this.type.equals(LiteralType.BOOLEAN)) {
+			return value.equals("true");
+		} else {
+			return false;
+		}
+	}
+	
+	@Override
+	public boolean isAlwaysFalse() {
+		if (this.type.equals(LiteralType.BOOLEAN)) {
+			return value.equals("false");
+		} else {
+			return false;
+		}
 	}
 }

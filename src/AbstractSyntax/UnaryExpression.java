@@ -64,4 +64,22 @@ public class UnaryExpression extends Expression {
 		}
 		this.exprType = eType;
 	}
+	
+	@Override
+	public boolean isAlwaysTrue() {
+		if (this.operator.equals(UnaryOperator.NOT)) {
+			return expression.isAlwaysFalse();
+		} else {
+			return false;
+		}
+	}
+	
+	@Override
+	public boolean isAlwaysFalse() {
+		if (this.operator.equals(UnaryOperator.NOT)) {
+			return expression.isAlwaysTrue();
+		} else {
+			return false;
+		}
+	}
 }
