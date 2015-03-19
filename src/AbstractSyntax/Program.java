@@ -139,6 +139,12 @@ public class Program extends ASTNode {
 		return typeDecls;
 	}
 	
+	@Override public void checkReachability(boolean canLeavePrevious) throws ReachabilityException {
+		for (Classfile file : this.files) {
+			file.checkReachability(true);
+		}
+	}
+	
 	// ---------- For code generate ----------
 	
 	@Override

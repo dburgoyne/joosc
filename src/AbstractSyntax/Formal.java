@@ -69,4 +69,8 @@ public class Formal extends ASTNode
 	@Override public void checkTypes() throws TypeCheckingException {
 		// Do nothing.
 	}
+	
+	@Override public void checkReachability(boolean canLeavePrevious) throws ReachabilityException {
+		// Do nothing.
+	}
 }

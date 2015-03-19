@@ -7,6 +7,7 @@ import AbstractSyntax.ImportException;
 import AbstractSyntax.NameConflictException;
 import AbstractSyntax.NameLinkingException;
 import AbstractSyntax.Program;
+import AbstractSyntax.ReachabilityException;
 import AbstractSyntax.TypeCheckingException;
 import AbstractSyntax.TypeDecl;
 import AbstractSyntax.TypeLinkingException;
@@ -79,6 +80,9 @@ public class Compiler {
     		// Type checking pass.
     		program.checkTypes();
     		
+    		// Reachability analysis pass.
+    		program.checkReachability(true);
+    		
     	} catch (Exception e) {
 			if (e instanceof NameConflictException
 			 || e instanceof ImportException
@@ -86,7 +90,8 @@ public class Compiler {
 			 || e instanceof Hierarchy.CycleDetected
 			 || e instanceof MemberSet.Exception
 			 || e instanceof NameLinkingException
-			 || e instanceof TypeCheckingException) {
+			 || e instanceof TypeCheckingException
+			 || e instanceof ReachabilityException) {
     			System.err.println(e.getMessage());
     			failed = true;
 			} else {

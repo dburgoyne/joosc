@@ -31,6 +31,11 @@ public abstract class ASTNode {
 	public abstract void linkNames(TypeDecl curType, boolean staticCtx, EnvironmentDecl curDecl, Local curLocal, boolean lValue) throws NameLinkingException;
 	public abstract void checkTypes() throws TypeCheckingException;
 	
+	// ---------- Reachability analysis ----------
+	protected boolean canEnter = true;
+	protected boolean canLeave = true;
+	public abstract void checkReachability(boolean canLeavePrevious) throws ReachabilityException;
+	
 	// ---------- For code generate ----------
 	
 	protected static List<String> scope;

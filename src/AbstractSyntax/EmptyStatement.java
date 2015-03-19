@@ -20,4 +20,6 @@ public class EmptyStatement extends Statement {
 	@Override public void linkNames(TypeDecl curType, boolean staticCtx, EnvironmentDecl curDecl, Local curLocal, boolean lValue) { }
 
 	@Override public void checkTypes() throws TypeCheckingException { }
+	
+	@Override public void checkReachability(boolean canLeavePrevious) throws ReachabilityException { }
 }

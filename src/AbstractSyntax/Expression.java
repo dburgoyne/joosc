@@ -104,4 +104,14 @@ public abstract class Expression extends Statement {
 		}
 		
 	}
+	
+	@Override public void checkReachability(boolean canLeavePrevious) {
+		// An expression can complete normally iff it is reachable.
+		this.canEnter = canLeavePrevious;
+		this.canLeave = this.canEnter;
+	}
+	
+	// TODO TODO TODO
+	public boolean isAlwaysTrue() { return false; }
+	public boolean isAlwaysFalse() { return false; }
 }

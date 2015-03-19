@@ -65,4 +65,19 @@ public class IfStatement extends Statement {
 			this.elseBody.checkTypes();
 		}
 	}
+	
+	@Override public void checkReachability(boolean canLeavePrevious) throws ReachabilityException {
+		this.canEnter = canLeavePrevious;
+		if (!this.canEnter) {
+			throw new ReachabilityException.UnreachableStatement(this);
+		}
+		this.condition.checkReachability(true);  // Not really necessary
+		this.body.checkReachability(true);
+		if (this.elseBody == null) {
+			this.canLeave = this.canEnter;
+		} else {
+			this.elseBody.checkReachability(true);
+			this.canLeave = this.body.canLeave || this.elseBody.canLeave;
+		}
+	}
 }

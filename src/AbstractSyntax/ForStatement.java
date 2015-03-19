@@ -97,4 +97,26 @@ public class ForStatement extends Statement {
 		}
 		this.body.checkTypes();
 	}
+	
+	@Override public void checkReachability(boolean canLeavePrevious) throws ReachabilityException {
+		this.canEnter = canLeavePrevious;
+		if (!this.canEnter) {
+			throw new ReachabilityException.UnreachableStatement(this);
+		}
+		
+		if (this.initializer != null) {
+			this.initializer.checkReachability(true);
+		}
+		if (this.condition != null) {
+			this.condition.checkReachability(true);
+		}
+		if (this.postExpression != null) {
+			this.postExpression.checkReachability(true);
+		}
+		// Body is unreachable if the condition is present and always false.
+		this.body.checkReachability(!(this.condition != null && this.condition.isAlwaysFalse()));
+		
+		// Can leave the loop only if we can leave the body and the condition is not always true.
+		this.canLeave = this.body.canLeave && !(this.condition == null || this.condition.isAlwaysTrue());
+	}
 }

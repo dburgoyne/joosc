@@ -261,6 +261,10 @@ public class Classfile extends ASTNode {
 		this.typeDecl.checkTypes();
 	}
 	
+	@Override public void checkReachability(boolean canLeavePrevious) throws ReachabilityException {
+		this.typeDecl.checkReachability(true);
+	}
+	
 	// ---------- For code generate ----------
 
 	@Override

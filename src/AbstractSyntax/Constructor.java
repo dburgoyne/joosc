@@ -112,6 +112,10 @@ public class Constructor extends ASTNode implements EnvironmentDecl {
 		this.block.checkTypes();
 	}
 	
+	@Override public void checkReachability(boolean canLeavePrevious) throws ReachabilityException {
+		this.block.checkReachability(true);
+	}
+	
 	// ---------- For code generate ----------
 
 	@Override

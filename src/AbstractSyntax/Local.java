@@ -93,5 +93,14 @@ public class Local extends BlockStatement
 			throw new TypeCheckingException.TypeMismatch(this.initializer, this.type.getCanonicalName());
 		}
 	}
+	
+	@Override public void checkReachability(boolean canLeavePrevious) throws ReachabilityException {
+		// A local variable declaration can complete normally iff it is reachable.
+		this.canEnter = canLeavePrevious;
+		if (!this.canEnter) {
+			throw new ReachabilityException.UnreachableStatement(this);
+		}
+		this.canLeave = this.canEnter;
+	}
 
 }

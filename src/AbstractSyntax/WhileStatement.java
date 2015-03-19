@@ -47,4 +47,17 @@ public class WhileStatement extends Statement {
 		
 		this.body.checkTypes();
 	}
+	@Override public void checkReachability(boolean canLeavePrevious) throws ReachabilityException {
+		this.canEnter = canLeavePrevious;
+		if (!this.canEnter) {
+			throw new ReachabilityException.UnreachableStatement(this);
+		}
+		this.condition.checkReachability(true);
+		
+		// Body is unreachable if the condition is always false.
+		this.body.checkReachability(!this.condition.isAlwaysFalse());
+		
+		// Can leave the loop only if we can leave the body and the condition is not always true.
+		this.canLeave = this.body.canLeave && !this.condition.isAlwaysTrue();
+	}
 }

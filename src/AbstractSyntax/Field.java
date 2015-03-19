@@ -120,6 +120,12 @@ public class Field extends Decl implements Identifier.Interpretation {
 		}
 	}
 	
+	@Override public void checkReachability(boolean canLeavePrevious) throws ReachabilityException {
+		if (this.initializer != null) {
+			this.initializer.checkReachability(true); // Not really necessary
+		}
+	}
+	
 	// ---------- For code generate ----------
 
 	@Override

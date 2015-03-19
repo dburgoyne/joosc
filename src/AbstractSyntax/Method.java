@@ -266,6 +266,12 @@ public class Method extends Decl {
 		}
 	}
 	
+	@Override public void checkReachability(boolean canLeavePrevious) throws ReachabilityException {
+		if (this.block != null) {
+			this.block.checkReachability(true);
+		}
+	}
+	
 	// ---------- For code generate ----------
 
 	@Override

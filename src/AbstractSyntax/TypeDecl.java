@@ -445,6 +445,18 @@ public class TypeDecl extends ASTNode
 		}
 	}
 	
+	@Override public void checkReachability(boolean canLeavePrevious) throws ReachabilityException {
+		for (Constructor ctor : this.constructors) {
+			ctor.checkReachability(true);
+		}
+		for (Field field : this.fields) {
+			field.checkReachability(true);
+		}
+		for (Method method : this.methods) {
+			method.checkReachability(true);
+		}
+	}
+	
 	// ---------- For code generate ----------
 
 	@Override
