@@ -24,7 +24,7 @@ public class ReachabilityException extends Exception {
 		private static final long serialVersionUID = 8457161163202210657L;
 
 		public MayNotReturn(Method method) {
-			super(String.format("The method %m may not return in all executions.\n"
+			super(String.format("The method %s may not return in all executions.\n"
 					+ " at %s\n",
 					method.getName().toString(),
 					method.getPositionalString()));

@@ -270,6 +270,12 @@ public class Method extends Decl {
 		if (this.block != null) {
 			this.block.checkReachability(true);
 		}
+		
+		// If we can reach the end of the block, and our return type is non-void,
+		// then throw.
+		if (this.block != null && this.block.canLeave && this.type != null) {
+			throw new ReachabilityException.MayNotReturn(this);
+		}
 	}
 	
 	// ---------- For code generate ----------

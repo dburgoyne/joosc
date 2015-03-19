@@ -57,7 +57,7 @@ public class WhileStatement extends Statement {
 		// Body is unreachable if the condition is always false.
 		this.body.checkReachability(!this.condition.isAlwaysFalse());
 		
-		// Can leave the loop only if we can leave the body and the condition is not always true.
-		this.canLeave = this.body.canLeave && !this.condition.isAlwaysTrue();
+		// Can leave the loop only if the condition is not always true.
+		this.canLeave = !this.condition.isAlwaysTrue();
 	}
 }

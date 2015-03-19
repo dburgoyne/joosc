@@ -76,5 +76,6 @@ public class Block extends Statement {
 			bs.checkReachability(canLeavePreviousStatement);
 			canLeavePreviousStatement = bs.canLeave;
 		}
+		this.canLeave = canLeavePreviousStatement;
 	}
 }
