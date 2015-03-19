@@ -150,7 +150,7 @@ public class TypeDecl extends ASTNode
 			ParseTree grandchild = firstChild.getChildren()[0];
 			String grandchildName= grandchild.getSymbol();
 			if (grandchildName.equals("FieldDeclaration")) {
-				Field field = new Field(grandchild);
+				Field field = new Field(grandchild, this);
 				this.fields.add(0, field);
 			} else if (grandchildName.equals("MethodDeclaration")) {
 				Method method = new Method(grandchild, false);

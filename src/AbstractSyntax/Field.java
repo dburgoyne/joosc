@@ -24,10 +24,11 @@ public class Field extends Decl implements Identifier.Interpretation {
 		return this.name;
 	}
 	
-	public Field(ParseTree tree) {
+	public Field(ParseTree tree, TypeDecl declaringType) {
 		super(tree);
 		assert(tree.getSymbol().equals("FieldDeclaration"));
 		
+		this.declaringType = declaringType;
 		this.modifiers = Modifier.extractModifiers(tree.getChildren()[0]);
 		this.typeName = new Identifier(tree.getChildren()[1]);
 		extractVariableDeclarator(tree.getChildren()[2]);
@@ -94,7 +95,7 @@ public class Field extends Decl implements Identifier.Interpretation {
 
 	@Override
 	public void linkNames(TypeDecl curType, boolean staticCtx, EnvironmentDecl curDecl, Local curLocal, boolean lValue) throws NameLinkingException {
-		this.declaringType = curType;
+		assert this.declaringType == curType;
 		if (this.initializer != null) {
 			this.initializer.linkNames(curType, staticCtx, this, curLocal, false);
 		}
