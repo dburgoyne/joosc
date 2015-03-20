@@ -1,5 +1,7 @@
 package AbstractSyntax;
 
+import AbstractSyntax.Expression.ExpressionValue;
+import AbstractSyntax.Literal.LiteralType;
 import Parser.ParseTree;
 import Types.PrimitiveType;
 import Types.Type;
@@ -63,5 +65,35 @@ public class UnaryExpression extends Expression {
 			throw new TypeCheckingException.TypeMismatch(this.expression, "an integral type");
 		}
 		this.exprType = eType;
+	}
+	
+	@Override
+	public boolean isAlwaysTrue() {
+		if (this.operator.equals(UnaryOperator.NOT)) {
+			return expression.isAlwaysFalse();
+		} else {
+			return false;
+		}
+	}
+	
+	@Override
+	public boolean isAlwaysFalse() {
+		if (this.operator.equals(UnaryOperator.NOT)) {
+			return expression.isAlwaysTrue();
+		} else {
+			return false;
+		}
+	}
+	
+	@Override
+	public ExpressionValue tryFetchValue() {
+		ExpressionValue eValue = expression.tryFetchValue();
+		assert(eValue != null);
+		if (this.operator.equals(UnaryOperator.NOT)) {
+			eValue.toNot();
+		} else {
+			eValue.toMinus();
+		}
+		return eValue;
 	}
 }

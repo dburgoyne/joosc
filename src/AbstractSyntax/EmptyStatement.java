@@ -21,5 +21,10 @@ public class EmptyStatement extends Statement {
 
 	@Override public void checkTypes() throws TypeCheckingException { }
 	
-	@Override public void checkReachability(boolean canLeavePrevious) throws ReachabilityException { }
+	@Override public void checkReachability(boolean canLeavePrevious) throws ReachabilityException {
+		this.canEnter = canLeavePrevious;
+		if (!canLeavePrevious) {
+			throw new ReachabilityException.UnreachableStatement(this);
+		}
+	}
 }

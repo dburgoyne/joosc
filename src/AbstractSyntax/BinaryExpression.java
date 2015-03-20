@@ -1,5 +1,7 @@
 package AbstractSyntax;
 
+import AbstractSyntax.Expression.ExpressionValue;
+import AbstractSyntax.UnaryExpression.UnaryOperator;
 import Parser.ParseTree;
 import Types.PrimitiveType;
 import Types.Type;
@@ -184,6 +186,29 @@ public class BinaryExpression extends Expression {
 		  default:
 			this.exprType = PrimitiveType.BOOLEAN;
 			break;
+		}
+	}
+	
+	@Override
+	public boolean isAlwaysTrue() {
+		ExpressionValue ev = this.tryFetchValue();
+		return (ev!=null && ev.boolValue());
+	}
+	
+	@Override
+	public boolean isAlwaysFalse() {
+		ExpressionValue ev = this.tryFetchValue();
+		return (ev!=null && !ev.boolValue());
+	}
+	
+	@Override
+	public ExpressionValue tryFetchValue() {
+		ExpressionValue lEValue = left.tryFetchValue();
+		ExpressionValue rEValue = right.tryFetchValue();
+		if(lEValue != null && rEValue != null) {
+			return lEValue.binaryOperate(rEValue, operator);
+		} else {
+			return null;
 		}
 	}
 }
