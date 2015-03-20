@@ -186,4 +186,87 @@ public class BinaryExpression extends Expression {
 			break;
 		}
 	}
+	
+	@Override public Object asConstExpr() {
+		Object subLeft = this.left.asConstExpr();
+		if (subLeft == null)
+			return null;
+		
+		Object subRight = this.right.asConstExpr();
+		if (subRight == null)
+			return null;
+
+		String strLeft = subLeft instanceof String ? (String)subLeft : null;
+		String strRight = subRight instanceof String ? (String)subRight : null;
+		Boolean boolLeft = subLeft instanceof Boolean ? (Boolean)subLeft : null;
+		Boolean boolRight = subRight instanceof Boolean ? (Boolean)subRight : null;
+		Integer intLeft = subLeft instanceof Integer ? (Integer)(int)(Integer)subLeft
+						: subLeft instanceof Short ? (Integer)(int)(short)(Short)subLeft
+						: subLeft instanceof Byte ? (Integer)(int)(byte)(Byte)subLeft
+						: subLeft instanceof Character ? (Integer)(int)(char)(Character)subLeft
+						: (Integer)null;
+		Integer intRight = subRight instanceof Integer ? (Integer)(int)(Integer)subRight
+						 : subRight instanceof Short ? (Integer)(int)(short)(Short)subRight
+						 : subRight instanceof Byte ? (Integer)(int)(byte)(Byte)subRight
+						 : subRight instanceof Character ? (Integer)(int)(char)(Character)subRight
+						 : (Integer)null;
+		
+		switch (this.operator) {
+		  case PLUS:
+			if (subLeft instanceof String || subRight instanceof String)
+				return subLeft.toString() + subRight;
+			assert intLeft != null && intRight != null;
+			return (int)intLeft + (int)intRight;
+		  case MINUS:
+			assert intLeft != null && intRight != null;
+		    return (int)intLeft - (int)intRight;	
+		  case STAR:
+			assert intLeft != null && intRight != null;
+			return (int)intLeft * (int)intRight;	
+		  case SLASH:
+			assert intLeft != null && intRight != null;
+			return (int)intLeft / (int)intRight;	
+		  case MOD:
+			assert intLeft != null && intRight != null;
+			return (int)intLeft % (int)intRight;	
+		  case GT:
+			assert intLeft != null && intRight != null;
+			return (int)intLeft > (int)intRight;	
+		  case LT:
+			assert intLeft != null && intRight != null;
+			return (int)intLeft < (int)intRight;	
+		  case GE:
+			assert intLeft != null && intRight != null;
+			return (int)intLeft >= (int)intRight;	
+		  case LE:
+			assert intLeft != null && intRight != null;
+			return (int)intLeft <= (int)intRight;	
+
+		  case LAND:
+		    assert boolLeft != null && boolRight != null;
+		    return (boolean)boolLeft && (boolean)boolRight;
+		  case LOR:
+		    assert boolLeft != null && boolRight != null;
+		    return (boolean)boolLeft || (boolean)boolRight;
+		    
+		  case EQ:
+			if (strLeft != null)
+				return strLeft.equals(strRight);
+			if (intLeft != null)
+				return intLeft.equals(intRight);
+			if (boolLeft != null)
+				return boolLeft.equals(boolRight);
+			return null;
+		  case NE:
+			if (strLeft != null)
+				return !strLeft.equals(strRight);
+			if (intLeft != null)
+				return !intLeft.equals(intRight);
+			if (boolLeft != null)
+				return !boolLeft.equals(boolRight);
+			return null;
+		  default:
+			return null;
+		}
+	}
 }

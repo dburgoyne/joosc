@@ -1,6 +1,5 @@
 package AbstractSyntax;
 
-import AbstractSyntax.UnaryExpression.UnaryOperator;
 import Parser.ParseTree;
 import Types.NullType;
 import Types.PrimitiveType;
@@ -65,21 +64,30 @@ public class Literal extends Expression {
 		this.exprType = this.type.getType();
 	}
 	
-	@Override
-	public boolean isAlwaysTrue() {
-		if (this.type.equals(LiteralType.BOOLEAN)) {
-			return value.equals("true");
-		} else {
-			return false;
-		}
-	}
-	
-	@Override
-	public boolean isAlwaysFalse() {
-		if (this.type.equals(LiteralType.BOOLEAN)) {
-			return value.equals("false");
-		} else {
-			return false;
+	@Override public Object asConstExpr() {
+		String escapedValue = this.value
+			.replace("\\t", "\t")
+			.replace("\\n", "\n")
+			.replace("\\f", "\f")
+			.replace("\\r", "\r")
+			.replace("\\\"", "\"")
+			.replace("\\\'", "\'")
+			.replace("\\\\", "\\");
+		switch (this.type) {
+		case INTEGER:
+			return Integer.parseInt(this.value);
+		case BOOLEAN:
+			return this.value.equals("true") ? Boolean.TRUE : Boolean.FALSE;
+		case CHARACTER:
+			assert this.value.startsWith("\'");
+			assert this.value.endsWith("\'");
+			return escapedValue.charAt(1);
+		case STRING:
+			assert this.value.startsWith("\"");
+			assert this.value.endsWith("\"");
+			return escapedValue.substring(1, escapedValue.length() - 1);
+		default:
+			return null;
 		}
 	}
 }

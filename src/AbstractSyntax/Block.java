@@ -68,6 +68,9 @@ public class Block extends Statement {
 	
 	@Override public void checkReachability(boolean canLeavePrevious) throws ReachabilityException {
 		this.canEnter = canLeavePrevious;
+		if (!this.canEnter) {
+			throw new ReachabilityException.UnreachableStatement(this);
+		}
 		boolean canLeavePreviousStatement = true;
 		for (BlockStatement bs : this.statements) {
 			if (!canLeavePreviousStatement) {

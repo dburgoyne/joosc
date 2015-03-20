@@ -105,13 +105,16 @@ public abstract class Expression extends Statement {
 		
 	}
 	
-	@Override public void checkReachability(boolean canLeavePrevious) {
+	@Override public void checkReachability(boolean canLeavePrevious) throws ReachabilityException {
 		// An expression can complete normally iff it is reachable.
 		this.canEnter = canLeavePrevious;
+		if (!this.canEnter) {
+			throw new ReachabilityException.UnreachableStatement(this);
+		}
 		this.canLeave = this.canEnter;
 	}
 	
-	// TODO TODO TODO
-	public boolean isAlwaysTrue() { return false; }
-	public boolean isAlwaysFalse() { return false; }
+	public Object asConstExpr() { return null; }
+	public final boolean isAlwaysTrue() { return Boolean.TRUE.equals(this.asConstExpr()); }
+	public final boolean isAlwaysFalse() { return Boolean.FALSE.equals(this.asConstExpr()); }
 }

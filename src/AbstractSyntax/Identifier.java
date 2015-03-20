@@ -550,4 +550,32 @@ public class Identifier extends Expression {
 		assert false;
 	}
 
+	@Override public Object asConstExpr() {
+		Interpretation interp = this.getInterpretation();
+		
+		if (interp instanceof Field) {
+			Field f = (Field)interp;
+			if (!f.modifiers.contains(Modifier.STATIC))
+				return null;
+			if (!f.modifiers.contains(Modifier.FINAL))
+				return null;
+			if (f.initializer == null)
+				return null;
+			return f.initializer.asConstExpr();
+		}
+		
+		if (this.isSimple() && interp instanceof FieldAccessExpression) {
+			FieldAccessExpression expr = (FieldAccessExpression)interp;
+			Field f = expr.field;
+			if (f == null)
+				return null;
+			if (!f.modifiers.contains(Modifier.FINAL))
+				return null;
+			if (f.initializer == null)
+				return null;
+			return f.initializer.asConstExpr();
+		}
+		
+		return null;
+	}
 }
