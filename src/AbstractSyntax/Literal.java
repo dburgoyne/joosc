@@ -1,5 +1,6 @@
 package AbstractSyntax;
 
+import AbstractSyntax.Expression.ExpressionValue;
 import AbstractSyntax.UnaryExpression.UnaryOperator;
 import Parser.ParseTree;
 import Types.NullType;
@@ -80,6 +81,15 @@ public class Literal extends Expression {
 			return value.equals("false");
 		} else {
 			return false;
+		}
+	}
+	
+	@Override
+	public ExpressionValue tryFetchValue() {
+		if (type.equals(LiteralType.NULL)) {
+			return null;
+		} else {
+			return new ExpressionValue(type, value);
 		}
 	}
 }

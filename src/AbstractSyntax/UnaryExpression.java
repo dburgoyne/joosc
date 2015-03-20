@@ -1,5 +1,7 @@
 package AbstractSyntax;
 
+import AbstractSyntax.Expression.ExpressionValue;
+import AbstractSyntax.Literal.LiteralType;
 import Parser.ParseTree;
 import Types.PrimitiveType;
 import Types.Type;
@@ -81,5 +83,17 @@ public class UnaryExpression extends Expression {
 		} else {
 			return false;
 		}
+	}
+	
+	@Override
+	public ExpressionValue tryFetchValue() {
+		ExpressionValue eValue = expression.tryFetchValue();
+		assert(eValue != null);
+		if (this.operator.equals(UnaryOperator.NOT)) {
+			eValue.toNot();
+		} else {
+			eValue.toMinus();
+		}
+		return eValue;
 	}
 }

@@ -1,5 +1,6 @@
 package AbstractSyntax;
 
+import AbstractSyntax.Literal.LiteralType;
 import Parser.ParseTree;
 import Types.Type;
 
@@ -114,4 +115,101 @@ public abstract class Expression extends Statement {
 	// TODO TODO TODO
 	public boolean isAlwaysTrue() { return false; }
 	public boolean isAlwaysFalse() { return false; }
+	public ExpressionValue tryFetchValue() { return null; }
+	
+	class ExpressionValue {
+		Literal.LiteralType type;
+		String value;
+		
+		public ExpressionValue(Literal.LiteralType type, String value) {
+			this.type = type;
+			this.value = value;
+		}
+		
+		public void toNot() {
+			assert(type.equals(LiteralType.BOOLEAN));
+			if (value.equals("false")) {
+				value = "true";
+			} else {
+				value = "false";
+			}
+		}
+		
+		public void toMinus() {
+			assert(type.equals(LiteralType.INTEGER));
+			value = Integer.toString(-1 * Integer.parseInt(value));
+		}
+		
+		public boolean boolValue() {
+			assert(type.equals(LiteralType.BOOLEAN));
+			return value.equals("true");
+		}
+		
+		public int intValue() {
+			assert(type.equals(LiteralType.INTEGER));
+			return Integer.parseInt(value);
+		}
+		
+		public ExpressionValue binaryOperate(ExpressionValue ev, BinaryExpression.BinaryOperator op) {
+			switch(op){
+			case PLUS:
+				assert(this.type.equals(LiteralType.INTEGER));
+				assert(ev.type.equals(LiteralType.INTEGER));
+				return new ExpressionValue(LiteralType.INTEGER, Integer.toString(Integer.parseInt(this.value) + Integer.parseInt(ev.value)));
+			case MINUS:
+				assert(this.type.equals(LiteralType.INTEGER));
+				assert(ev.type.equals(LiteralType.INTEGER));
+				return new ExpressionValue(LiteralType.INTEGER, Integer.toString(Integer.parseInt(this.value) - Integer.parseInt(ev.value)));
+			case STAR:
+				assert(this.type.equals(LiteralType.INTEGER));
+				assert(ev.type.equals(LiteralType.INTEGER));
+				return new ExpressionValue(LiteralType.INTEGER, Integer.toString(Integer.parseInt(this.value) * Integer.parseInt(ev.value)));
+			case SLASH:
+				assert(this.type.equals(LiteralType.INTEGER));
+				assert(ev.type.equals(LiteralType.INTEGER));
+				return new ExpressionValue(LiteralType.INTEGER, Integer.toString(Integer.parseInt(this.value) / Integer.parseInt(ev.value)));
+			case MOD:
+				assert(this.type.equals(LiteralType.INTEGER));
+				assert(ev.type.equals(LiteralType.INTEGER));
+				return new ExpressionValue(LiteralType.INTEGER, Integer.toString(Integer.parseInt(this.value) % Integer.parseInt(ev.value)));
+			case LAND:
+				assert(this.type.equals(LiteralType.BOOLEAN));
+				assert(ev.type.equals(LiteralType.BOOLEAN));
+				return new ExpressionValue(LiteralType.BOOLEAN, Boolean.toString(this.boolValue() && ev.boolValue()));
+			case LOR:
+				assert(this.type.equals(LiteralType.BOOLEAN));
+				assert(ev.type.equals(LiteralType.BOOLEAN));
+				return new ExpressionValue(LiteralType.BOOLEAN, Boolean.toString(this.boolValue() || ev.boolValue()));
+			case EQ:
+				assert(this.type.equals(LiteralType.INTEGER));
+				assert(ev.type.equals(LiteralType.INTEGER));
+				return new ExpressionValue(LiteralType.BOOLEAN, Boolean.toString(this.intValue() == ev.intValue()));
+			case NE:
+				assert(this.type.equals(LiteralType.INTEGER));
+				assert(ev.type.equals(LiteralType.INTEGER));
+				return new ExpressionValue(LiteralType.BOOLEAN, Boolean.toString(this.intValue() != ev.intValue()));
+			case GT:
+				assert(this.type.equals(LiteralType.INTEGER));
+				assert(ev.type.equals(LiteralType.INTEGER));
+				return new ExpressionValue(LiteralType.BOOLEAN, Boolean.toString(this.intValue() > ev.intValue()));
+			case LT:
+				assert(this.type.equals(LiteralType.INTEGER));
+				assert(ev.type.equals(LiteralType.INTEGER));
+				return new ExpressionValue(LiteralType.BOOLEAN, Boolean.toString(this.intValue() < ev.intValue()));
+			case GE:
+				assert(this.type.equals(LiteralType.INTEGER));
+				assert(ev.type.equals(LiteralType.INTEGER));
+				return new ExpressionValue(LiteralType.BOOLEAN, Boolean.toString(this.intValue() >= ev.intValue()));
+			case LE:
+				assert(this.type.equals(LiteralType.INTEGER));
+				assert(ev.type.equals(LiteralType.INTEGER));
+				return new ExpressionValue(LiteralType.BOOLEAN, Boolean.toString(this.intValue() <= ev.intValue()));
+			case ASSIGN:
+				assert(this.type.equals(ev.type));
+				return ev;
+			default:
+				return null;
+			}
+		}
+	}
 }
