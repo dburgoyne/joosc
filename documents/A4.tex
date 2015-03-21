@@ -1,0 +1,211 @@
+\documentclass[12pt]{article}
+
+\usepackage[latin9]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{color}
+\newcommand{\code}[1]{\texttt{#1}}
+\geometry{verbose,tmargin=3cm,bmargin=3cm,lmargin=2.5cm,rmargin=2.5cm,footskip=1cm}
+
+% Java listing highlighting
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=Java,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=false,
+  breakatwhitespace=true,
+  tabsize=4
+}
+
+\begin{document}
+
+\begin{center}
+\textbf{\large{}CS 444 - Assignments 2, 3 and 4}
+\end{center}
+
+\begin{flushleft}
+dburgoyn \textbf{\hfill{}} Section 001 \\
+udimitri \textbf{\hfill{}} 2015-03-19 \\
+x2fang \\
+\end{flushleft}
+
+% Main body begins here
+
+This document describes the design of our abstract syntax; describes the environment building, type linking, hierarchy checking, name linking, type checking and reachability analysis phases of our compiler; discusses challenges that we encountered during these phases and how we tried to overcome them; and explains the testing that we did before submitting to Marmoset.
+
+\section{Abstract syntax design}
+
+Our abstract syntax tree is described by the following class hierarchy, rooted at \code{ASTNode}:
+
+\begin{itemize}
+\item \code{Program}: contains a list of \code{Classfile}s
+\item \code{Classfile}: contains a package name\footnote{Represented by an \code{Identifier}.}, a list of imports\footnotemark[\value{footnote}], and a \code{TypeDecl}.
+\item \code{TypeDecl}: defines a class or interface; contains a list of modifiers, as well as lists of \code{Constructor}s, \code{Field}s and \code{Method}s.
+\item \code{Constructor}: contains a list of modifiers, a name\footnotemark[\value{footnote}], a list of \code{Formal}s, and a \code{Block}.
+\item \code{Decl} (abstract): contains a type name\footnotemark[\value{footnote}] and a name\footnotemark[\value{footnote}].
+\begin{itemize}
+\item \code{Field}: contains a list of modifiers and an optional initializer \code{Expression}.
+\item \code{Method}: contains a list of modifiers, a list of \code{Formal}s, and an optional \code{Block}.
+\end{itemize}
+\item \code{Formal}: contains a type name\footnotemark[\value{footnote}] and a name\footnotemark[\value{footnote}].
+\item \code{BlockStatement} (abstract)
+\begin{itemize}
+\item \code{Local}: contains a type name\footnotemark[\value{footnote}], a name\footnotemark[\value{footnote}], and an initializer \code{Expression}.
+\item \code{Statement} (abstract)
+\begin{itemize}
+\item \code{Block}: contains a list of \code{BlockStatement}s.
+\item \code{EmptyStatement}
+\item \code{ForStatement}
+\item \code{IfStatement}
+\item \code{ReturnStatement}
+\item \code{WhileStatement}
+\item \code{Expression} (abstract)
+\begin{itemize}
+\item \code{ArrayAccessExpression}
+\item \code{ArrayCreationExpression}
+\item \code{BinaryExpression}: contains a binary operator (including assignment but excluding \code{instanceof}), and left and right \code{Expression}s.
+\item \code{CastExpression}: contains a type name\footnotemark[\value{footnote}] and an \code{Expression}.
+\item \code{ClassInstanceCreationExpression}: contains a type name\footnotemark[\value{footnote}] and a list of argument \code{Expression}s.
+\item \code{FieldAccessExpression}: contains a primary \code{Expression} and a field name.
+\item \code{Identifier}: contains a list of component \code{String}s. May represent a package name, a type name, an on-demand import, the keyword \code{this}, a variable reference, or a member access.
+\item \code{InstanceofExpression}: contains an \code{Expression} and a type name\footnotemark[\value{footnote}].
+\item \code{Literal}: contains a type and a lexeme.
+\item \code{MethodInvocationExpression}: contains either a primary \code{Expression} and a single-component method name\footnotemark[\value{footnote}], or no primary \code{Expression} and a possibly multi-component method name\footnotemark[\value{footnote}].
+\item \code{UnaryExpression}: contains a unary operator and an \code{Expression}.
+\end{itemize}
+\end{itemize}
+\end{itemize}
+\end{itemize}
+
+During the construction of the AST, some collections of parse tree nodes are folded into flat collections in the corresponding AST node.  For example, when visiting a parse tree node corresponding to the production \code{ConstructorDeclaration Modifiers ConstructorDeclarator ConstructorBody}, all the descendants of the \code{Modifiers} parse tree node will be folded into a \code{List<Modifier>} in the new \code{Constructor} AST node.
+
+Most of the work done in assignments 2, 3 and 4 involves making passes through the AST.  We do not make use of the Visitor pattern here, but instead add a new method to \code{ASTNode} that is overridden by its concrete subclasses.  The \code{Compiler}'s \code{compile()} method (essentially the starting point of the compilation process) invokes the root \code{Program} node's new method.  Each AST in turn invokes the new method on its children, until every AST node has had its method invoked.
+
+Inherited attributes are implemented as parameters to these methods, and synthesized attributes are implemented as fields within \code{ASTNode} or its subclasses.  During some passes through the AST, some nodes may store inherited attributes in a field for use in a later pass.
+
+\section{Environment building}
+
+The classes \code{Constructor}, \code{Decl}, \code{Formal}, \code{Local} and \code{TypeDecl} implement an \code{EnvironmentDecl} interface. We added to \code{ASTNode} an environment field of type \code{Cons<EnvironmentDecl>}, where \code{Cons} is a generic, immutable, singly-linked list.  This enables sharing of environment information between environments of different AST nodes, avoiding the problems described in lecture associated with replicating this information.
+
+We added the methods \code{buildEnvironment()} and \code{exportEnvironmentDecls()} to \code{ASTNode} for this pass. \code{buildEnvironment()} takes in a node's parent's environment, computes the node's local environment, and recursively builds the environments of the node's children.  \code{exportEnvironmentDecls()} reports any new environment declarations introduced by a node into its parent's environment (e.g. \code{Locals} add themselves to their parent \code{Block}'s scope, while other types of \code{BlockStatement} add nothing).
+
+The following is \code{Block}'s implementation of \code{buildEnvironment()}, which demonstrates the use of \code{exportEnvironmentDecls()} to build the node's environment incrementally:
+
+\begin{lstlisting}
+public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment)
+		throws NameConflictException, ImportException {
+	this.environment = parentEnvironment;
+	
+	for (BlockStatement statement : this.statements) {
+		statement.buildEnvironment(this.environment);
+		EnvironmentDecl export = statement.exportEnvironmentDecls();
+		if (export != null) {
+			this.environment = new Cons<EnvironmentDecl>(export, this.environment);
+		}
+	}
+}
+\end{lstlisting}
+
+\subsection{Import resolution}
+
+Import resolution is performed during this phase, in \code{Classfile}'s \code{buildEnvironment()} method.  This is possible as early as this phase because the parent environment (inherited from the root \code{Program} node) is a list of all type declarations in the program.  Imports are resolved in the manner dictated by the JLS, with single imports resolved first, followed by the implicit current-package on-demand import, followed by explicit on-demand imports, followed by the implicit \code{java.lang.*} on-demand import.
+
+\section{Type linking}
+
+We added the method \code{linkTypes()} to \code{ASTNode} for this pass.  It introduces an inherited attribute \code{allTypes}, which is a list of all types declared in the program.  This list is eventually passed down to the \code{resolveType()} methods of those \code{Identifier} nodes which are known to refer to types grammatically (e.g. the \code{Identifier} in a \code{ClassInstanceCreationExpression}).
+
+Since type names can refer non non-reference types, we introduced a \code{Type} interface with the following implementation hierarchy:
+
+\begin{itemize}
+\item \code{Type}
+\begin{itemize}
+\item \code{ArrayType}: wraps a non-\code{ArrayType} child \code{Type}
+\item \code{NullType}: represents the type of the \code{null} literal
+\item \code{PrimitiveType}: represents any primitive type
+\item \code{TypeDecl}: represents any class or interface type in the program
+\end{itemize}
+\end{itemize}
+
+These classes provide the methods \code{canCastTo()} and \code{isAssignableTo()}, which are useful later on in the type checking pass. We use a null \code{Type} to signify the return type of methods that return \code{void}.
+
+In \code{resolveType()}, we disambiguate between array types, primitive types, unqualified reference types, and qualified reference types.  If the \code{Identifier} names a qualified reference type, we check that no prefix of the \code{Identifier} resolves to a type.  For both qualified and unqualified reference types, we check that the whole \code{Identifier} resolves to exactly one type.
+
+\section{Hierarchy checking}
+
+The hierarchy checking phase begins with the construction of a directed graph (stored as an adjacency matrix) from the set of all declared types in the program.  For each declared type, we locate the row $i$ for that type and the columns $j$ for each of its direct supertypes (extended classes, and extended or implemented interfaces), and set the matrix elements $(i,j)$ to $1$.
+
+In order to detect any cycles in this graph, we then attempt to create a topological ordering of the nodes of this graph.  This is implemented with the standard depth-first search algorithm and should succeed iff the graph is acyclic.  If successful, this step produces a topologically-sorted list of types (where every declared type appears to the right of all its supertypes).
+
+We then process the declared types in the topological order computed in the previous step.  For each declared type, we populate its memberset field, which is an object containing the constructors, fields,and methods declared by the type; the fields and methods inherited from the type's supertypes; and a set of the type's supertypes.  Abstract and concrete methods are stored in distinct lists.
+
+Processing the declared types in topological order ensures that a \code{TypeDecl}'s supertypes, if any, already have valid membersets when the \code{TypeDecl}'s memberset is being created.  This facilitates the propagation of inherited fields and methods. Each addition to the memberset is validated as it occurs.
+
+A \code{validate()} method is called on the memberset at the end of this procedure to enforce constraints that cannot be checked until the entire memberset has been populated.
+
+\section{Name linking}
+
+We added the method \code{linkNames()} to \code{ASTNode} for this pass. This method introduces the inherited attributes \code{curType}, which represents the containing type declaration (if any) of the node being processed; \code{curDecl}, which represents the containing class member declaration (if any) of the node being processed; \code{curLocal}, which represents the containing local variable declaration (if any) of the node being processed; \code{staticCtx}, which is true iff the containing class member declaration (if any) is static; and \code{lValue}, which is true iff the node being processed is an expression on the left-hand side of an assignment.
+
+Most implementations of \code{linkNames()} simply forward the method call to their children.  Two non-trivial implementations occur in \code{Identifier} and \code{MethodInvocationExpression}.
+
+\code{Identifier}'s implementation of \code{linkNames()} produces an object of type \code{Interpretation}, which represents the entity that the \code{Identifier} resolves to. An \code{Identifier} may resolve to any of 1) a formal parameter, local variable, or field; 2) a non-static field access; 3) a package or a prefix of a package; 4) a declared type; or 5) the keyword \code{this}. 
+
+These cases are disambiguated using the method described in lecture.  Interpretations are built inductively: the interpretation of a single-component \code{Identifier} is computed directly from the inherited attributes, and the interpretation of a multi-component \code{Identifier} builds on that of its longest proper prefix.
+
+Our grammar allows \code{MethodInvocationExpression}s to be constructed from either a primary \code{Expression} and a single-component \code{Identifier} (method name), or no primary \code{Expression} and a possibly multi-component \code{Identifier}. \code{MethodInvocationExpression}'s implementation of \code{linkNames()} attempts to cleanly separate the method name from the target expression or type. In the first case, where the \code{MethodInvocationExpression} contains a non-null primary \code{Expression}, we simply interpret the \code{Expression} as the target. The second case is more involved: the method name may have a single component, in which case the target is an implicit \code{this}, or the method name may have multiple components, in which case the interpretation of the longest proper prefix of the method name is used as the target. This target could either be a \code{TypeDecl} (in the case of static calls), a \code{FieldAccessExpression}, a \code{Local}, a \code{Formal}, a \code{Field}, or the keyword \code{this}.
+
+\section{Type checking}
+
+We added the method \code{checkTypes()} to \code{ASTNode} for this pass. We did not introduce any inherited attributes in this pass, though we did make use of previously-propagated inherited attributes as needed. Most concrete implementations of \code{checkTypes()} are fairly straightforward in that they first type-check the node's children and then verify that these types are as expected.  Three non-trivial implementations occur in \code{MethodInvocationExpression}, \code{ClassInstanceCreationExpression} and \code{FieldAccessExpression}.  These implementations must resolve the node to a member of a type declaration, and must check that this access is valid according to visibility and typing rules. Furthermore, to resolve a constructor or method, we must disambiguate between overloaded methods and constructors by matching their signatures with the types of the provided arguments in the invocation.
+
+
+\section{Reachability analysis}
+
+We added the method \code{checkReachability()} to \code{ASTNode} for this pass.  This method introduces an inherited attribute \code{canLeavePrevious}, which indicates whether the previous statement may terminate normally, and computes a synthesized attribute \code{canLeave}, which indicates whether the current statement may terminate normally.
+
+Constant folding (but not constant propagation) is performed during this phase as required by section 15.28 of the JLS, and is used to determine whether for- and while-loops may run forever or not run at all based on the truth values of their conditions.
+
+Detection of unreachable code or of non-void methods that may not return causes an exception to be raised.
+
+\section{Challenges}
+
+One challenge we encountered during these phases of our compiler design involved the special treatment of the classes \code{java.lang.Object} and \code{java.lang.String} in Joos 1W. Since the supertype of a class or interface is assumed to be \code{java.lang.Object} if none is explicitly declared, we must remember the location of this class for use in the hierarchy checking phase. To solve this problem, during the environment building phase, the root \code{Program} node checks the canonical name of all \code{TypeDecl}s in the program, and stores the \code{TypeDecl} in a public static field if its canonical name is "java.lang.Object". We store the \code{TypeDecl} for \code{java.lang.String} in an analogous way to use when resolving the types of string literals.
+
+Another challenge arose from decisions we made in the design of our concrete and abstract grammars. We made simplifications in our concrete grammar to make it LR(1), and some of these simplifications persisted in the abstract grammar. These simplifications led, for example, to our \code{Identifier} class being used for a large number of different purposes. The inconsistency of \code{MethodInvocationExpression}s is another casualty of our grammar simplifications. Some decisions, such as making \code{this} an \code{Identifier}, were made for convenience early on but contributed to the described problems as our compiler became more complex.
+
+\section{Testing}
+
+We tested our code extensively using the public Marmoset tests for each assignment. We separated the positive and negative Marmoset tests into separate folders. Our compiler contains a class called \code{RunCompilerTests} whose main entry point runs these tests against our compiler and reports whether each test succeeded or failed. If any tests failed, we would arbitrarily pick a failed test, run it individually to determine the cause of failure, fix it, and then re-run the entire test suite.
+
+\end{document}
+
+%%  LocalWords:  udimitri reachability ASTNode Classfile TypeDecl AST
+%%  LocalWords:  Decl initializer BlockStatement EmptyStatement multi
+%%  LocalWords:  ForStatement IfStatement ReturnStatement dburgoyn
+%%  LocalWords:  WhileStatement ArrayAccessExpression instanceof JLS
+%%  LocalWords:  ArrayCreationExpression BinaryExpression lexeme iff
+%%  LocalWords:  CastExpression ClassInstanceCreationExpression unary
+%%  LocalWords:  FieldAccessExpression InstanceofExpression linkTypes
+%%  LocalWords:  MethodInvocationExpression UnaryExpression allTypes
+%%  LocalWords:  ConstructorDeclaration ConstructorDeclarator acyclic
+%%  LocalWords:  ConstructorBody subclasses EnvironmentDecl ArrayType
+%%  LocalWords:  buildEnvironment exportEnvironmentDecls resolveType
+%%  LocalWords:  parentEnvironment NameConflictException NullType
+%%  LocalWords:  ImportException PrimitiveType canCastTo supertypes
+%%  LocalWords:  isAssignableTo memberset membersets linkNames lValue
+%%  LocalWords:  curType curDecl curLocal staticCtx disambiguated
+%%  LocalWords:  checkTypes checkReachability canLeavePrevious Joos
+%%  LocalWords:  canLeave supertype RunCompilerTests
