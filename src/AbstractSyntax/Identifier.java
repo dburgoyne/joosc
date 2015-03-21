@@ -437,11 +437,13 @@ public class Identifier extends Expression {
 			return new ArrayType(clone.resolveType(allTypes, localEnv));
 		}
 		
-		// Special case, this denotes a primitive type.
+		// Special case, this may denote a primitive type.
 		if (this.isSimple()) {
 			PrimitiveType prim = PrimitiveType.fromString(this.getSingleComponent());
-			if (prim != null) 
+			if (prim != null) {
 				return prim;
+			}
+			// (Keep going if this wasn't a primitive type)
 		}
 		
 		// General case, this should resolve to a TypeDecl:
