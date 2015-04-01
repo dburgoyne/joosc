@@ -278,6 +278,8 @@ public class BinaryExpression extends Expression {
 	// TODO Get rid of the throws
 	@Override public void generateCode(PrintWriter writer) throws IOException {
 		
+		String label;
+		
 		// String appends and assignments are the only special cases
 		if (this.operator == BinaryOperator.PLUS &&
 				(this.left.getType() == Program.javaLangString || this.right.getType() == Program.javaLangString)) {
@@ -286,41 +288,89 @@ public class BinaryExpression extends Expression {
 			// TODO
 		} else {
 			// All other cases start the same way.
+			assert(this.left.getType() instanceof PrimitiveType);
+			assert(this.right.getType() instanceof PrimitiveType);
 			this.left.generateCode(writer);
+			// Sign-extend the LHS by the correct amount, if less than 32 bits.
+			switch (((PrimitiveType)this.left.getType()).width()) {
+			  case 1:
+				writer.println("movsx eax,al  ; Sign extend 1 byte to 4 bytes");
+				break;
+			  case 2:
+				writer.println("movsx eax,ax  ; Sign extend 2 bytes to 4 bytes");
+				break;
+			  default: // 4 bytes; do nothing
+				break;
+			}
 			writer.println("push eax");
 			this.right.generateCode(writer);
+			// Sign-extend the RHS by the correct amount, if less than 32 bits.
+			switch (((PrimitiveType)this.right.getType()).width()) {
+			  case 1:
+				writer.println("movsx eax,al  ; Sign extend 1 byte to 4 bytes");
+				break;
+			  case 2:
+				writer.println("movsx eax,ax  ; Sign extend 2 bytes to 4 bytes");
+				break;
+			  default: // 4 bytes; do nothing
+				break;
+			}
 			// Convenient to have the left expression in eax
-			writer.println("mov ecx,eax");
+			writer.println("mov ebx,eax");
 			writer.println("pop eax");
 			
 			switch (this.operator) {
 			  case PLUS:
-				writer.println("add eax, ecx");
+				writer.println("add eax, ebx");
 				break;
 			  case MINUS:
-				writer.println("sub eax, ecx");
+				writer.println("sub eax, ebx");
 				break;
 			  case STAR:
 				// Only the lower 32 bits of the product make it into eax
-				writer.println("imul ecx");
+				writer.println("imul ebx");
 				break;
 			  case SLASH:
 				writer.println("cdq");
-				writer.println("idiv ecx");
+				writer.println("idiv ebx");
 				break;
 			  case MOD:
 				writer.println("cdq");
-				writer.println("idiv ecx");
+				writer.println("idiv ebx");
 				writer.println("mov eax,edx");
 				break;
 			  case GT:
-				// TODO
+				label = Utilities.Label.generateLabel("binary_gt");
+				writer.println("cmp eax,ebx");
+				writer.println("mov eax,1");
+				writer.println("jg " + label);
+				writer.println("mov eax,0");
+				writer.println(label + ":");
+				break;
 			  case LT:
-				// TODO
+			    label = Utilities.Label.generateLabel("binary_lt");
+				writer.println("cmp eax,ebx");
+				writer.println("mov eax,1");
+				writer.println("jl " + label);
+				writer.println("mov eax,0");
+				writer.println(label + ":");
+				break;
 			  case GE:
-				// TODO
+			    label = Utilities.Label.generateLabel("binary_ge");
+				writer.println("cmp eax,ebx");
+				writer.println("mov eax,1");
+				writer.println("jge " + label);
+				writer.println("mov eax,0");
+				writer.println(label + ":");
+				break;
 			  case LE:
-				// TODO
+			    label = Utilities.Label.generateLabel("binary_le");
+				writer.println("cmp eax,ebx");
+				writer.println("mov eax,1");
+				writer.println("jle " + label);
+				writer.println("mov eax,0");
+				writer.println(label + ":");
+				break;
 			  case LAND:
 				writer.println("and eax,edx");
 				break;
@@ -328,9 +378,21 @@ public class BinaryExpression extends Expression {
 				writer.println("or eax,edx");
 				break;
 			  case EQ:
-				// TODO
+			    label = Utilities.Label.generateLabel("binary_eq");
+				writer.println("cmp eax,ebx");
+				writer.println("mov eax,1");
+				writer.println("je " + label);
+				writer.println("mov eax,0");
+				writer.println(label + ":");
+				break;
 			  case NE:
-				// TODO
+				label = Utilities.Label.generateLabel("binary_ne");
+				writer.println("cmp eax,ebx");
+				writer.println("mov eax,1");
+				writer.println("jne " + label);
+				writer.println("mov eax,0");
+				writer.println(label + ":");
+				break;
 
 			  default: break;
 			}

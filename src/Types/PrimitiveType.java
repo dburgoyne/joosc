@@ -16,6 +16,15 @@ public enum PrimitiveType implements Type {
 		return (this != BOOLEAN);
 	}
 	
+	// How many bytes are needed to represent this type?
+	public int width() {
+		return this == BOOLEAN ? 1
+			 : this == BYTE ? 1
+			 : this == CHAR ? 2
+			 : this == SHORT ? 2
+			 : 4;
+	}
+	
 	@Override public boolean canBeCastAs(Type t) {
 		return t instanceof PrimitiveType
 		    && (this.isIntegral() == ((PrimitiveType)t).isIntegral());
