@@ -1,5 +1,7 @@
 package AbstractSyntax;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 
 import Parser.ParseTree;
@@ -36,33 +38,15 @@ public abstract class ASTNode {
 	protected boolean canLeave = true;
 	public abstract void checkReachability(boolean canLeavePrevious) throws ReachabilityException;
 	
-	// ---------- For code generate ----------
+	// ---------- Code generation ----------
 	
 	protected static List<String> scope;
 	protected String commentName;
 	
-	public void codeGenerate() {
-		setCommentName(); // Comment
-		commentGenerate(true); // Comment
-		selfGenerate(); 
-		hierarchyGenerate();
-		commentGenerate(false); // Comment
+	public void generateCode(PrintWriter writer) throws IOException {
+		writer.println("Code generation for " + this.getClass().getName() + " is not yet implemented.");
 	}
-	
-	protected void setCommentName() {
-		this.commentName = String.format("an unspecific %s", this.getClass().toString());
-	}
-	
-	protected void selfGenerate() {
-		String info = String.format("; -!- Self generate code is not implement for %s.", commentName);
-		System.out.println(info);
-	}
-	
-	protected void hierarchyGenerate() {
-		String info = String.format("; -!- Hierarchy generate code is not implement for %s, subnodes will not be visited.", commentName);
-		System.out.println(info);
-	}
-	
+
 	protected String scopeIdentifier(String name, List<Formal> parameters) {
 		String identifier = scope.get(0);
 		for (int i = 1; i < scope.size(); i++) {
@@ -85,17 +69,12 @@ public abstract class ASTNode {
 		return identifier;
 	}
 	
-	protected void setLabel(String identifier) {
-		System.out.println(identifier + ":");
+	protected void setLabel(PrintWriter writer, String identifier) {
+		writer.println(identifier + ":");
 	}
 	
-	protected void setRetrun() {
-		System.out.println("leave");
-		System.out.println("ret");
-	}
-	
-	private void commentGenerate(boolean upper) {
+	protected void generateComment(PrintWriter writer, boolean upper) {
 		String info = String.format("; %s of code for %s.", upper ? "<- Start" : "-> End", commentName);
-		System.out.println(info);
+		writer.println(info);
 	}
 }

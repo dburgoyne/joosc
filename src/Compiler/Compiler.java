@@ -27,6 +27,7 @@ public class Compiler {
 
 	protected static ParseTable parseTable;
 	protected static ParseTree[] parseTrees;
+	public static final String OUTPUT_DIR = "output";
 
     //Argument 1: .lr1 file input
     //Argument 2: test file input
@@ -83,6 +84,9 @@ public class Compiler {
     		// Reachability analysis pass.
     		program.checkReachability(true);
     		
+    		// Code generation pass.
+    		program.generateCode(null);
+    		
     	} catch (Exception e) {
 			if (e instanceof NameConflictException
 			 || e instanceof ImportException
@@ -108,9 +112,7 @@ public class Compiler {
         if (failed) {
     		return 42;
     	}
-        
-        program.codeGenerate();
-        
+
         return 0;
     }
     

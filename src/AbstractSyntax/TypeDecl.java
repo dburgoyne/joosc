@@ -1,5 +1,6 @@
 package AbstractSyntax;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -457,29 +458,29 @@ public class TypeDecl extends ASTNode
 		}
 	}
 	
-	// ---------- For code generate ----------
-
+	// ---------- Code generation ----------
+	
 	@Override
-	protected void setCommentName() {
-		this.commentName = String.format("Type %s", name.toString());
-	}
+	public void generateCode(PrintWriter writer) {
 		
-	@Override
-	protected void selfGenerate() {
+		// TODO I'm not sure what Xiang wanted this scope list for.
 		scope.add(name.toString());
-	}
 		
-	@Override
-	protected void hierarchyGenerate() {
+		this.commentName = String.format("Type %s", name.toString());
+		generateComment(writer, true);
+		
 		for (Constructor constructor : constructors) {
-			constructor.codeGenerate();
+			constructor.generateCode(writer);
 		}
+		// TODO Static fields should be handled separately
 		for (Field field : fields) {
-			field.codeGenerate();
+			field.generateCode(writer);
 		}
 		for (Method method : methods) {
-			method.codeGenerate();
+			method.generateCode(writer);
 		}
+		
+		generateComment(writer, false);
+		
 	}
-
 }

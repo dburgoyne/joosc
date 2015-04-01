@@ -1,5 +1,6 @@
 package AbstractSyntax;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -116,22 +117,13 @@ public class Constructor extends ASTNode implements EnvironmentDecl {
 		this.block.checkReachability(true);
 	}
 	
-	// ---------- For code generate ----------
+	// ---------- Code generation ----------
 
-	@Override
-	protected void setCommentName() {
+	@Override public void generateCode(PrintWriter writer) {
 		this.commentName = String.format("Constructor %s", scopeIdentifier(name.toString(), parameters));
-	}
-		
-	@Override
-	protected void selfGenerate() {
-		setLabel(this.scopeIdentifier(name.toString(), parameters));
-		setRetrun();
-	}
-		
-	@Override
-	protected void hierarchyGenerate() {
+		setLabel(writer, this.scopeIdentifier(name.toString(), parameters));
 		// TODO
-		super.hierarchyGenerate();
+		writer.println("leave");
+		writer.println("ret");
 	}
 }

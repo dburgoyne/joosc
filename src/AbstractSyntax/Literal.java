@@ -44,6 +44,11 @@ public class Literal extends Expression {
 		assert(firstChild.isTerminal());
 		this.type = LiteralType.fromString(firstChild.getSymbol());
 		this.value = firstChild.getToken().getLexeme();
+		
+		// Remember all string literals in the program.
+		if (this.type == LiteralType.STRING) {
+			Program.allStringLiterals.add(this);
+		}
 	}
 	
 	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) {

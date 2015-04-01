@@ -1,5 +1,6 @@
 package AbstractSyntax;
 
+import java.io.PrintWriter;
 import java.util.List;
 
 import Parser.ParseTree;
@@ -128,19 +129,9 @@ public class Field extends Decl implements Identifier.Interpretation {
 	
 	// ---------- For code generate ----------
 
-	@Override
-	protected void setCommentName() {
+	@Override public void generateCode(PrintWriter writer) {
 		this.commentName = String.format("Field %s", scopeIdentifier(name.toString()));
-	}
-		
-	@Override
-	protected void selfGenerate() {
-		setLabel(this.scopeIdentifier(name.toString()));
-	}
-		
-	@Override
-	protected void hierarchyGenerate() {
+		setLabel(writer, this.scopeIdentifier(name.toString()));
 		// TODO
-		super.hierarchyGenerate();
 	}
 }

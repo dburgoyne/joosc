@@ -1,5 +1,8 @@
 package AbstractSyntax;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+
 import Parser.ParseTree;
 import Types.PrimitiveType;
 import Types.Type;
@@ -267,6 +270,70 @@ public class BinaryExpression extends Expression {
 			return null;
 		  default:
 			return null;
+		}
+	}
+	
+	// ---------- Code generation ----------
+	
+	// TODO Get rid of the throws
+	@Override public void generateCode(PrintWriter writer) throws IOException {
+		
+		// String appends and assignments are the only special cases
+		if (this.operator == BinaryOperator.PLUS &&
+				(this.left.getType() == Program.javaLangString || this.right.getType() == Program.javaLangString)) {
+			// TODO
+		} else if (this.operator == BinaryOperator.ASSIGN) {
+			// TODO
+		} else {
+			// All other cases start the same way.
+			this.left.generateCode(writer);
+			writer.println("push eax");
+			this.right.generateCode(writer);
+			// Convenient to have the left expression in eax
+			writer.println("mov ecx,eax");
+			writer.println("pop eax");
+			
+			switch (this.operator) {
+			  case PLUS:
+				writer.println("add eax, ecx");
+				break;
+			  case MINUS:
+				writer.println("sub eax, ecx");
+				break;
+			  case STAR:
+				// Only the lower 32 bits of the product make it into eax
+				writer.println("imul ecx");
+				break;
+			  case SLASH:
+				writer.println("cdq");
+				writer.println("idiv ecx");
+				break;
+			  case MOD:
+				writer.println("cdq");
+				writer.println("idiv ecx");
+				writer.println("mov eax,edx");
+				break;
+			  case GT:
+				// TODO
+			  case LT:
+				// TODO
+			  case GE:
+				// TODO
+			  case LE:
+				// TODO
+			  case LAND:
+				writer.println("and eax,edx");
+				break;
+			  case LOR:
+				writer.println("or eax,edx");
+				break;
+			  case EQ:
+				// TODO
+			  case NE:
+				// TODO
+
+			  default: break;
+			}
 		}
 	}
 }

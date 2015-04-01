@@ -1,8 +1,11 @@
 package AbstractSyntax;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import Compiler.Compiler;
 import Parser.ParseTree;
 import Utilities.Cons;
 
@@ -12,9 +15,13 @@ public class Program extends ASTNode {
 	public static TypeDecl javaLangObject;
 	public static TypeDecl javaLangString;
 	
+	// List of all string literals in the program, to be populated before code generation.
+	public static List<Literal> allStringLiterals; 
+	
 	public Program(ParseTree... trees) {
 		super(null);
 		files = new ArrayList<Classfile>();
+		allStringLiterals = new ArrayList<Literal>();
 		for (ParseTree tree : trees) {
 			Classfile file = new Classfile(tree);
 			files.add(file);
@@ -145,22 +152,15 @@ public class Program extends ASTNode {
 		}
 	}
 	
-	// ---------- For code generate ----------
+	// ---------- Code generation ----------
 	
-	@Override
-	protected void setCommentName() {
-		this.commentName = "Program";
-	}
-	
-	@Override
-	protected void selfGenerate() {
-		// Do nothing
-	}
-	
-	@Override
-	protected void hierarchyGenerate() {
+	@Override public void generateCode(PrintWriter writer) throws IOException {
+		this.commentName = this.getClass().toString();
 		for (Classfile file : files) {
-			file.codeGenerate();
+			String outputFileName = file.typeDecl.getCanonicalName().toString() + ".s";
+			writer = new PrintWriter(Compiler.OUTPUT_DIR + "/" + outputFileName);
+			file.generateCode(writer);
+			writer.close();
 		}
 	}
 }
