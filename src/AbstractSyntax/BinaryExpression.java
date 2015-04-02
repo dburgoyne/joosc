@@ -1,8 +1,6 @@
 package AbstractSyntax;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-
+import Compiler.AsmWriter;
 import Parser.ParseTree;
 import Types.PrimitiveType;
 import Types.Type;
@@ -275,17 +273,16 @@ public class BinaryExpression extends Expression {
 	
 	// ---------- Code generation ----------
 	
-	// TODO Get rid of the throws
-	@Override public void generateCode(PrintWriter writer) throws IOException {
+	@Override public void generateCode(AsmWriter writer) {
 		
 		String label;
 		
 		// String appends and assignments are the only special cases
 		if (this.operator == BinaryOperator.PLUS &&
 				(this.left.getType() == Program.javaLangString || this.right.getType() == Program.javaLangString)) {
-			// TODO
+			// TODO Call java.lang.String methods to convert primitives to String.
 		} else if (this.operator == BinaryOperator.ASSIGN) {
-			// TODO
+			// TODO add ability to get lvalue of assignable expressions. 
 		} else {
 			// All other cases start the same way.
 			assert(this.left.getType() instanceof PrimitiveType);
@@ -294,104 +291,104 @@ public class BinaryExpression extends Expression {
 			// Sign-extend the LHS by the correct amount, if less than 32 bits.
 			switch (((PrimitiveType)this.left.getType()).width()) {
 			  case 1:
-				writer.println("movsx eax,al  ; Sign extend 1 byte to 4 bytes");
+				writer.line("movsx eax,al  ; Sign extend 1 byte to 4 bytes");
 				break;
 			  case 2:
-				writer.println("movsx eax,ax  ; Sign extend 2 bytes to 4 bytes");
+				writer.line("movsx eax,ax  ; Sign extend 2 bytes to 4 bytes");
 				break;
 			  default: // 4 bytes; do nothing
 				break;
 			}
-			writer.println("push eax");
+			writer.instr("push", "eax");
 			this.right.generateCode(writer);
 			// Sign-extend the RHS by the correct amount, if less than 32 bits.
 			switch (((PrimitiveType)this.right.getType()).width()) {
 			  case 1:
-				writer.println("movsx eax,al  ; Sign extend 1 byte to 4 bytes");
+				writer.line("movsx eax,al  ; Sign extend 1 byte to 4 bytes");
 				break;
 			  case 2:
-				writer.println("movsx eax,ax  ; Sign extend 2 bytes to 4 bytes");
+				writer.line("movsx eax,ax  ; Sign extend 2 bytes to 4 bytes");
 				break;
 			  default: // 4 bytes; do nothing
 				break;
 			}
 			// Convenient to have the left expression in eax
-			writer.println("mov ebx,eax");
-			writer.println("pop eax");
+			writer.instr("mov", "ebx", "eax");
+			writer.instr("pop", "eax");
 			
 			switch (this.operator) {
 			  case PLUS:
-				writer.println("add eax, ebx");
+				writer.instr("add", "eax", "ebx");
 				break;
 			  case MINUS:
-				writer.println("sub eax, ebx");
+				writer.instr("sub", "eax", "ebx");
 				break;
 			  case STAR:
 				// Only the lower 32 bits of the product make it into eax
-				writer.println("imul ebx");
+				writer.instr("imul", "ebx");
 				break;
 			  case SLASH:
-				writer.println("cdq");
-				writer.println("idiv ebx");
+				writer.instr("cdq");
+				writer.instr("idiv", "ebx");
 				break;
 			  case MOD:
-				writer.println("cdq");
-				writer.println("idiv ebx");
-				writer.println("mov eax,edx");
+				writer.instr("cdq");
+				writer.instr("idiv", "ebx");
+				writer.instr("mov", "eax", "edx");
 				break;
 			  case GT:
 				label = Utilities.Label.generateLabel("binary_gt");
-				writer.println("cmp eax,ebx");
-				writer.println("mov eax,1");
-				writer.println("jg " + label);
-				writer.println("mov eax,0");
-				writer.println(label + ":");
+				writer.instr("cmp", "eax", "ebx");
+				writer.instr("mov", "eax", "1");
+				writer.instr("jg", label);
+				writer.instr("mov", "eax", "0");
+				writer.label(label);
 				break;
 			  case LT:
 			    label = Utilities.Label.generateLabel("binary_lt");
-				writer.println("cmp eax,ebx");
-				writer.println("mov eax,1");
-				writer.println("jl " + label);
-				writer.println("mov eax,0");
-				writer.println(label + ":");
+				writer.instr("cmp", "eax", "ebx");
+				writer.instr("mov", "eax", "1");
+				writer.instr("jl", label);
+				writer.instr("mov", "eax", "0");
+				writer.label(label);
 				break;
 			  case GE:
 			    label = Utilities.Label.generateLabel("binary_ge");
-				writer.println("cmp eax,ebx");
-				writer.println("mov eax,1");
-				writer.println("jge " + label);
-				writer.println("mov eax,0");
-				writer.println(label + ":");
+				writer.instr("cmp", "eax", "ebx");
+				writer.instr("mov", "eax", "1");
+				writer.instr("jge", label);
+				writer.instr("mov", "eax", "0");
+				writer.label(label);
 				break;
 			  case LE:
 			    label = Utilities.Label.generateLabel("binary_le");
-				writer.println("cmp eax,ebx");
-				writer.println("mov eax,1");
-				writer.println("jle " + label);
-				writer.println("mov eax,0");
-				writer.println(label + ":");
+				writer.instr("cmp", "eax", "ebx");
+				writer.instr("mov", "eax", "1");
+				writer.instr("jle", label);
+				writer.instr("mov", "eax", "0");
+				writer.label(label);
 				break;
 			  case LAND:
-				writer.println("and eax,edx");
+				writer.instr("and", "eax,edx");
 				break;
 			  case LOR:
-				writer.println("or eax,edx");
+				writer.instr("or", "eax,edx");
 				break;
 			  case EQ:
 			    label = Utilities.Label.generateLabel("binary_eq");
-				writer.println("cmp eax,ebx");
-				writer.println("mov eax,1");
-				writer.println("je " + label);
-				writer.println("mov eax,0");
-				writer.println(label + ":");
+				writer.instr("cmp", "eax", "ebx");
+				writer.instr("mov", "eax", "1");
+				writer.instr("je", label);
+				writer.instr("mov", "eax", "0");
+				writer.label(label);
 				break;
 			  case NE:
 				label = Utilities.Label.generateLabel("binary_ne");
-				writer.println("cmp eax,ebx");
-				writer.println("mov eax,1");
-				writer.println("jne " + label);
-				writer.println("mov eax,0");
-				writer.println(label + ":");
+				writer.instr("cmp", "eax", "ebx");
+				writer.instr("mov", "eax", "1");
+				writer.instr("jne", label);
+				writer.instr("mov", "eax", "0");
+				writer.label(label);
 				break;
 
 			  default: break;

@@ -1,9 +1,8 @@
 package AbstractSyntax;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.List;
 
+import Compiler.AsmWriter;
 import Parser.ParseTree;
 import Scanner.Token;
 import Utilities.Cons;
@@ -39,42 +38,7 @@ public abstract class ASTNode {
 	public abstract void checkReachability(boolean canLeavePrevious) throws ReachabilityException;
 	
 	// ---------- Code generation ----------
-	
-	protected static List<String> scope;
-	protected String commentName;
-	
-	public void generateCode(PrintWriter writer) throws IOException {
-		writer.println("Code generation for " + this.getClass().getName() + " is not yet implemented.");
-	}
-
-	protected String scopeIdentifier(String name, List<Formal> parameters) {
-		String identifier = scope.get(0);
-		for (int i = 1; i < scope.size(); i++) {
-			identifier = identifier + "." + scope.get(i);
-		}
-		identifier = identifier + "." + name;
-		for (Formal formal : parameters) {
-			identifier = identifier + "#" + formal.type.getCanonicalName();
-		}
-		identifier = identifier + "#";
-		return identifier;
-	}
-	
-	protected String scopeIdentifier(String name) {
-		String identifier = scope.get(0);
-		for (int i = 1; i < scope.size(); i++) {
-			identifier = identifier + "." + scope.get(i);
-		}
-		identifier = identifier + "." + name;
-		return identifier;
-	}
-	
-	protected void setLabel(PrintWriter writer, String identifier) {
-		writer.println(identifier + ":");
-	}
-	
-	protected void generateComment(PrintWriter writer, boolean upper) {
-		String info = String.format("; %s of code for %s.", upper ? "<- Start" : "-> End", commentName);
-		writer.println(info);
+	public void generateCode(AsmWriter writer) {
+		writer.comment("Code generation for %s is not yet implemented.", this.getClass().getName());
 	}
 }

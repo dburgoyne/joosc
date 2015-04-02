@@ -18,7 +18,7 @@ package Scanner;
 public class Regex {
 
     public static enum Type {
-        // TODO Consider adding support for character equivalence classes.
+        // TO DO Consider adding support for character equivalence classes.
         // Idea: change the m_symbol field in this class to a predicate that returns true iff it is fed
         // a character in the class.
         EMPTY_SET,
@@ -62,7 +62,7 @@ public class Regex {
     }
     
     public static Regex derivative(Regex r, char a) {
-        // TODO Consider simplifying before and/or after this operation
+        // TO DO Consider simplifying before and/or after this operation
         Regex toReturn = null;
         
         switch(r.getType()) {
@@ -141,7 +141,7 @@ public class Regex {
                         r = new Regex(Regex.Type.EMPTY_STRING);
                         continue loop;
                     }
-                    // TODO Maybe add the simplification (complement(empty set))^* ~ complement(empty set)
+                    // TO DO Maybe add the simplification (complement(empty set))^* ~ complement(empty set)
                     break;
                 case CONCATENATION:
                     if (r.getInner1().getType() == Regex.Type.EMPTY_SET
@@ -366,8 +366,8 @@ public class Regex {
             return false;
         }
         Regex r = (Regex)o;
-        // TODO This needs to account for commutativity and associativity of conjunction, discunction.
-        // TODO This may need to account for character class equivalence.
+        // TO DO This needs to account for commutativity and associativity of conjunction, discunction.
+        // TO DO This may need to account for character class equivalence.
         return (this.getType() == r.getType()
              && this.getSymbol() == r.getSymbol()
              && this.getInner1() == r.getInner1()

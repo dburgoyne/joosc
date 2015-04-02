@@ -1,9 +1,9 @@
 package AbstractSyntax;
 
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import Compiler.AsmWriter;
 import Parser.ParseTree;
 import Types.MemberSet;
 import Types.Type;
@@ -36,6 +36,18 @@ public class TypeDecl extends ASTNode
 	
 	// Back reference to the parent Classfile node.
 	protected Classfile parent;
+	
+	// Type IDs: must be assigned before being accessed. 
+	private int tid = 0;
+	public void setTypeID(int tid) {
+		assert this.tid == 0;
+		assert tid > 0;
+		this.tid = tid;
+	}
+	@Override public int getTypeID() {
+		assert this.tid > 0;
+		return this.tid;
+	}
 	
 	public String toString() {
 		String toReturn = "";
@@ -461,18 +473,14 @@ public class TypeDecl extends ASTNode
 	// ---------- Code generation ----------
 	
 	@Override
-	public void generateCode(PrintWriter writer) {
+	public void generateCode(AsmWriter writer) {
 		
-		// TODO I'm not sure what Xiang wanted this scope list for.
-		scope.add(name.toString());
-		
-		this.commentName = String.format("Type %s", name.toString());
-		generateComment(writer, true);
+		writer.pushComment("Type %s", this.getCanonicalName());
 		
 		for (Constructor constructor : constructors) {
 			constructor.generateCode(writer);
 		}
-		// TODO Static fields should be handled separately
+		// Only Static fields should generate any code.
 		for (Field field : fields) {
 			field.generateCode(writer);
 		}
@@ -480,7 +488,9 @@ public class TypeDecl extends ASTNode
 			method.generateCode(writer);
 		}
 		
-		generateComment(writer, false);
+		// TODO generate other items...
+		
+		writer.popComment();
 		
 	}
 }

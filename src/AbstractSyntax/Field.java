@@ -1,8 +1,8 @@
 package AbstractSyntax;
 
-import java.io.PrintWriter;
 import java.util.List;
 
+import Compiler.AsmWriter;
 import Parser.ParseTree;
 import Types.Type;
 import Utilities.BiPredicate;
@@ -23,6 +23,10 @@ public class Field extends Decl implements Identifier.Interpretation {
 	
 	public Identifier getName() {
 		return this.name;
+	}
+	
+	@Override public String toString() {
+		return type + " " + this.getName();
 	}
 	
 	public Field(ParseTree tree, TypeDecl declaringType) {
@@ -129,9 +133,8 @@ public class Field extends Decl implements Identifier.Interpretation {
 	
 	// ---------- For code generate ----------
 
-	@Override public void generateCode(PrintWriter writer) {
-		this.commentName = String.format("Field %s", scopeIdentifier(name.toString()));
-		setLabel(writer, this.scopeIdentifier(name.toString()));
-		// TODO
+	@Override public void generateCode(AsmWriter writer) {
+		writer.comment("TODO: Field %s", this);
+		// TODO Ignore non-static fields; else generate label and zero word.
 	}
 }

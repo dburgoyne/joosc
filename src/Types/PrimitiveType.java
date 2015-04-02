@@ -29,7 +29,7 @@ public enum PrimitiveType implements Type {
 		return t instanceof PrimitiveType
 		    && (this.isIntegral() == ((PrimitiveType)t).isIntegral());
 	}
-	
+
 	@Override public boolean canBeAssignedTo(Type t) {
 		return t instanceof PrimitiveType
 			&& (this == BOOLEAN ? t == BOOLEAN
@@ -39,8 +39,20 @@ public enum PrimitiveType implements Type {
 			: (t == INT));
 	}
 	
+	@Override public int getTypeID() {
+		return this == BOOLEAN ? -1
+			 : this == BYTE ? -2
+			 : this == CHAR ? -3
+			 : this == SHORT ? -4
+			 : -5;
+	}
+	
 	
 	@Override public String getCanonicalName() {
+		return canonicalName;
+	}
+	
+	@Override public String toString() {
 		return canonicalName;
 	}
 

@@ -49,7 +49,7 @@ public enum TokenType {
 	// CommentTail and
 	// CommentTailStar. It is based on a regex found at
 	// http://www.cs.dartmouth.edu/~mckeeman/cs118/assignments/comment.html
-	// TODO This regex should be thoroughly tested.
+	// TO DO This regex should be thoroughly tested.
 
 	TraditionalComment(
 
@@ -89,7 +89,7 @@ public enum TokenType {
 	IdentifierChars(Regex.Build(Regex.Type.CONCATENATION, new Regex(
 			CharacterClass.JavaLetter), new Regex(Regex.Type.KLEENE_CLOSURE,
 			new Regex(CharacterClass.JavaLetterOrDigit)))),
-	// TODO It will be necessary to identify keywords explicitly in the scanner
+	// TO DO It will be necessary to identify keywords explicitly in the scanner
 	// and invalidate illegitimate matches of this regex.
 	Identifier(IdentifierChars.getRegex()),
 
@@ -116,7 +116,7 @@ public enum TokenType {
 	BooleanLiteral(Regex.Build(Regex.Type.DISJUNCTION, new Regex("true"),
 			new Regex("false"))),
 
-	// TODO We may not need these.
+	// TO DO We may not need these.
 	OctalEscape(Regex.Build(Regex.Type.DISJUNCTION, Regex.Build(
 			Regex.Type.CONCATENATION, new Regex('\\'), new Regex(
 					CharacterClass.OctalDigit)), Regex.Build(

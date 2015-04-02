@@ -8,4 +8,6 @@ public interface Type {
 	public boolean canBeCastAs(Type t);
 	public boolean canBeAssignedTo(Type t);
 	
+	// Return this type's runtime identifier (TypeID). 
+	public int getTypeID();
 }

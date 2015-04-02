@@ -1,10 +1,10 @@
 package AbstractSyntax;
 
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import Compiler.AsmWriter;
 import Parser.ParseTree;
 import Utilities.Cons;
 import Utilities.Predicate;
@@ -268,18 +268,11 @@ public class Classfile extends ASTNode {
 	
 	// ---------- For code generate ----------
 
-	@Override public void generateCode(PrintWriter writer) {
+	@Override public void generateCode(AsmWriter writer) {
 		
-		// TODO I'm not sure what Xiang wanted this scope list for.
-		scope = new ArrayList<String>();
-		if (packageName != null) {
-			scope.addAll(packageName.components);
-		}
-		
-		this.commentName = String.format("File %s", parseTree.getToken().getFileName());
-		generateComment(writer, true);
+		writer.pushComment("Source file: %s", parseTree.getToken().getFileName());
 		this.typeDecl.generateCode(writer);
-		generateComment(writer, false);
+		writer.popComment();
 		
 	}
 }

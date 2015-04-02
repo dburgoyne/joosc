@@ -1,9 +1,9 @@
 package AbstractSyntax;
 
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import Compiler.AsmWriter;
 import Parser.ParseTree;
 import Types.Type;
 import Utilities.BiPredicate;
@@ -281,11 +281,10 @@ public class Method extends Decl {
 	
 	// ---------- Code generation ----------
 
-	@Override public void generateCode(PrintWriter writer) {
-		this.commentName = String.format("Method %s", scopeIdentifier(name.toString(), parameters));
-		setLabel(writer, this.scopeIdentifier(name.toString(), parameters));
-		// TODO
-		writer.println("leave");
-		writer.println("ret");
+	@Override public void generateCode(AsmWriter writer) {
+		writer.comment("TODO: Method %s", this);
+		// TODO Do proper method generation (i.e. first create arg frame, then codegen Block)
+		//writer.instr("leave");
+		//writer.instr("ret");
 	}
 }

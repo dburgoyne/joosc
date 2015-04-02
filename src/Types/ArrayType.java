@@ -18,6 +18,14 @@ public class ArrayType implements Type {
 		return this.type.getCanonicalName() + "[]";
 	}
 	
+	@Override public String toString() {
+		return this.getCanonicalName();
+	}
+	
+	@Override public int getTypeID() {
+		return 0;
+	}
+	
 	@Override public boolean canBeCastAs(Type t) {
 		return t.canBeAssignedTo(this) || this.canBeAssignedTo(t);
 	}

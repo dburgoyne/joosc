@@ -7,6 +7,10 @@ public enum NullType implements Type {
 	@Override public String getCanonicalName() {
 		return "(null)";
 	}
+	
+	@Override public int getTypeID() {
+		return -6;
+	}
 
 	@Override public boolean canBeCastAs(Type t) {
 		return !(t instanceof PrimitiveType);

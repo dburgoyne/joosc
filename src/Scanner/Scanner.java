@@ -27,7 +27,7 @@ import Utilities.StringUtils;
 
 public class Scanner {
 
-	// TODO These constants should likely go somewhere else.
+	// TO DO These constants should likely go somewhere else.
 	public final static int TAB_SIZE = 4;
 	public final static String[] KEYWORDS = { "abstract", "default", "if",
 			"private", "this", "boolean", "do", "implements", "protected",
@@ -71,7 +71,7 @@ public class Scanner {
 	public static int longestPrefix(Regex r, String s) {
 		int length = 0;
 		for (int i = 0; i < s.length(); i++) {
-			// TODO Benchmark this function with and without simplification
+			// TO DO Benchmark this function with and without simplification
 			// here.
 			r = Regex.simplify(Regex.derivative(r, s.charAt(i)));
 			// If r is equivalent to the empty set, we can break from the loop.
@@ -97,7 +97,7 @@ public class Scanner {
 		while (joosSource.length() > 0) {
 			// Compute the length of the longest prefix of the remaining
 			// input matched by each token type regex.
-			// TODO Consider trying to parallelize this.
+			// TO DO Consider trying to parallelize this.
 			Map<TokenType, Integer> matchLengths = new HashMap<TokenType, Integer>();
 			for (TokenType tokenType : tokensToScanFor) {
 				matchLengths.put(tokenType,

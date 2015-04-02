@@ -1,9 +1,9 @@
 package AbstractSyntax;
 
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import Compiler.AsmWriter;
 import Parser.ParseTree;
 import Utilities.BiPredicate;
 import Utilities.Cons;
@@ -119,11 +119,10 @@ public class Constructor extends ASTNode implements EnvironmentDecl {
 	
 	// ---------- Code generation ----------
 
-	@Override public void generateCode(PrintWriter writer) {
-		this.commentName = String.format("Constructor %s", scopeIdentifier(name.toString(), parameters));
-		setLabel(writer, this.scopeIdentifier(name.toString(), parameters));
-		// TODO
-		writer.println("leave");
-		writer.println("ret");
+	@Override public void generateCode(AsmWriter writer) {
+		writer.comment("TODO: Constructor %s", this);
+		// TODO Ctors should call non-static initializers, then their own body.
+		//writer.instr("leave");
+		//writer.instr("ret");
 	}
 }

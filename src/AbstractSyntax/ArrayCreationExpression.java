@@ -22,7 +22,7 @@ public class ArrayCreationExpression extends Expression {
 			this.dimExpr = Expression.extractExpression(tree.getChildren()[2].getChildren()[1]);
 		} else if (tree.numChildren() == 4) {
 			// Do nothing.
-			// TODO The rules "ArrayCreationExpression new PrimitiveType [ ]" and
+			// The rules "ArrayCreationExpression new PrimitiveType [ ]" and
 			// "ArrayCreationExpression new AmbiguousName [ ]" probably don't belong in Joos.
 		}
 	}
@@ -53,7 +53,7 @@ public class ArrayCreationExpression extends Expression {
 	@Override
 	public void checkTypes() throws TypeCheckingException {
 		
-		// TODO This should probably be fixed in the grammar.
+		// TO DO This should probably be fixed in the grammar.
 		if (this.dimExpr == null) {
 			throw new TypeCheckingException.TypeMismatch(this, "an integral type");
 		}

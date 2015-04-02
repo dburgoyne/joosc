@@ -1,11 +1,9 @@
 package AbstractSyntax;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import Compiler.Compiler;
+import Compiler.AsmWriter;
 import Parser.ParseTree;
 import Utilities.Cons;
 
@@ -154,13 +152,25 @@ public class Program extends ASTNode {
 	
 	// ---------- Code generation ----------
 	
-	@Override public void generateCode(PrintWriter writer) throws IOException {
-		this.commentName = this.getClass().toString();
+	@Override public void generateCode(AsmWriter writer) {
+		Exception err = null;
 		for (Classfile file : files) {
-			String outputFileName = file.typeDecl.getCanonicalName().toString() + ".s";
-			writer = new PrintWriter(Compiler.OUTPUT_DIR + "/" + outputFileName);
-			file.generateCode(writer);
-			writer.close();
+			try {
+				writer = new AsmWriter(file.typeDecl);
+				file.generateCode(writer);
+			} catch (Exception caught) {
+				if (err != null) {
+					System.err.println(err);
+				}
+				err = caught;
+			} finally {
+				if (writer != null) {
+					writer.close();
+				}
+			}
+		}
+		if (err != null) {
+			throw new RuntimeException(err);
 		}
 	}
 }
