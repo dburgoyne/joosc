@@ -71,8 +71,12 @@ public class Compiler {
     		List<TypeDecl> sortedTypes = h.topologicalSort();
     		
     		// Build method/field/ctor/ancestor sets in topological order.
-    		for (TypeDecl ty : sortedTypes) {
-    			ty.buildMemberSet();
+    		{
+    			int tid = 0;
+	    		for (TypeDecl ty : sortedTypes) {
+	    			ty.buildMemberSet();
+	    			ty.setTypeID(++tid);
+	    		}
     		}
     		
     		// Name resolution pass.
@@ -83,6 +87,11 @@ public class Compiler {
     		
     		// Reachability analysis pass.
     		program.checkReachability(true);
+    		
+    		// Build Vtable schemas and field indices.
+    		for (TypeDecl ty : sortedTypes) {
+    			ty.buildSchema();
+    		}
     		
     		// Code generation pass.
     		program.generateCode(null);

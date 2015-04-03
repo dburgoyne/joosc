@@ -1,6 +1,7 @@
 package AbstractSyntax;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import Compiler.AsmWriter;
@@ -492,5 +493,40 @@ public class TypeDecl extends ASTNode
 		
 		writer.popComment();
 		
+	}
+	
+	// All non-static fields present in a concrete object of this type,
+	// sorted in object layout order. 
+	private Field[] allInstanceFields = null;
+	protected Field[] getAllInstanceFields() {
+		assert this.allInstanceFields != null;
+		return this.allInstanceFields;
+	}
+	
+	// All non-static methods callable on an object of this type,
+	// sorted in the order in which they appear in this type's Vtable.
+	private Method[] allInstanceMethods = null;
+	protected Method[] getAllInstanceMethods() {
+		assert this.allInstanceMethods != null;
+		return this.allInstanceMethods;
+	}
+	
+	// Maps a type T to a Vtable. If this <: T, maps to V_(T, this). Else, null.
+	private HashMap<TypeDecl, Method[]> allVtables = null;
+	protected Method[] getVtableFor(TypeDecl t) {
+		assert allVtables != null;
+		assert allVtables.containsKey(t) == this.isSubtypeOf(t);
+		return allVtables.get(t);
+	}
+
+	public void buildSchema() {
+		// Fields.
+		Field[] parentInstanceFields = this.superclass == null 
+				? new Field[0] 
+				: this.superclass.getAllInstanceFields();
+		allInstanceFields = new Field[parentInstanceFields.length + this.fields.size()];
+		for (Field f : parentInstanceFields) {
+			
+		}
 	}
 }
