@@ -201,6 +201,7 @@ public class Program extends ASTNode {
 			writer.line("%s: resb %d",
 					str.label,
 					Program.javaLangString.sizeOf());
+			writer.justDefinedGlobal(str.label);
 		}
 		
 		writer.verbatimln("section .text");
@@ -217,6 +218,8 @@ public class Program extends ASTNode {
 		// Call the java.lang.String constructor on each literal, and store the java.lang.String object references in an array.
 		writer.verbatimfn("global strlit_init");
 		writer.label("strlit_init");
+		writer.justDefinedGlobal("strlit_init");
+		
 		for (int i = 0; i < Program.allStringLiterals.size(); i++) {
 			Literal str = Program.allStringLiterals.get(i);
 			// Push str.label

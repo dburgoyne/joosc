@@ -2,6 +2,7 @@ package CodeGeneration;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.HashSet;
 import java.util.LinkedList;
 
 import AbstractSyntax.TypeDecl;
@@ -21,6 +22,12 @@ public class AsmWriter {
 	}
 	
 	public void close() {
+		// Output extern declarations at end of file.
+		for (String label : usedGlobals) {
+			if (!definedGlobals.contains(label)) {
+				this.verbatimfn("extern %s", label);
+			}
+		}
 		writer.close();
 	}
 	
@@ -102,7 +109,7 @@ public class AsmWriter {
 	public void verbatimln(Object x) {
 		writer.println(x);
 	}
-	public void verbatimln() {
+	public void line() {
 		writer.println();
 	}
 	public void verbatimf(String fmt, Object... args) {
@@ -110,10 +117,23 @@ public class AsmWriter {
 	}
 	public void verbatimfn(String fmt, Object... args) {
 		verbatimf(fmt, args);
-		verbatimln();
+		line();
 	}
 	
 	private int getIndentLevel() {
 		return this.comments.size();
+	}
+
+	private HashSet<String> usedGlobals = new HashSet<String>();
+	private HashSet<String> definedGlobals = new HashSet<String>();
+
+	// Called after referring to a label defined as global in some module.
+	public void justUsedGlobal(String label) {
+		usedGlobals.add(label);
+	}
+	
+	// Called after defining a label as global.
+	public void justDefinedGlobal(String label) {
+		definedGlobals.add(label);
 	}
 }

@@ -154,8 +154,10 @@ public class Field extends Decl implements Identifier.Interpretation {
 
 	@Override public void generateCode(AsmWriter writer, Frame frame) {
 		if (this.isStatic()) {
-			writer.verbatimfn("global %s", this.getStaticLabel());
-			writer.verbatimfn("%s: dd 0", getStaticLabel());
+			String label = this.getStaticLabel();
+			writer.verbatimfn("global %s", label);
+			writer.verbatimfn("%s: dd 0", label);
+			writer.justDefinedGlobal(label);
 		}
 	}
 }

@@ -305,8 +305,10 @@ public class Method extends Decl {
 	@Override public void generateCode(AsmWriter writer, Frame frame) {
 		writer.pushComment("Method %s", this);
 
-		writer.verbatimfn("global %s", this.getImplementationLabel());
-		writer.label(this.getImplementationLabel());
+		String implLbl = this.getImplementationLabel();
+		writer.verbatimfn("global %s", implLbl);
+		writer.label(implLbl);
+		writer.justDefinedGlobal(implLbl);
 		
 		// New top-level frame.
 		frame = new Frame();
@@ -325,23 +327,36 @@ public class Method extends Decl {
 		if (!this.isStatic()) {
 			writer.comment("Method %s dispatcher", this);
 
-			writer.verbatimfn("global %s", this.getDispatcherLabel());
-			writer.label(this.getDispatcherLabel());
-			frame.enter(writer);
+			String callLbl = this.getDispatcherLabel();
+			writer.verbatimfn("global %s", callLbl);
+			writer.label(callLbl);
+			writer.justDefinedGlobal(callLbl);
 			
 			// Can't call methods on a null object.
-			writer.instr("mov", "eax", frame.derefThis());
+			writer.instr("mov", "eax", "[esp + " + 4*(this.parameters.size() + 1) + "]"); // eax <- this
 			writer.instr("cmp", "eax", 0);
-			writer.instr("je", "__exception");
+			writer.instr("je",    "__exception");
+			writer.justUsedGlobal("__exception");
 			
-			writer.instr("mov", "eax", "[eax]");
-			writer.instr("mov", "eax", "[eax*4 + " + this.declaringType.getSubtypeTableLabel() + "]");
-			// TODO Search the vtable (now in eax) using the index of this method in this.declaringType.allInstanceMethods. 
-			
-			frame.leave(writer);
-			writer.instr("ret", (this.parameters.size() + 1) * 4);
+			writer.instr("mov", "eax", "[eax]"); // eax <- this.tid
+			writer.instr("mov", "eax",           // eax <- V_(T, S)
+					"[eax*4 + " + this.declaringType.getSubtypeTableLabel() + "]");
+			writer.instr("jmp",                  // direct jump to impl
+					"[eax + " + 4*this.getVtableIndex() + "]");
 		}
 		
 		writer.popComment();
+	}
+	
+	// Search self in vtable of this.declaringType using the index of this method in
+	// this.declaringType.allInstanceMethods. 
+	private int getVtableIndex() {
+		Method[] vtable = this.declaringType.getAllInstanceMethods();
+		int index;
+		for (index = 0; index < vtable.length; index++) {
+			if (vtable[index] == this) break;
+		}
+		assert index < vtable.length;
+		return index;
 	}
 }

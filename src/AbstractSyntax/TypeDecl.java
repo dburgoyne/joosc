@@ -539,9 +539,12 @@ public class TypeDecl extends ASTNode
 			String label = this.getVtableLabelFor(t);
 			writer.verbatimfn("global %s", label);
 			writer.label(label);
+			writer.justDefinedGlobal(label);
 			
 			for (int i = 0; i < vtable.length; i++) {
-				writer.line("dd %s", vtable[i].getImplementationLabel());
+				String implLbl = vtable[i].getImplementationLabel();
+				writer.line("dd %s", implLbl);
+				writer.justUsedGlobal(implLbl);
 			}
 			writer.popComment();
 		}
@@ -551,18 +554,21 @@ public class TypeDecl extends ASTNode
 		String tableLabel = this.getSubtypeTableLabel();
 		writer.verbatimfn("global %s", tableLabel);
 		writer.label(tableLabel);
+		writer.justDefinedGlobal(tableLabel);
+		
 		for (int i = 0; i < this.subtypeTableEntries.length; i++) {
 			String entryLabel = this.subtypeTableEntries[i];
-			if (entryLabel == null) {
-				if (i == 0 && (this == Program.javaLangObject
-					     	|| this == Program.javaLangCloneable
-					        || this == Program.javaIoSerializable)) {
-					entryLabel = Program.javaLangObject.getVtableLabelFor(Program.javaLangObject);
-				} else {
-					entryLabel = "0";
-				}
+			if (entryLabel == null 
+					&& i == 0
+					&& (this == Program.javaLangObject
+					 || this == Program.javaLangCloneable
+					 || this == Program.javaIoSerializable)) {
+				entryLabel = Program.javaLangObject.getVtableLabelFor(Program.javaLangObject);
 			}
-			writer.instr("dd", entryLabel);
+			writer.instr("dd", entryLabel == null ? 0 : entryLabel);
+			if (entryLabel != null) {
+				writer.justUsedGlobal(entryLabel);
+			}
 		}
 	}
 	
@@ -577,8 +583,13 @@ public class TypeDecl extends ASTNode
 	public void generateFieldInitializers(AsmWriter writer, boolean isStatic) {
 
 		String label = this.getInitializerLabel(isStatic);
-		writer.verbatimfn("global %s", label);
-		writer.label(label);
+		if (isStatic) {
+			writer.verbatimfn("global %s", label);
+			writer.label(label);
+			writer.justDefinedGlobal(label);
+		} else {
+			writer.label(label);
+		}
 		
 		// New top-level frame.
 		Frame frame = new Frame();
@@ -587,8 +598,10 @@ public class TypeDecl extends ASTNode
 		
 		// Call supertype's zero-argument constructor before non-static field initialization.
 		if (!isStatic && this.superclass != null) {
+			String superCtorLbl = this.superclass.getDefaultConstructorLabel();
 			writer.instr("push", "dword " + frame.derefThis());
-			writer.instr("call", this.superclass.getDefaultConstructorLabel());
+			writer.instr("call", superCtorLbl);
+			writer.justUsedGlobal(superCtorLbl);
 		}
 		
 		for (Field f : this.fields) {

@@ -127,8 +127,10 @@ public class Constructor extends ASTNode implements EnvironmentDecl {
 	// ---------- Code generation ----------
 
 	@Override public void generateCode(AsmWriter writer, Frame frame) {
-		writer.verbatimfn("global %s", this.getLabel());
-		writer.label(this.getLabel());
+		String ctorLbl = this.getLabel();
+		writer.verbatimfn("global %s", ctorLbl);
+		writer.label(ctorLbl);
+		writer.justDefinedGlobal(ctorLbl);
 		
 		// New top-level frame.
 		frame = new Frame();
