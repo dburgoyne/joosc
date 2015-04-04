@@ -1,5 +1,10 @@
 package AbstractSyntax;
 
+import Exceptions.ImportException;
+import Exceptions.NameConflictException;
+import Exceptions.NameLinkingException;
+import Exceptions.TypeCheckingException;
+import Exceptions.TypeLinkingException;
 import Parser.ParseTree;
 import Types.ArrayType;
 import Types.PrimitiveType;

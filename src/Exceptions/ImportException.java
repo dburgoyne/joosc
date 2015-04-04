@@ -1,5 +1,7 @@
-package AbstractSyntax;
+package Exceptions;
 
+import AbstractSyntax.Identifier;
+import AbstractSyntax.TypeDecl;
 import Utilities.StringUtils;
 
 public abstract class ImportException extends Exception {

@@ -3,8 +3,16 @@ package AbstractSyntax;
 import java.util.ArrayList;
 import java.util.List;
 
-import Compiler.AsmWriter;
+import CodeGeneration.AsmWriter;
+import CodeGeneration.Frame;
+import Exceptions.ImportException;
+import Exceptions.NameConflictException;
+import Exceptions.NameLinkingException;
+import Exceptions.ReachabilityException;
+import Exceptions.TypeCheckingException;
+import Exceptions.TypeLinkingException;
 import Parser.ParseTree;
+import Types.PrimitiveType;
 import Utilities.Cons;
 
 public class Program extends ASTNode {
@@ -12,6 +20,8 @@ public class Program extends ASTNode {
 	
 	public static TypeDecl javaLangObject;
 	public static TypeDecl javaLangString;
+	public static TypeDecl javaLangCloneable;
+	public static TypeDecl javaIoSerializable;
 	
 	// List of all string literals in the program, to be populated before code generation.
 	public static List<Literal> allStringLiterals; 
@@ -39,6 +49,12 @@ public class Program extends ASTNode {
 			}
 			if(type.getCanonicalName().equals("java.lang.String")) {
 				Program.javaLangString = type;
+			}
+			if(type.getCanonicalName().equals("java.lang.Cloneable")) {
+				Program.javaLangCloneable = type;
+			}
+			if(type.getCanonicalName().equals("java.io.Serializable")) {
+				Program.javaIoSerializable = type;
 			}
 			
 			this.environment = new Cons<EnvironmentDecl>(export, this.environment);
@@ -152,12 +168,12 @@ public class Program extends ASTNode {
 	
 	// ---------- Code generation ----------
 	
-	@Override public void generateCode(AsmWriter writer) {
+	@Override public void generateCode(AsmWriter writer, Frame frame) {
 		Exception err = null;
 		for (Classfile file : files) {
 			try {
 				writer = new AsmWriter(file.typeDecl);
-				file.generateCode(writer);
+				file.generateCode(writer, frame);
 			} catch (Exception caught) {
 				if (err != null) {
 					System.err.println(err);
@@ -172,5 +188,46 @@ public class Program extends ASTNode {
 		if (err != null) {
 			throw new RuntimeException(err);
 		}
+	}
+	
+	public static void generateStringTable(AsmWriter writer) {
+		writer.pushComment("String literal table");
+
+		writer.verbatimln("section .bss");
+		for (int i = 0; i < Program.allStringLiterals.size(); i++) {
+			Literal str = Program.allStringLiterals.get(i);
+			str.label = "strlit_" + i;
+			writer.verbatimfn("global %s", str.label);
+			writer.line("%s: resb %d",
+					str.label,
+					Program.javaLangString.sizeOf());
+		}
+		
+		writer.verbatimln("section .text");
+		for (int i = 0; i < Program.allStringLiterals.size(); i++) {
+			Literal str = Program.allStringLiterals.get(i);
+			String label = str.label + "_data";
+			writer.line("%s: db 0, %d, %d, %s",
+					label,
+					PrimitiveType.CHAR.getTypeID(),
+					str.value.length() - 2,
+					str.value);
+		}
+		
+		// Call the java.lang.String constructor on each literal, and store the java.lang.String object references in an array.
+		writer.verbatimfn("global strlit_init");
+		writer.label("strlit_init");
+		for (int i = 0; i < Program.allStringLiterals.size(); i++) {
+			Literal str = Program.allStringLiterals.get(i);
+			// Push str.label
+			writer.instr("push", str.label);
+			// Push corresponding char[] literal label
+			writer.instr("push", str.label + "_data");
+			// Call constructor
+			writer.instr("call", "ctor_java.lang.String#char@");
+			// Callee pops.
+		}
+		writer.instr("ret");
+		writer.popComment();
 	}
 }

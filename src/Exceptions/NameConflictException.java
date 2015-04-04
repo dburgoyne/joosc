@@ -1,4 +1,9 @@
-package AbstractSyntax;
+package Exceptions;
+
+import AbstractSyntax.Field;
+import AbstractSyntax.Formal;
+import AbstractSyntax.Local;
+import AbstractSyntax.TypeDecl;
 
 public class NameConflictException extends Exception {
 	

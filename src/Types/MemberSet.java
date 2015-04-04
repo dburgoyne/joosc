@@ -30,6 +30,13 @@ public class MemberSet {
 		return Cons.union(inheritedFields, declaredFields,
 						  new Decl.SameNamePredicate());
 	}
+	public Cons<Method> getInstanceMethods() { 
+		return Cons.filter(this.getMethods(), new Predicate<Method>() {
+			public boolean test(Method m) {
+				return !m.isStatic();
+			}
+		});
+	}
 	public Cons<Method> getMethods() { 
 		return Cons.union(inheritedAbstractMethods, 
 			   Cons.union(declaredAbstractMethods,
@@ -40,7 +47,7 @@ public class MemberSet {
 				  new Method.SameSignaturePredicate());
 	}
 	
-	public List<TypeDecl> getSupertypes() {
+	public List<TypeDecl> getStrictSupertypes() {
 		return Cons.toList(this.supertypes);
 	}
 	

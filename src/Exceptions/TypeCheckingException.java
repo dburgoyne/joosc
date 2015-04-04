@@ -1,7 +1,17 @@
-package AbstractSyntax;
+package Exceptions;
 
 import java.util.List;
 
+import AbstractSyntax.BinaryExpression;
+import AbstractSyntax.ClassInstanceCreationExpression;
+import AbstractSyntax.Constructor;
+import AbstractSyntax.Expression;
+import AbstractSyntax.FieldAccessExpression;
+import AbstractSyntax.Identifier;
+import AbstractSyntax.Method;
+import AbstractSyntax.MethodInvocationExpression;
+import AbstractSyntax.ReturnStatement;
+import AbstractSyntax.TypeDecl;
 import Types.Type;
 
 public abstract class TypeCheckingException extends Exception {

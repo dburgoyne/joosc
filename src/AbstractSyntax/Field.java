@@ -2,7 +2,14 @@ package AbstractSyntax;
 
 import java.util.List;
 
-import Compiler.AsmWriter;
+import CodeGeneration.AsmWriter;
+import CodeGeneration.Frame;
+import Exceptions.ImportException;
+import Exceptions.NameConflictException;
+import Exceptions.NameLinkingException;
+import Exceptions.ReachabilityException;
+import Exceptions.TypeCheckingException;
+import Exceptions.TypeLinkingException;
 import Parser.ParseTree;
 import Types.Type;
 import Utilities.BiPredicate;
@@ -27,6 +34,10 @@ public class Field extends Decl implements Identifier.Interpretation {
 	
 	@Override public String toString() {
 		return type + " " + this.getName();
+	}
+	
+	public boolean isStatic() {
+		return this.modifiers.contains(Modifier.STATIC);
 	}
 	
 	public Field(ParseTree tree, TypeDecl declaringType) {
@@ -131,10 +142,20 @@ public class Field extends Decl implements Identifier.Interpretation {
 		}
 	}
 	
-	// ---------- For code generate ----------
+	// ---------- Code generation ----------
+	
+	// The offset of this field from the start of the object, in bytes.
+	public int byteOffset;
+	
+	public String getStaticLabel() {
+		assert(this.isStatic());
+		return Utilities.Label.generateLabel("sf", this.declaringType.getCanonicalName(), this.name.getSingleComponent(), null);
+	}
 
-	@Override public void generateCode(AsmWriter writer) {
-		writer.comment("TODO: Field %s", this);
-		// TODO Ignore non-static fields; else generate label and zero word.
+	@Override public void generateCode(AsmWriter writer, Frame frame) {
+		if (this.isStatic()) {
+			writer.verbatimfn("global %s", this.getStaticLabel());
+			writer.verbatimfn("%s: dd 0", getStaticLabel());
+		}
 	}
 }

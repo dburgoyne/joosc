@@ -2,7 +2,14 @@ package AbstractSyntax;
 
 import java.util.List;
 
-import Compiler.AsmWriter;
+import CodeGeneration.AsmWriter;
+import CodeGeneration.Frame;
+import Exceptions.ImportException;
+import Exceptions.NameConflictException;
+import Exceptions.NameLinkingException;
+import Exceptions.ReachabilityException;
+import Exceptions.TypeCheckingException;
+import Exceptions.TypeLinkingException;
 import Parser.ParseTree;
 import Scanner.Token;
 import Utilities.Cons;
@@ -38,7 +45,7 @@ public abstract class ASTNode {
 	public abstract void checkReachability(boolean canLeavePrevious) throws ReachabilityException;
 	
 	// ---------- Code generation ----------
-	public void generateCode(AsmWriter writer) {
+	public void generateCode(AsmWriter writer, Frame frame) {
 		writer.comment("Code generation for %s is not yet implemented.", this.getClass().getName());
 	}
 }

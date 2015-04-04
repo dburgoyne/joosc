@@ -3,6 +3,11 @@ package AbstractSyntax;
 import java.util.ArrayList;
 import java.util.List;
 
+import Exceptions.ImportException;
+import Exceptions.NameConflictException;
+import Exceptions.NameLinkingException;
+import Exceptions.TypeCheckingException;
+import Exceptions.TypeLinkingException;
 import Parser.ParseTree;
 import Utilities.BiPredicate;
 import Utilities.Cons;

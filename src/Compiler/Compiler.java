@@ -3,14 +3,14 @@ package Compiler;
 import java.io.IOException;
 import java.util.List;
 
-import AbstractSyntax.ImportException;
-import AbstractSyntax.NameConflictException;
-import AbstractSyntax.NameLinkingException;
 import AbstractSyntax.Program;
-import AbstractSyntax.ReachabilityException;
-import AbstractSyntax.TypeCheckingException;
 import AbstractSyntax.TypeDecl;
-import AbstractSyntax.TypeLinkingException;
+import Exceptions.ImportException;
+import Exceptions.NameConflictException;
+import Exceptions.NameLinkingException;
+import Exceptions.ReachabilityException;
+import Exceptions.TypeCheckingException;
+import Exceptions.TypeLinkingException;
 import Parser.ParseException;
 import Parser.ParseTable;
 import Parser.ParseTree;
@@ -94,7 +94,7 @@ public class Compiler {
     		}
     		
     		// Code generation pass.
-    		program.generateCode(null);
+    		program.generateCode(null, null);
     		
     	} catch (Exception e) {
 			if (e instanceof NameConflictException
@@ -116,6 +116,8 @@ public class Compiler {
 			// during repeated runs.
 			Program.javaLangObject = null;
 			Program.javaLangString = null;
+			Program.javaLangCloneable = null;
+			Program.javaIoSerializable = null;
 		}
         
         if (failed) {

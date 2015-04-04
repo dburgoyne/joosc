@@ -1,5 +1,7 @@
 package AbstractSyntax;
 
+import Exceptions.TypeCheckingException;
+import Exceptions.TypeLinkingException;
 import Parser.ParseTree;
 import Types.NullType;
 import Types.PrimitiveType;
@@ -35,6 +37,7 @@ public class Literal extends Expression {
 	
 	protected LiteralType type;
 	protected String value;
+	protected String label;  // For String literals
 	
 	public Literal(ParseTree tree) {
 		super(tree);

@@ -1,5 +1,9 @@
 package AbstractSyntax;
 
+import Exceptions.NameConflictException;
+import Exceptions.ReachabilityException;
+import Exceptions.TypeCheckingException;
+import Exceptions.TypeLinkingException;
 import Parser.ParseTree;
 import Types.Type;
 import Utilities.Cons;
@@ -13,6 +17,10 @@ public class Formal extends ASTNode
 	
 	public Identifier getName() {
 		return this.name;
+	}
+	
+	public Type getType() {
+		return this.type;
 	}
 	
 	public Formal(ParseTree tree) {

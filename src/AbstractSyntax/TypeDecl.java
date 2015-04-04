@@ -1,10 +1,19 @@
 package AbstractSyntax;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import Compiler.AsmWriter;
+import CodeGeneration.AsmWriter;
+import CodeGeneration.Frame;
+import Exceptions.ImportException;
+import Exceptions.NameConflictException;
+import Exceptions.NameLinkingException;
+import Exceptions.ReachabilityException;
+import Exceptions.TypeCheckingException;
+import Exceptions.TypeLinkingException;
 import Parser.ParseTree;
 import Types.MemberSet;
 import Types.Type;
@@ -15,7 +24,7 @@ import Utilities.Predicate;
 public class TypeDecl extends ASTNode
 		implements EnvironmentDecl, Type, Identifier.Interpretation {
 	
-	enum Kind {
+	public enum Kind {
 		CLASS,
 		INTERFACE
 	};
@@ -35,8 +44,14 @@ public class TypeDecl extends ASTNode
 	
 	protected MemberSet memberSet;
 	
+	protected List<TypeDecl> allTypes;
+	
 	// Back reference to the parent Classfile node.
 	protected Classfile parent;
+	
+	public TypeDecl.Kind getKind() {
+		return this.kind;
+	}
 	
 	// Type IDs: must be assigned before being accessed. 
 	private int tid = 0;
@@ -315,6 +330,8 @@ public class TypeDecl extends ASTNode
 
 	@Override public void linkTypes(Cons<TypeDecl> allTypes) throws TypeLinkingException {
 		
+		this.allTypes = Cons.toList(allTypes);
+		
 		// Hierarchy decls:
 		
 		if (this.superclassName != null) {
@@ -433,7 +450,7 @@ public class TypeDecl extends ASTNode
 	}
 	
 	public boolean isSubtypeOf(TypeDecl t) {
-		return (t.equals(this) || this.memberSet.getSupertypes().contains(t));
+		return (t.equals(this) || this.memberSet.getStrictSupertypes().contains(t));
 	}
 	 public int f = 117 + (f=2) + 2;
 
@@ -474,25 +491,123 @@ public class TypeDecl extends ASTNode
 	// ---------- Code generation ----------
 	
 	@Override
-	public void generateCode(AsmWriter writer) {
+	public void generateCode(AsmWriter writer, Frame frame) {
 		
 		writer.pushComment("Type %s", this.getCanonicalName());
 		
+		writer.comment("VTables");
+		this.generateVTables(writer);
+		
+		writer.comment("Subtype table");
+		this.generateSubtypeTable(writer);
+		
+		writer.comment("Static field initializers");
+		this.generateFieldInitializers(writer, true);
+		writer.comment("Non-static field initializers");
+		this.generateFieldInitializers(writer, false);
+		
+		writer.comment("Constructors");
 		for (Constructor constructor : constructors) {
-			constructor.generateCode(writer);
+			constructor.generateCode(writer, frame);
 		}
+		
 		// Only Static fields should generate any code.
+		writer.comment("Fields");
+		writer.verbatimln("section .data");
 		for (Field field : fields) {
-			field.generateCode(writer);
+			field.generateCode(writer, frame);
 		}
+		writer.verbatimln("section .text");
+
+		writer.comment("Methods");
 		for (Method method : methods) {
-			method.generateCode(writer);
+			method.generateCode(writer, frame);
 		}
 		
 		// TODO generate other items...
 		
 		writer.popComment();
 		
+	}
+	
+	public void generateVTables(AsmWriter writer) {
+		
+		for (Map.Entry<TypeDecl, Method[]> entry : this.allVtables.entrySet()) {
+			TypeDecl t = entry.getKey();
+			Method[] vtable = entry.getValue();
+			writer.pushComment("V_(%s, %s)", t.getCanonicalName(), this.getCanonicalName());
+			String label = this.getVtableLabelFor(t);
+			writer.verbatimfn("global %s", label);
+			writer.label(label);
+			
+			for (int i = 0; i < vtable.length; i++) {
+				writer.line("dd %s", vtable[i].getImplementationLabel());
+			}
+			writer.popComment();
+		}
+	}
+	
+	public void generateSubtypeTable(AsmWriter writer) {
+		String tableLabel = this.getSubtypeTableLabel();
+		writer.verbatimfn("global %s", tableLabel);
+		writer.label(tableLabel);
+		for (int i = 0; i < this.subtypeTableEntries.length; i++) {
+			String entryLabel = this.subtypeTableEntries[i];
+			if (entryLabel == null) {
+				if (i == 0 && (this == Program.javaLangObject
+					     	|| this == Program.javaLangCloneable
+					        || this == Program.javaIoSerializable)) {
+					entryLabel = Program.javaLangObject.getVtableLabelFor(Program.javaLangObject);
+				} else {
+					entryLabel = "0";
+				}
+			}
+			writer.instr("dd", entryLabel);
+		}
+	}
+	
+	public String getDefaultConstructorLabel() {
+		return Utilities.Label.generateLabel("ctor", this.getCanonicalName(), null, null);
+	}
+	
+	public String getInitializerLabel(boolean isStatic) {
+		return Utilities.Label.generateLabel(isStatic ? "si" : "ii", this.getCanonicalName(), null, null);
+	}
+	
+	public void generateFieldInitializers(AsmWriter writer, boolean isStatic) {
+
+		String label = this.getInitializerLabel(isStatic);
+		writer.verbatimfn("global %s", label);
+		writer.label(label);
+		
+		// New top-level frame.
+		Frame frame = new Frame();
+		frame.declare(new ArrayList<Formal>(), isStatic);
+		frame.enter(writer);
+		
+		// Call supertype's zero-argument constructor before non-static field initialization.
+		if (!isStatic && this.superclass != null) {
+			writer.instr("push", "dword " + frame.derefThis());
+			writer.instr("call", this.superclass.getDefaultConstructorLabel());
+		}
+		
+		for (Field f : this.fields) {
+			if (f.initializer != null) {
+				if (f.isStatic() && isStatic) {
+					// Evaluate the initializer and stick eax in the field
+					f.initializer.generateCode(writer, frame);
+					writer.instr("mov", "[" + f.getStaticLabel() + "]", "eax");
+				} else if (!f.isStatic() && !isStatic) {
+					// Evaluate the initializer and stick eax in the field
+					f.initializer.generateCode(writer, frame);
+					writer.instr("mov", "ebx", frame.derefThis());
+					writer.instr("mov", "[ebx+" + f.byteOffset + "]", "eax");
+				}
+			}
+		}
+
+		frame.leave(writer);
+		writer.instr("ret", isStatic ? 0 : 4);
 	}
 	
 	// All non-static fields present in a concrete object of this type,
@@ -513,10 +628,20 @@ public class TypeDecl extends ASTNode
 	
 	// Maps a type T to a Vtable. If this <: T, maps to V_(T, this). Else, null.
 	private HashMap<TypeDecl, Method[]> allVtables = null;
+	private String[] subtypeTableEntries;
+
 	protected Method[] getVtableFor(TypeDecl t) {
-		assert allVtables != null;
-		assert allVtables.containsKey(t) == this.isSubtypeOf(t);
+		assert(allVtables != null);
+		assert(allVtables.containsKey(t) == this.isSubtypeOf(t));
 		return allVtables.get(t);
+	}
+	
+	protected String getVtableLabelFor(TypeDecl t) {
+		return Utilities.Label.generateLabel("vt", t.getCanonicalName(), this.getCanonicalName(), null);
+	}
+	
+	protected String getSubtypeTableLabel() {
+		return Utilities.Label.generateLabel("st", this.getCanonicalName(), null, null);
 	}
 
 	public void buildSchema() {
@@ -524,9 +649,44 @@ public class TypeDecl extends ASTNode
 		Field[] parentInstanceFields = this.superclass == null 
 				? new Field[0] 
 				: this.superclass.getAllInstanceFields();
-		allInstanceFields = new Field[parentInstanceFields.length + this.fields.size()];
-		for (Field f : parentInstanceFields) {
-			
+		allInstanceFields = Arrays.copyOf(parentInstanceFields,
+										  parentInstanceFields.length + this.fields.size());
+		for (int i = 0; i < this.fields.size(); i++) {
+			this.fields.get(i).byteOffset = 4 + (parentInstanceFields.length + i) * 4;
+			allInstanceFields[parentInstanceFields.length + i] = this.fields.get(i);
 		}
+		
+		// Vtables.
+		this.allInstanceMethods = Cons.toList(this.memberSet.getInstanceMethods()).toArray(new Method[0]);
+		this.allVtables = new HashMap<TypeDecl, Method[]>(); 
+		
+		for (TypeDecl supertype : this.memberSet.getStrictSupertypes()) {
+			Method[] superVTable = (Method[])supertype.getAllInstanceMethods().clone();
+			for (int i = 0; i < superVTable.length; i++) {
+				Method m1 = superVTable[i];
+				for (int j = 0; j < this.allInstanceMethods.length; j++) {
+					Method m2 = this.allInstanceMethods[j];
+					if (new Method.SameSignaturePredicate().test(m1, m2)) {
+						superVTable[i] = m2;
+						break;
+					}
+				}
+			}
+			this.allVtables.put(supertype, superVTable);
+		}
+		
+		// Add this type's methods to the map.
+		this.allVtables.put(this, this.allInstanceMethods);
+		
+		// Subtype table.
+		this.subtypeTableEntries = new String[this.allTypes.size() + 1];
+		for (TypeDecl t : this.allTypes) {
+			String label = t.isSubtypeOf(this) ? t.getVtableLabelFor(this) : null;
+			subtypeTableEntries[t.getTypeID()] = label;
+		}
+	}
+	
+	public int sizeOf() {
+		return (this.allInstanceFields.length + 1) * 4;
 	}
 }

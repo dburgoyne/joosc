@@ -1,16 +1,18 @@
-package Compiler;
+package CodeGeneration;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.LinkedList;
 
 import AbstractSyntax.TypeDecl;
+import Compiler.Compiler;
 
 // Convenience wrapper around PrintWriter
 public class AsmWriter {
 
 	protected PrintWriter writer;
 	protected TypeDecl typeDecl;
+	protected final String INDENT = "  ";
 	
 	public AsmWriter(TypeDecl typeDecl) throws FileNotFoundException {
 		this.typeDecl = typeDecl;
@@ -27,6 +29,7 @@ public class AsmWriter {
 	// Print the "beginning" of this comment and increase indentation.
 	public void pushComment(String fmt, Object... args) {
 		String comment = String.format(fmt, args);
+		writer.println();
 		for (String line : comment.split("\\r?\\n"))
 			this.comment(">>> %s", line);
 		comments.addLast(comment);
@@ -38,6 +41,7 @@ public class AsmWriter {
 		assert comment != null;
 		for (String line : comment.split("\\r?\\n"))
 			this.comment("<<< %s", line);
+		writer.println();
 	}
 	
 	// print a comment at the current indentation level.
@@ -46,8 +50,8 @@ public class AsmWriter {
 		for (String line
 				: String.format(fmt, args).split("\\r?\\n")) {
 			writer.print("; ");
-			for (int i = 0; i < indent; i++) {
-				writer.print(' ');
+			for (int i = 0; i < indent-1; i++) {
+				writer.print(INDENT);
 			}
 			writer.println(line);
 		}
@@ -57,7 +61,7 @@ public class AsmWriter {
 	public void instr(Object operator, Object... operands) {
 		int indent = this.getIndentLevel();
 		for (int i = 0; i < indent; i++) {
-			writer.print(' ');
+			writer.print(INDENT);
 		}
 		writer.print(operator);
 		for (int i = 0; i < operands.length; i++) {
@@ -79,7 +83,7 @@ public class AsmWriter {
 		for (String line
 				: String.format(fmt, args).split("\\r?\\n")) {
 			for (int i = 0; i < indent; i++) {
-				writer.print(' ');
+				writer.print(INDENT);
 			}
 			writer.println(line);
 		}

@@ -4,7 +4,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import Compiler.AsmWriter;
+import CodeGeneration.AsmWriter;
+import CodeGeneration.Frame;
+import Exceptions.ImportException;
+import Exceptions.NameConflictException;
+import Exceptions.NameLinkingException;
+import Exceptions.ReachabilityException;
+import Exceptions.TypeCheckingException;
+import Exceptions.TypeLinkingException;
 import Parser.ParseTree;
 import Utilities.Cons;
 import Utilities.Predicate;
@@ -266,12 +273,16 @@ public class Classfile extends ASTNode {
 		this.typeDecl.checkReachability(true);
 	}
 	
-	// ---------- For code generate ----------
+	// ---------- Code generation ----------
 
-	@Override public void generateCode(AsmWriter writer) {
+	@Override public void generateCode(AsmWriter writer, Frame frame) {
 		
 		writer.pushComment("Source file: %s", parseTree.getToken().getFileName());
-		this.typeDecl.generateCode(writer);
+		// Special code for java.lang.String
+		if (this.typeDecl == Program.javaLangString) {
+			Program.generateStringTable(writer);
+		}
+		this.typeDecl.generateCode(writer, frame);
 		writer.popComment();
 		
 	}

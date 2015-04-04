@@ -1,4 +1,7 @@
-package AbstractSyntax;
+package Exceptions;
+
+import AbstractSyntax.BlockStatement;
+import AbstractSyntax.Method;
 
 public class ReachabilityException extends Exception {
 	

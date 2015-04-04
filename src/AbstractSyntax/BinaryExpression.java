@@ -1,6 +1,12 @@
 package AbstractSyntax;
 
-import Compiler.AsmWriter;
+import CodeGeneration.AsmWriter;
+import CodeGeneration.Frame;
+import Exceptions.ImportException;
+import Exceptions.NameConflictException;
+import Exceptions.NameLinkingException;
+import Exceptions.TypeCheckingException;
+import Exceptions.TypeLinkingException;
 import Parser.ParseTree;
 import Types.PrimitiveType;
 import Types.Type;
@@ -273,7 +279,7 @@ public class BinaryExpression extends Expression {
 	
 	// ---------- Code generation ----------
 	
-	@Override public void generateCode(AsmWriter writer) {
+	@Override public void generateCode(AsmWriter writer, Frame frame) {
 		
 		String label;
 		
@@ -287,7 +293,7 @@ public class BinaryExpression extends Expression {
 			// All other cases start the same way.
 			assert(this.left.getType() instanceof PrimitiveType);
 			assert(this.right.getType() instanceof PrimitiveType);
-			this.left.generateCode(writer);
+			this.left.generateCode(writer, frame);
 			// Sign-extend the LHS by the correct amount, if less than 32 bits.
 			switch (((PrimitiveType)this.left.getType()).width()) {
 			  case 1:
@@ -300,7 +306,7 @@ public class BinaryExpression extends Expression {
 				break;
 			}
 			writer.instr("push", "eax");
-			this.right.generateCode(writer);
+			this.right.generateCode(writer, frame);
 			// Sign-extend the RHS by the correct amount, if less than 32 bits.
 			switch (((PrimitiveType)this.right.getType()).width()) {
 			  case 1:

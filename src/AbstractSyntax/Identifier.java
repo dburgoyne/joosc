@@ -3,6 +3,10 @@ package AbstractSyntax;
 import java.util.ArrayList;
 import java.util.List;
 
+import Exceptions.NameConflictException;
+import Exceptions.NameLinkingException;
+import Exceptions.TypeCheckingException;
+import Exceptions.TypeLinkingException;
 import Parser.ParseTree;
 import Types.ArrayType;
 import Types.PrimitiveType;
@@ -65,7 +69,7 @@ public class Identifier extends Expression {
 		return this.components.get(0);
 	}
 	
-	protected List<String> getPackageName() {
+	public List<String> getPackageName() {
 		List<String> packageName = new ArrayList<String>();
 		for (int i = 0; i < this.components.size() - 1; i++) {
 			packageName.add(this.components.get(i));

@@ -3,7 +3,14 @@ package AbstractSyntax;
 import java.util.ArrayList;
 import java.util.List;
 
-import Compiler.AsmWriter;
+import CodeGeneration.AsmWriter;
+import CodeGeneration.Frame;
+import Exceptions.ImportException;
+import Exceptions.NameConflictException;
+import Exceptions.NameLinkingException;
+import Exceptions.ReachabilityException;
+import Exceptions.TypeCheckingException;
+import Exceptions.TypeLinkingException;
 import Parser.ParseTree;
 import Utilities.BiPredicate;
 import Utilities.Cons;
@@ -119,10 +126,29 @@ public class Constructor extends ASTNode implements EnvironmentDecl {
 	
 	// ---------- Code generation ----------
 
-	@Override public void generateCode(AsmWriter writer) {
-		writer.comment("TODO: Constructor %s", this);
-		// TODO Ctors should call non-static initializers, then their own body.
-		//writer.instr("leave");
-		//writer.instr("ret");
+	@Override public void generateCode(AsmWriter writer, Frame frame) {
+		writer.verbatimfn("global %s", this.getLabel());
+		writer.label(this.getLabel());
+		
+		// New top-level frame.
+		frame = new Frame();
+		frame.declare(this.parameters, false);
+		frame.enter(writer);
+		writer.instr("push", "dword " + frame.derefThis());
+		
+		// Ctors should call non-static initializers, then their own body.
+		String iiLabel = this.parent.getInitializerLabel(false);
+		writer.instr("call", iiLabel);
+		this.block.generateCode(writer, frame);
+		frame.leave(writer);
+		// Add one for 'this' pointer from __malloc.
+		writer.instr("ret", (this.parameters.size() + 1) * 4);
+	}
+	
+	public String getLabel() {
+		return Utilities.Label.generateLabel("ctor",
+				this.parent.getCanonicalName(),
+				null,
+				Utilities.Label.typesOfFormals(this.parameters));
 	}
 }

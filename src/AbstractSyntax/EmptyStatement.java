@@ -1,5 +1,7 @@
 package AbstractSyntax;
 
+import Exceptions.ReachabilityException;
+import Exceptions.TypeCheckingException;
 import Parser.ParseTree;
 import Utilities.Cons;
 

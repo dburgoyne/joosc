@@ -1,5 +1,7 @@
-package AbstractSyntax;
+package Exceptions;
 
+import AbstractSyntax.Identifier;
+import AbstractSyntax.TypeDecl;
 import Types.Type;
 
 public abstract class TypeLinkingException extends Exception {
@@ -79,12 +81,12 @@ public abstract class TypeLinkingException extends Exception {
 		
 		private static String createMessage(TypeDecl child, TypeDecl parent) {
 			String childKind = 
-				child.kind == TypeDecl.Kind.CLASS ? "Class" : "Interface";
+				child.getKind() == TypeDecl.Kind.CLASS ? "Class" : "Interface";
 			String parentKind =
-				parent.kind == TypeDecl.Kind.CLASS ? "class" : "interface";
+				parent.getKind() == TypeDecl.Kind.CLASS ? "class" : "interface";
 			String verb = 
-				child.kind == TypeDecl.Kind.CLASS
-				  ? parent.kind == TypeDecl.Kind.CLASS
+				child.getKind() == TypeDecl.Kind.CLASS
+				  ? parent.getKind() == TypeDecl.Kind.CLASS
 				      ? "implements"
 					  : "extends"
 				  : "extends";
@@ -105,9 +107,9 @@ public abstract class TypeLinkingException extends Exception {
 		
 		private static String createMessage(TypeDecl child, TypeDecl parent) {
 			String childKind = 
-				child.kind == TypeDecl.Kind.CLASS ? "Class" : "Interface";
+				child.getKind() == TypeDecl.Kind.CLASS ? "Class" : "Interface";
 			String verb = 
-				child.kind == TypeDecl.Kind.CLASS ? "implements" : "extends";
+				child.getKind() == TypeDecl.Kind.CLASS ? "implements" : "extends";
 			return String.format("%s %s already %s interface %s\n at %s.",
 					childKind, child.getCanonicalName(),
 					verb,

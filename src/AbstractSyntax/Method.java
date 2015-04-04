@@ -3,7 +3,14 @@ package AbstractSyntax;
 import java.util.ArrayList;
 import java.util.List;
 
-import Compiler.AsmWriter;
+import CodeGeneration.AsmWriter;
+import CodeGeneration.Frame;
+import Exceptions.ImportException;
+import Exceptions.NameConflictException;
+import Exceptions.NameLinkingException;
+import Exceptions.ReachabilityException;
+import Exceptions.TypeCheckingException;
+import Exceptions.TypeLinkingException;
 import Parser.ParseTree;
 import Types.Type;
 import Utilities.BiPredicate;
@@ -280,11 +287,61 @@ public class Method extends Decl {
 	}
 	
 	// ---------- Code generation ----------
+	
+	public String getDispatcherLabel() {
+		return Utilities.Label.generateLabel(this.isStatic() ? "sm" : "call",
+				this.declaringType.getCanonicalName(),
+				this.getName().getSingleComponent(),
+				Utilities.Label.typesOfFormals(this.parameters));
+	}
+	
+	public String getImplementationLabel() {
+		return Utilities.Label.generateLabel(this.isStatic() ? "sm" : "im",
+				this.declaringType.getCanonicalName(),
+				this.getName().getSingleComponent(),
+				Utilities.Label.typesOfFormals(this.parameters));
+	}
 
-	@Override public void generateCode(AsmWriter writer) {
-		writer.comment("TODO: Method %s", this);
-		// TODO Do proper method generation (i.e. first create arg frame, then codegen Block)
-		//writer.instr("leave");
-		//writer.instr("ret");
+	@Override public void generateCode(AsmWriter writer, Frame frame) {
+		writer.pushComment("Method %s", this);
+
+		writer.verbatimfn("global %s", this.getImplementationLabel());
+		writer.label(this.getImplementationLabel());
+		
+		// New top-level frame.
+		frame = new Frame();
+		frame.declare(this.parameters, this.isStatic());
+		frame.enter(writer);
+
+		if (this.block == null) {
+			writer.comment("No code for abstract method %s", this.name);
+		} else {
+			this.block.generateCode(writer, frame);
+		}
+		frame.leave(writer);
+		// Add one for 'this' pointer.
+		writer.instr("ret", (this.parameters.size() + (this.isStatic() ? 0 : 1)) * 4);
+		
+		if (!this.isStatic()) {
+			writer.comment("Method %s dispatcher", this);
+
+			writer.verbatimfn("global %s", this.getDispatcherLabel());
+			writer.label(this.getDispatcherLabel());
+			frame.enter(writer);
+			
+			// Can't call methods on a null object.
+			writer.instr("mov", "eax", frame.derefThis());
+			writer.instr("cmp", "eax", 0);
+			writer.instr("je", "__exception");
+			
+			writer.instr("mov", "eax", "[eax]");
+			writer.instr("mov", "eax", "[eax*4 + " + this.declaringType.getSubtypeTableLabel() + "]");
+			// TODO Search the vtable (now in eax) using the index of this method in this.declaringType.allInstanceMethods. 
+			
+			frame.leave(writer);
+			writer.instr("ret", (this.parameters.size() + 1) * 4);
+		}
+		
+		writer.popComment();
 	}
 }

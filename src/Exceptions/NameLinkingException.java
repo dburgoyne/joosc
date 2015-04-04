@@ -1,5 +1,7 @@
-package AbstractSyntax;
+package Exceptions;
 
+import AbstractSyntax.Expression;
+import AbstractSyntax.Identifier;
 import Types.Type;
 
 public abstract class NameLinkingException extends Exception {

@@ -1,12 +1,24 @@
 package Utilities;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+
+import AbstractSyntax.Formal;
 
 public class Label {
 	
+	private static int counter = 0;
+	
 	public static String generateLabel(String prefix) {
-		return prefix + "_" + UUID.randomUUID().toString();
+		return prefix + "_" + (++counter);
+	}
+	
+	public static List<String> typesOfFormals(List<Formal> params) {
+		List<String> strParams = new ArrayList<String>();
+		for (Formal param : params) {
+			strParams.add(param.getType().getCanonicalName());
+		}
+		return strParams;
 	}
 	
 	public static String generateLabel(String prefix, String type, String name, List<String> params) {
@@ -16,7 +28,8 @@ public class Label {
 		}
 		if (params != null) {
 			for (String param : params) {
-				toReturn += "#" + param;
+				// Nasm doesn;t like [ or ] in comments.
+				toReturn += "#" + param.replaceAll("\\[\\]", "@");
 			}
 		}
 		return toReturn;
