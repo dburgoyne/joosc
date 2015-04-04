@@ -163,4 +163,9 @@ public class Program extends ASTNode {
 			file.codeGenerate();
 		}
 	}
+	
+	@Override
+	protected void finishGenerate() {
+		// Nothing
+	}
 }

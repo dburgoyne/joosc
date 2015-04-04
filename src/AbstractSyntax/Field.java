@@ -2,6 +2,7 @@ package AbstractSyntax;
 
 import java.util.List;
 
+import AbstractSyntax.Expression.ExpressionValue;
 import Parser.ParseTree;
 import Types.Type;
 import Utilities.BiPredicate;
@@ -126,7 +127,15 @@ public class Field extends Decl implements Identifier.Interpretation {
 		}
 	}
 	
+	public boolean isStatic() {
+		return modifiers.contains(Modifier.STATIC);
+	}
+	
 	// ---------- For code generate ----------
+	
+	public void recordField() {
+		s_field.add(name.toString());
+	}
 
 	@Override
 	protected void setCommentName() {
@@ -135,12 +144,26 @@ public class Field extends Decl implements Identifier.Interpretation {
 		
 	@Override
 	protected void selfGenerate() {
-		setLabel(this.scopeIdentifier(name.toString()));
+		setLabel();
 	}
 		
 	@Override
 	protected void hierarchyGenerate() {
-		// TODO
-		super.hierarchyGenerate();
+		ExpressionValue ev = initializer.tryFetchValue();
+		if (ev == null) {
+			setBlank();
+		} else {
+			setValue(ev.rawValue());
+		}
+	}
+	
+	@Override
+	protected void finishGenerate() {
+		// Nothing
+	}
+	
+	@Override
+	protected String selfIdentifier() {
+		return scopeIdentifier(name.toString());
 	}
 }

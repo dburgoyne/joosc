@@ -287,13 +287,25 @@ public class Method extends Decl {
 		
 	@Override
 	protected void selfGenerate() {
-		setLabel(this.scopeIdentifier(name.toString(), parameters));
-		setRetrun();
+		setLabel();
+		s_local = new ArrayList<String>();
+		System.out.println("mov esi, esp");
 	}
 		
 	@Override
 	protected void hierarchyGenerate() {
-		// TODO
-		super.hierarchyGenerate();
+		if (block != null) {
+			block.codeGenerate();
+		}
+	}
+	
+	@Override
+	protected void finishGenerate() {
+		setReturn();
+	}
+	
+	@Override
+	protected String selfIdentifier() {
+		return scopeIdentifier(name.toString(), parameters);
 	}
 }

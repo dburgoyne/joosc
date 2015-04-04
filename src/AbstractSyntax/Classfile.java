@@ -274,9 +274,9 @@ public class Classfile extends ASTNode {
 		
 	@Override
 	protected void selfGenerate() {
-		scope = new ArrayList<String>();
+		s_scope = new ArrayList<String>();
 		if (packageName != null) {
-			scope.addAll(packageName.components);
+			s_scope.addAll(packageName.components);
 		}
 	}
 		
@@ -285,4 +285,8 @@ public class Classfile extends ASTNode {
 		this.typeDecl.codeGenerate();
 	}
 	
+	@Override
+	protected void finishGenerate() {
+		// Nothing
+	}
 }

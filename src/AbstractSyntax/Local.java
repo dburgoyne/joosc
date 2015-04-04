@@ -1,5 +1,8 @@
 package AbstractSyntax;
 
+import java.util.ArrayList;
+
+import AbstractSyntax.Expression.ExpressionValue;
 import Parser.ParseTree;
 import Types.Type;
 import Utilities.Cons;
@@ -103,4 +106,30 @@ public class Local extends BlockStatement
 		this.canLeave = this.canEnter;
 	}
 
+	// ---------- For code generate ----------
+
+	@Override
+	protected void setCommentName() {
+		this.commentName = "";
+	}
+		
+	@Override
+	protected void selfGenerate() {
+		s_local.add(name.toString());
+		ExpressionValue ev = initializer.tryFetchValue();
+		if (ev != null) {
+			System.out.println("mov eax " + ev.value);
+		}
+		System.out.println("push eax");
+	}
+		
+	@Override
+	protected void hierarchyGenerate() {
+		// Nothing
+	}
+	
+	@Override
+	protected void finishGenerate() {
+		// Nothing
+	}
 }

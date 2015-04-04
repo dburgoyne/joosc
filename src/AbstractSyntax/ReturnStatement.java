@@ -78,4 +78,26 @@ public class ReturnStatement extends Statement {
 		}
 		this.canLeave = false;
 	}
+	
+	// ---------- For code generate ----------
+	
+	@Override
+	protected void setCommentName() {
+		this.commentName = "";
+	}
+		
+	@Override
+	protected void selfGenerate() {
+		// Nothing
+	}
+		
+	@Override
+	protected void hierarchyGenerate() {
+		expression.codeGenerate();
+	}
+	
+	@Override
+	protected void finishGenerate() {
+		// Nothing
+	}
 }

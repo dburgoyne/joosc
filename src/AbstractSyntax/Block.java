@@ -82,4 +82,28 @@ public class Block extends Statement {
 		}
 		this.canLeave = canLeavePreviousStatement;
 	}
+	
+	// ---------- For code generate ----------
+
+	@Override
+	protected void setCommentName() {
+		this.commentName = "";
+	}
+		
+	@Override
+	protected void selfGenerate() {
+		// Nothing
+	}
+		
+	@Override
+	protected void hierarchyGenerate() {
+		for (BlockStatement bs : statements) {
+			bs.codeGenerate();
+		}
+	}
+	
+	@Override
+	protected void finishGenerate() {
+		// Nothing
+	}
 }

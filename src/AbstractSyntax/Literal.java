@@ -92,4 +92,30 @@ public class Literal extends Expression {
 			return new ExpressionValue(type, value);
 		}
 	}
+	
+	// ---------- For code generate ----------
+	
+	@Override
+	protected void setCommentName() {
+		this.commentName = "";
+	}
+		
+	@Override
+	protected void selfGenerate() {
+		if (this.type.equals(LiteralType.INTEGER)) {
+			System.out.println("mov eax " + value);
+		} else {
+			// TODO
+		}
+	}
+		
+	@Override
+	protected void hierarchyGenerate() {
+		// Nothing
+	}
+	
+	@Override
+	protected void finishGenerate() {
+		// Nothing
+	}
 }

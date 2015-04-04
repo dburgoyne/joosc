@@ -211,4 +211,52 @@ public class BinaryExpression extends Expression {
 			return null;
 		}
 	}
+	
+	// ---------- For code generate ----------
+
+	@Override
+	protected void setCommentName() {
+		this.commentName = "";
+	}
+		
+	@Override
+	protected void selfGenerate() {
+		// Nothing
+	}
+		
+	@Override
+	protected void hierarchyGenerate() {
+		left.codeGenerate();
+		System.out.println("push eax");
+		right.codeGenerate();
+		System.out.println("pop ebx");
+		switch (this.operator) {
+		case PLUS:
+			System.out.println("add eax, ebx");
+			break;
+		case MINUS:
+			System.out.println("sub eax, ebx");
+			break;
+		case STAR:
+			System.out.println("imul eax, ebx"); // fix later
+			break;
+		case SLASH:
+			System.out.println("idiv eax, ebx"); // fix later
+			System.out.println("mov eax, al");
+			break;
+		case MOD:
+			System.out.println("idiv eax, ebx"); // fix later
+			System.out.println("mov eax, ah");
+			break;
+		case ASSIGN:
+			System.out.println("mov [ebx], [eax]");
+			break;
+		default:
+		}
+	}
+	
+	@Override
+	protected void finishGenerate() {
+		// Nothing
+	}
 }

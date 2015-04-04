@@ -125,13 +125,24 @@ public class Constructor extends ASTNode implements EnvironmentDecl {
 		
 	@Override
 	protected void selfGenerate() {
-		setLabel(this.scopeIdentifier(name.toString(), parameters));
-		setRetrun();
+		setLabel();
+		s_local = new ArrayList<String>();
 	}
 		
 	@Override
 	protected void hierarchyGenerate() {
-		// TODO
-		super.hierarchyGenerate();
+		if (block != null) {
+			block.codeGenerate();
+		}
+	}
+	
+	@Override
+	protected void finishGenerate() {
+		setReturn();
+	}
+	
+	@Override
+	protected String selfIdentifier() {
+		return scopeIdentifier(name.toString(), parameters);
 	}
 }

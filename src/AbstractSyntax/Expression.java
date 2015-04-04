@@ -150,6 +150,10 @@ public abstract class Expression extends Statement {
 			return Integer.parseInt(value);
 		}
 		
+		public String rawValue() {
+			return value;
+		}
+		
 		public ExpressionValue binaryOperate(ExpressionValue ev, BinaryExpression.BinaryOperator op) {
 			switch(op){
 			case PLUS:

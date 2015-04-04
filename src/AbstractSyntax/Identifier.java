@@ -3,6 +3,7 @@ package AbstractSyntax;
 import java.util.ArrayList;
 import java.util.List;
 
+import AbstractSyntax.Expression.ExpressionValue;
 import Parser.ParseTree;
 import Types.ArrayType;
 import Types.PrimitiveType;
@@ -549,5 +550,33 @@ public class Identifier extends Expression {
 
 		assert false;
 	}
+	
+	// ---------- For code generate ----------
 
+	@Override
+	protected void setCommentName() {
+		this.commentName = "";
+	}
+		
+	@Override
+	protected void selfGenerate() {
+		int varIndex;
+		varIndex=s_local.lastIndexOf(components.get(0));
+		if(varIndex < 0) {
+			varIndex=s_field.lastIndexOf(components.get(0));
+			System.out.println("; TODO");
+		} else {
+			System.out.println("sub esi, " + (varIndex + 1));
+		}
+	}
+		
+	@Override
+	protected void hierarchyGenerate() {
+		// Nothing
+	}
+	
+	@Override
+	protected void finishGenerate() {
+		// Nothing
+	}
 }

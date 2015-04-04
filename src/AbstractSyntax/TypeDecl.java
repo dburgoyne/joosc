@@ -466,7 +466,21 @@ public class TypeDecl extends ASTNode
 		
 	@Override
 	protected void selfGenerate() {
-		scope.add(name.toString());
+		s_scope.add(name.toString());
+		s_field = new ArrayList<String>();
+		setLabel();
+		for (Constructor constructor : constructors) {
+			constructor.pointerGenerate();
+		}
+		for (Method method : methods) {
+			method.pointerGenerate();
+		}
+		for (Field field : fields) {
+			field.recordField();
+			if(field.isStatic()) {
+				field.pointerGenerate();
+			}
+		}
 	}
 		
 	@Override
@@ -474,12 +488,23 @@ public class TypeDecl extends ASTNode
 		for (Constructor constructor : constructors) {
 			constructor.codeGenerate();
 		}
-		for (Field field : fields) {
-			field.codeGenerate();
-		}
 		for (Method method : methods) {
 			method.codeGenerate();
 		}
+		for (Field field : fields) {
+			if(field.isStatic()) {
+				//field.codeGenerate();
+			}
+		}
 	}
-
+	
+	@Override
+	protected void finishGenerate() {
+		// Nothing
+	}
+	
+	@Override
+	protected String selfIdentifier() {
+		return scopeIdentifier();
+	}
 }
