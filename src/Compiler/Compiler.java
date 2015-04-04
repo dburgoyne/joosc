@@ -96,6 +96,7 @@ public class Compiler {
     		// Code generation pass.
     		program.generateCode(null, null);
     		
+    		
     	} catch (Exception e) {
 			if (e instanceof NameConflictException
 			 || e instanceof ImportException
@@ -111,13 +112,6 @@ public class Compiler {
 				e.printStackTrace();
 				return 1;
 			}
-		} finally {
-			// Set java.lang.Object and java.lang.String back to null to prevent problems
-			// during repeated runs.
-			Program.javaLangObject = null;
-			Program.javaLangString = null;
-			Program.javaLangCloneable = null;
-			Program.javaIoSerializable = null;
 		}
         
         if (failed) {

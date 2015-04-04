@@ -346,6 +346,10 @@ public class Method extends Decl {
 		}
 		
 		writer.popComment();
+		
+		if (this == Program.staticIntTest) {
+			Program.generateStart(writer);
+		}
 	}
 	
 	// Search self in vtable of this.declaringType using the index of this method in

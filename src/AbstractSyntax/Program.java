@@ -22,6 +22,7 @@ public class Program extends ASTNode {
 	public static TypeDecl javaLangString;
 	public static TypeDecl javaLangCloneable;
 	public static TypeDecl javaIoSerializable;
+	public static Method   staticIntTest;
 	
 	// List of all string literals in the program, to be populated before code generation.
 	public static List<Literal> allStringLiterals; 
@@ -29,7 +30,16 @@ public class Program extends ASTNode {
 	public Program(ParseTree... trees) {
 		super(null);
 		files = new ArrayList<Classfile>();
-		allStringLiterals = new ArrayList<Literal>();
+
+		// Set java.lang.Object and java.lang.String back to null to prevent problems
+		// during repeated runs.
+		Program.javaLangObject = null;
+		Program.javaLangString = null;
+		Program.javaLangCloneable = null;
+		Program.javaIoSerializable = null;
+		Program.staticIntTest = null;
+		Program.allStringLiterals = new ArrayList<Literal>();
+		
 		for (ParseTree tree : trees) {
 			Classfile file = new Classfile(tree);
 			files.add(file);
@@ -231,6 +241,34 @@ public class Program extends ASTNode {
 			// Callee pops.
 		}
 		writer.instr("ret");
+		writer.popComment();
+	}
+	
+	public static void generateStart(AsmWriter writer) {
+		writer.pushComment("Program entry point");
+		writer.verbatimln("global _start");
+		writer.label("_start");
+		
+		// Call String Literal initializer
+		writer.instr("call",  "strlit_init");
+		writer.justUsedGlobal("strlit_init");
+		
+		// Call all static initializers
+		for (TypeDecl ty : javaLangObject.allTypes) {
+			String siLbl = ty.getInitializerLabel(true);
+			writer.instr("call", siLbl);
+			writer.justUsedGlobal(siLbl);
+		}
+		
+		// Call static int test()
+		String testLbl = staticIntTest.getDispatcherLabel();
+		writer.instr("call", testLbl);
+		writer.justUsedGlobal(testLbl);
+		
+		// call sys exit with eax.
+		writer.instr("jmp", "__debexit"); // from runtime.s
+		writer.justUsedGlobal("__debexit");
+		
 		writer.popComment();
 	}
 }

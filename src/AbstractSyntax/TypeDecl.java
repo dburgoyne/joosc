@@ -16,6 +16,7 @@ import Exceptions.TypeCheckingException;
 import Exceptions.TypeLinkingException;
 import Parser.ParseTree;
 import Types.MemberSet;
+import Types.PrimitiveType;
 import Types.Type;
 import Utilities.Cons;
 import Utilities.ObjectUtils;
@@ -485,6 +486,13 @@ public class TypeDecl extends ASTNode
 		}
 		for (Method method : this.methods) {
 			method.checkReachability(true);
+			
+			if (method.isStatic()
+					&& method.type == PrimitiveType.INT
+					&& method.getName().getSingleComponent().equals("test")
+					&& Program.staticIntTest == null) {
+				Program.staticIntTest = method;
+			}
 		}
 	}
 	
@@ -494,6 +502,7 @@ public class TypeDecl extends ASTNode
 	public void generateCode(AsmWriter writer, Frame frame) {
 		
 		writer.pushComment("Type %s", this.getCanonicalName());
+		writer.verbatimln("section .text");
 		
 		writer.comment("VTables");
 		this.generateVTables(writer);
@@ -511,23 +520,19 @@ public class TypeDecl extends ASTNode
 			constructor.generateCode(writer, frame);
 		}
 		
-		// Only Static fields should generate any code.
-		writer.comment("Fields");
-		writer.verbatimln("section .data");
-		for (Field field : fields) {
-			field.generateCode(writer, frame);
-		}
-		writer.verbatimln("section .text");
-
 		writer.comment("Methods");
 		for (Method method : methods) {
 			method.generateCode(writer, frame);
 		}
 		
-		// TODO generate other items...
+		// Only Static fields should generate any code.
+		writer.comment("Static Fields");
+		writer.verbatimln("section .data");
+		for (Field field : fields) {
+			field.generateCode(writer, frame);
+		}
 		
 		writer.popComment();
-		
 	}
 	
 	public void generateVTables(AsmWriter writer) {
