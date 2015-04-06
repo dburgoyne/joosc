@@ -75,9 +75,11 @@ public class InstanceofExpression extends Expression {
 		writer.instr("je", label);
 		
 		if (this.type instanceof TypeDecl) {
+			String stLabel = ((TypeDecl)this.type).getSubtypeTableLabel();
 			writer.instr("mov", "eax", "[eax]"); // eax <- left.tid
 			writer.instr("mov", "eax",           // eax <- V_(T, S)
-					"[eax*4 + " + ((TypeDecl)this.type).getSubtypeTableLabel() + "]");
+					"[eax*4 + " + stLabel + "]");
+			writer.justUsedGlobal(stLabel);
 			writer.instr("cmp", "eax", 0);
 			writer.instr("je", label);
 		} else if (this.type instanceof ArrayType) {
@@ -96,9 +98,10 @@ public class InstanceofExpression extends Expression {
 				// Use the subtype table to compare types.
 				assert(((ArrayType) this.type).getInnerType() instanceof TypeDecl);
 				TypeDecl innerType = (TypeDecl)(((ArrayType) this.type).getInnerType());
-				
+				String stLabel = innerType.getSubtypeTableLabel();
 				writer.instr("mov", "eax",           // eax <- V_(T, S)
-						"[ebx*4 + " + innerType.getSubtypeTableLabel() + "]");
+						"[ebx*4 + " + stLabel + "]");
+				writer.justUsedGlobal(stLabel);
 				writer.instr("cmp", "eax", 0);
 				writer.instr("je", label);
 			}

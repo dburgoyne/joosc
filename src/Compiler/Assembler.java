@@ -31,7 +31,7 @@ public class Assembler {
 			System.err.println("--- ASSEMBLY FAILED ---");
 			return -1;
 		}
-		
+
 		// Attempt linking
 		Process p = Runtime.getRuntime().exec(String.format(LINKER_CMD, Utilities.StringUtils.join(listObjectFiles(), " ")));
 		int retval = p.waitFor();
@@ -40,17 +40,67 @@ public class Assembler {
 			System.err.println("--- LINKING FAILED ---");
 			return retval;
 		}
-		
+		/*		
 		// Attempt to run the program
-		p = Runtime.getRuntime().exec(RUN_CMD);
-		retval = p.waitFor();
-		if (retval != 123) {
-			Utilities.ProcessUtils.drainProcess(p, System.err);
+                class Drain extends Thread {
+                    private java.io.InputStream is;
+                    public java.io.StringWriter sw = new java.io.StringWriter();
+                    private java.io.PrintWriter pw = new java.io.PrintWriter(sw);
+                    Drain(java.io.InputStream is) {
+                        this.is = is;
+                    }
+                    public void run() {
+                        try {
+                            java.io.BufferedReader br = new java.io.BufferedReader(new java.io.InputStreamReader(is));
+                            String line;
+                            while ((line = br.readLine()) != null)
+                                pw.println(line);
+                        } catch (java.io.IOException ioe) {
+                            ioe.printStackTrace();  
+                        }
+                    }
+                }
+                
+                class Worker extends Thread {
+                    public Integer retval;
+                    public Drain out, err;
+                    public void run() {
+                        Process p = null;
+                        
+                        try {
+                            p = Runtime.getRuntime().exec(RUN_CMD);
+                            out = new Drain(p.getInputStream());
+                            err = new Drain(p.getErrorStream());
+                            out.start();
+                            err.start();
+                            retval = p.waitFor();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                        try {
+                            if (p != null)
+                                p.destroy();
+                            if (out != null)
+                                out.join();
+                            if (err != null)
+                                err.join();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                
+                Worker w = new Worker();
+                w.start();
+                w.join(2000);
+
+		if (w.retval == null || w.retval != 123) {
 			System.err.println("--- EXECUTION FAILED ---");
 			return retval;
-		}
+                        }*/
 		
-		cleanOutputDirectory();
+		//cleanOutputDirectory();
 		return 0;
     }
     

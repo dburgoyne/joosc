@@ -6,6 +6,8 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import Utilities.StringUtils;
+
 
 public class RunA5CompilerTests {
 
@@ -15,7 +17,7 @@ public class RunA5CompilerTests {
     final static String LIBRARY_DIR = "lib/5.0/";
     final static String OUTPUT_DIR = "output/";
     final static String ASSEMBLER_CMD = "/u/cs444/bin/nasm -O1 -f elf -g -F dwarf %s";
-    final static String LINKER_CMD = "ld -melf_i386 -o " + OUTPUT_DIR + "/main " + OUTPUT_DIR + "/*.o";
+    final static String LINKER_CMD = "ld -melf_i386 -o " + OUTPUT_DIR + "/main %s";
     
     public static void main(String[] args) throws IOException, InterruptedException {
         PrintStream stdout = System.out;
@@ -66,22 +68,23 @@ public class RunA5CompilerTests {
         				continue fail_outer;
         			}
         		}
-        		Process p = Runtime.getRuntime().exec(LINKER_CMD);
+        		Process p = Runtime.getRuntime().exec(String.format(LINKER_CMD, listObjectFiles()));
         		retval = p.waitFor();
     			if (retval != 0) {
     				Utilities.ProcessUtils.drainProcess(p, stderr);
     				stderr.println("--- LINKING FAILED ---");
     				continue fail_outer;
     			}
-    			// Attempt to run the program.
-    			p = Runtime.getRuntime().exec(OUTPUT_DIR + "/main");
-    			retval = p.waitFor();
-    			if (retval != 123) {
-    				stdout.println("+++ PASS +++");
-                    negatives_passed++;
-    			} else {
-    				stdout.println("+++ FAIL WITH"  + retval + " +++");
-    			}
+//    			// Attempt to run the program.
+//    			p = Runtime.getRuntime().exec(OUTPUT_DIR + "/main");
+//    			retval = p.waitFor();
+//    			if (retval != 123) {
+//    				stdout.println("+++ PASS +++");
+//                    negatives_passed++;
+//    			} else {
+//    				stdout.println("+++ FAIL WITH"  + retval + " +++");
+//    			}
+    			stdout.println("--- LINKING PASSED ---");
         		
         	} else {
         		stderr.println("--- COMPILATION FAILED ---");
@@ -110,7 +113,7 @@ public class RunA5CompilerTests {
         				continue pass_outer;
         			}
         		}
-        		Process p = Runtime.getRuntime().exec(LINKER_CMD);
+        		Process p = Runtime.getRuntime().exec(String.format(LINKER_CMD, listObjectFiles()));
         		retval = p.waitFor();
     			if (retval != 0) {
     				Utilities.ProcessUtils.drainProcess(p, stderr);
@@ -118,14 +121,16 @@ public class RunA5CompilerTests {
     				continue pass_outer;
     			}
     			// Attempt to run the program.
-    			p = Runtime.getRuntime().exec(OUTPUT_DIR + "/main");
-    			retval = p.waitFor();
-    			if (retval == 123) {
-    				stdout.println("+++ PASS +++");
-                    negatives_passed++;
-    			} else {
-    				stdout.println("+++ FAIL WITH " + retval + " +++");
-    			}
+//    			p = Runtime.getRuntime().exec(OUTPUT_DIR + "/main");
+//    			retval = p.waitFor();
+//    			if (retval == 123) {
+//    				stdout.println("+++ PASS +++");
+//                    negatives_passed++;
+//    			} else {
+//    				stdout.println("+++ FAIL WITH " + retval + " +++");
+//    			}
+
+    			stdout.println("--- LINKING PASSED ---");
         		
         	} else {
         		stderr.println("--- COMPILATION FAILED ---");
@@ -159,5 +164,16 @@ public class RunA5CompilerTests {
     		}
     	}
     	return tests;
+    }
+    
+    private static String listObjectFiles() {
+    	File dir = new File(OUTPUT_DIR);
+    	List<String> sfiles = new ArrayList<String>();
+    	for (File child : dir.listFiles()) {
+    		if (child.getName().endsWith(".o")) {
+                sfiles.add(OUTPUT_DIR + child.getName());
+        	}
+    	}
+    	return StringUtils.join(sfiles, " ");
     }
 }

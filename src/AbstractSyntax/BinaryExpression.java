@@ -328,7 +328,7 @@ public class BinaryExpression extends Expression {
 			String concatLabel = Utilities.Label.generateLabel("im",
 					Program.javaLangString.getCanonicalName(),
 					"concat",
-					null);
+					params);
 			writer.instr("call", concatLabel);
 			writer.justUsedGlobal(concatLabel);
 
@@ -366,9 +366,11 @@ public class BinaryExpression extends Expression {
 				
 				// Use the subtype table to compare types.
 				TypeDecl innerType = (TypeDecl)this.left.getType();
+				String stLbl = innerType.getSubtypeTableLabel();
 				
 				writer.instr("mov", "ebx",           // ebx <- V_(T, S)
-						"[ebx*4 + " + innerType.getSubtypeTableLabel() + "]");
+						"[ebx*4 + " + stLbl + "]");
+				writer.justUsedGlobal(stLbl);
 				writer.instr("cmp", "ebx", 0);
 				writer.instr("je", "__exception");
 				writer.justUsedGlobal("__exception");
