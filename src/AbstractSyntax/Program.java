@@ -217,11 +217,14 @@ public class Program extends ASTNode {
 		for (int i = 0; i < Program.allStringLiterals.size(); i++) {
 			Literal str = Program.allStringLiterals.get(i);
 			String label = str.label + "_data";
-			writer.line("%s: db 0, %d, %d, %s",
+			String constValue = (String)str.asConstExpr();
+			writer.line("%s: dd 0\n" + "dd %d\n" + "dd %d",
 					label,
 					PrimitiveType.CHAR.getTypeID(),
-					str.value.length() - 2,
-					str.value);
+					constValue.length());
+			for (int j = 0; j < constValue.length(); j++) {
+				writer.line("dd 0x%x", (int)constValue.charAt(j));
+			}
 		}
 		
 		// Call the java.lang.String constructor on each literal, and store the java.lang.String object references in an array.
@@ -231,6 +234,8 @@ public class Program extends ASTNode {
 		
 		for (int i = 0; i < Program.allStringLiterals.size(); i++) {
 			Literal str = Program.allStringLiterals.get(i);
+			// Set typeID
+			writer.instr("mov", "[" + str.label + "]", "dword " + Program.javaLangString.getTypeID());
 			// Push str.label
 			writer.instr("push", str.label);
 			// Push corresponding char[] literal label

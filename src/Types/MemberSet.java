@@ -82,7 +82,7 @@ public class MemberSet {
 			}
 			// A (concrete) protected method must not replace a public method.
 			if (Cons.contains(toCheck, method,
-					new Method.SameSignatureDifferentVisibilityDifferentAbstractnessPredicate())) {
+					new Method.SameSignatureNarrowerVisibilityThanDifferentAbstractnessPredicate())) {
 				throw new Exception.InvalidReplacement(method);
 			}
 		}
@@ -227,7 +227,7 @@ public class MemberSet {
 			}
 			// A protected method must not replace a public method.
 			if (Cons.contains(toCheck, method,
-					new Method.SameSignatureDifferentVisibilityDifferentAbstractnessPredicate())) {
+					new Method.SameSignatureNarrowerVisibilityThanDifferentAbstractnessPredicate())) {
 				throw new Exception.InvalidReplacement(method);
 			}
 			

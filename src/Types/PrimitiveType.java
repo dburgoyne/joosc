@@ -47,8 +47,8 @@ public enum PrimitiveType implements Type {
 		return this == BOOLEAN ? -1
 			 : this == BYTE ? -2
 			 : this == CHAR ? -3
-			 : this == SHORT ? -4
-			 : -5;
+			 : this == SHORT ? -5
+			 : -6;
 	}
 	
 	

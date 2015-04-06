@@ -82,16 +82,28 @@ public class ArrayCreationExpression extends Expression {
 	@Override public void generateCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
 		// Determine object size.
 		this.dimExpr.generateCode(writer, frame);
-		writer.instr("mov", "ecx", "eax");
+		writer.instr("push", "eax");  // Remember eax so we can loop later
 		writer.instr("lea", "eax", "[eax * 4 + 12]");
 		// Call __malloc
 		writer.instr("call", "__malloc");
 		writer.justUsedGlobal("__malloc");
+		writer.instr("pop", "ecx");  // eax holds the number of elements
 		writer.instr("push", "eax");
 		// Set the array type ID (0) in the first dword.
-		writer.instr("mov", "[eax]", "dword 0");
-		// Set the inner type ID in the second dword.
-		writer.instr("mov", "[eax + 4]", "dword " + this.type.getTypeID());
+		writer.instr("mov", "[eax]", "dword " + this.type.getTypeID());
+		// Set the inner (type ID / subtype table) in the second dword.
+		{
+			String entry = null;
+			if (this.type.getInnerType() instanceof PrimitiveType) {
+				entry = String.valueOf(this.type.getInnerType().getTypeID());
+			} else if (this.type.getInnerType() instanceof TypeDecl) {
+				entry = ((TypeDecl)this.type.getInnerType()).getSubtypeTableLabel();
+				writer.justUsedGlobal(entry);
+			} else {
+				assert false;
+			}
+			writer.instr("mov", "[eax + 4]", "dword " + entry);
+		}
 		// Set the array length in the third dword.
 		writer.instr("mov", "[eax + 8]", "ecx");
 		// Zero the object

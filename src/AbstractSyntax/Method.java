@@ -43,6 +43,10 @@ public class Method extends Decl {
 		return modifiers.contains(Modifier.STATIC);
 	}
 	
+	public boolean isNative() {
+		return modifiers.contains(Modifier.NATIVE);
+	}
+	
 	public boolean isFinal() {
 		return modifiers.contains(Modifier.FINAL);
 	}
@@ -185,6 +189,13 @@ public class Method extends Decl {
 		}
 	}
 	
+	public static class NarrowerVisibilityThanPredicate implements BiPredicate<Method> {
+		// Returns true iff m2 has wider visibility than m1.
+		public boolean test(Method m1, Method m2) {
+			return m1.isProtected() && m2.isPublic();
+		}
+	}
+	
 	public static class SameAbstractnessPredicate implements BiPredicate<Method> {
 		public boolean test(Method m1, Method m2) {
 			return m1.isAbstract() == m2.isAbstract();
@@ -226,10 +237,10 @@ public class Method extends Decl {
 		}
 	}
 	
-	public static class SameSignatureDifferentVisibilityDifferentAbstractnessPredicate implements BiPredicate<Method> {
+	public static class SameSignatureNarrowerVisibilityThanDifferentAbstractnessPredicate implements BiPredicate<Method> {
 		public boolean test(Method m1, Method m2) {
 			return  new SameSignaturePredicate().test(m1, m2)
-			    && !new SameVisibilityPredicate().test(m1, m2)
+			    &&  new NarrowerVisibilityThanPredicate().test(m1, m2)
 			    && !new SameAbstractnessPredicate().test(m1, m2);
 		}
 	}
@@ -321,7 +332,14 @@ public class Method extends Decl {
 		frame.enter(writer);
 
 		if (this.block == null) {
-			writer.comment("No code for abstract method %s", this.name);
+			if (this.isNative()) {  // Special case for java.io.OutputStream.nativeWrite(int)
+				String label = "NATIVE" + this.getDeclaringType().getCanonicalName() + "." + this.name.getSingleComponent();
+				writer.instr("mov", "eax", frame.deref(this.parameters.get(0)));
+				writer.instr("call", label);
+				writer.justUsedGlobal(label);
+			} else {
+				writer.comment("No code for abstract method %s", this.name);
+			}
 		} else {
 			this.block.generateCode(writer, frame);
 		}

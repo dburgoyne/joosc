@@ -132,7 +132,7 @@ public class FieldAccessExpression extends Expression implements Interpretation 
 		writer.instr("je",    "__exception");
 		writer.justUsedGlobal("__exception");
 		
-		writer.instr(instr, "eax", "[eax + " + byteOffset + "]"); // eax <- *?(eax + byteOffset)
+		writer.instr(instr, "eax", "[eax + " + byteOffset + "]  ; Accessing field " + this.fieldName + " of a(n) " + this.primary.getType()); // eax <- *?(eax + byteOffset)
 	}
 	
 	@Override public void generateCode(AsmWriter writer, Frame frame) throws CodeGenerationException {

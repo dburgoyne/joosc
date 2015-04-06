@@ -302,11 +302,11 @@ public class BinaryExpression extends Expression {
 			writer.justUsedGlobal(valueOfLabel);
 			writer.instr("push", "eax");
 			
-			this.left.generateCode(writer, frame);
+			this.right.generateCode(writer, frame);
 			writer.instr("push", "eax");
 			params.clear();
-			if (this.left.getType() instanceof PrimitiveType || this.left.getType() == Program.javaLangString) {
-				params.add(this.left.getType().getCanonicalName());
+			if (this.right.getType() instanceof PrimitiveType || this.right.getType() == Program.javaLangString) {
+				params.add(this.right.getType().getCanonicalName());
 			} else {
 				params.add(Program.javaLangObject.getCanonicalName());
 			}
@@ -332,7 +332,7 @@ public class BinaryExpression extends Expression {
 			
 			this.left.generateLValueCode(writer, frame);
 			writer.instr("push", "eax");
-			writer.instr("push", "ebx");
+			writer.instr("push", "ebx"); // may be a subtype table
 			
 			this.right.generateCode(writer, frame);
 
@@ -357,21 +357,16 @@ public class BinaryExpression extends Expression {
 			// Dynamically check type of new insertion into array.
 			if (this.left instanceof ArrayAccessExpression
 					&& this.left.getType() instanceof TypeDecl) {
-				// ebx <- array's inner type's TypeID (> 0).
+				// ebx <- array's inner type's subtype table
+				// Now need to check that [eax] is in ebx (lhs array's inner type's subtype table)
 				
-				// Use the subtype table to compare types.
-				TypeDecl innerType = (TypeDecl)this.left.getType();
-				String stLbl = innerType.getSubtypeTableLabel();
-				
-				writer.instr("mov", "ebx",           // ebx <- V_(T, S)
-						"[ebx*4 + " + stLbl + "]");
-				writer.justUsedGlobal(stLbl);
-				writer.instr("cmp", "ebx", 0);
+				writer.instr("mov", "ecx", "[eax]"); // ecx <- rhs's Type ID
+				writer.instr("cmp", "[ecx*4 + ebx]", "dword 0"); // lookup ecx in ebx
 				writer.instr("je", "__exception");
 				writer.justUsedGlobal("__exception");
 			}
 			
-			writer.instr("pop", "ebx"); // ebx <- lhs
+			writer.instr("pop", "ebx"); // ebx <- lhs's lvalue
 			writer.instr("mov", "[ebx]", "eax");
 		} else if (this.operator == BinaryOperator.LAND
 				|| this.operator == BinaryOperator.LOR) {

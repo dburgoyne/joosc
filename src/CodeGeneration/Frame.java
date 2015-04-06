@@ -94,6 +94,7 @@ public class Frame {
 			localFrame = localFrame.parent;
 		}
 		assert(localFrame.localOffsets.isEmpty());
+		writer.instr("leave  ; Should leave outermost frame");
 		// Return while popping all parameters, and 'this' pointer if it exists.
 		writer.instr("ret", (localFrame.formalOffsets.size() + (localFrame.thisOffset == null ? 0 : 1)) * 4);
 	}

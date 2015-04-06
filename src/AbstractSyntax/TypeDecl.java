@@ -558,6 +558,9 @@ public class TypeDecl extends ASTNode
 	}
 	
 	public void generateSubtypeTable(AsmWriter writer) {
+		// Generate TID before subtype table
+		writer.instr("dd", this.getTypeID() + "\t; type ID before subtype table");
+		
 		String tableLabel = this.getSubtypeTableLabel();
 		writer.verbatimfn("global %s", tableLabel);
 		writer.label(tableLabel);

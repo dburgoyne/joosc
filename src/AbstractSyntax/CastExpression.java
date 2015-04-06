@@ -162,11 +162,39 @@ public class CastExpression extends Expression {
 	
 	@Override public void generateCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
 		
+		this.expression.generateCode(writer, frame); // eax <- evaluate the expr
+		
+		if (this.type instanceof PrimitiveType) {
+			assert this.expression.getType() instanceof PrimitiveType;
+			PrimitiveType srcType = (PrimitiveType)this.type;
+			PrimitiveType dstType = (PrimitiveType)this.expression.getType();
+			String mov = srcType.isSigned() && dstType.isSigned() ? "movsx" : "movzx";
+			
+			// Widening cases
+			if        (srcType.width() == 1 && dstType.width() == 2) {
+				writer.instr(mov, "ax", "al");
+			} else if (srcType.width() == 1 && dstType.width() == 4) {
+				writer.instr(mov, "eax", "al");
+			} else if (srcType.width() == 2 && dstType.width() == 4) {
+				writer.instr(mov, "eax", "ax");
+			}
+			// Narrowing cases
+			else if (dstType.width() == 1 && (srcType.width() == 2 || srcType.width() == 4)) {
+				writer.instr("mov", "bl", "al");
+				writer.instr("mov", "eax", 0);
+				writer.instr("mov", "al", "bl");
+			} else if (dstType.width() == 2 && srcType.width() == 4) {
+				writer.instr("mov", "bx", "ax");
+				writer.instr("mov", "eax", 0);
+				writer.instr("mov", "ax", "bx");
+			}
+			return;
+		}
+		
+		writer.instr("push", "eax"); // save reference to original.
 		String label = Utilities.Label.generateLabel("cast_end");
 		
-		this.expression.generateCode(writer, frame);
-		writer.instr("push", "eax");
-		
+		// Handle casts to null
 		writer.instr("cmp", "eax", 0);
 		writer.instr("je", label);
 		
@@ -178,17 +206,16 @@ public class CastExpression extends Expression {
 			writer.instr("cmp", "eax", 0);
 			writer.instr("je", "__exception");
 			writer.justUsedGlobal("__exception");
-		} else if (this.type instanceof ArrayType) {
+		}  else if (this.type instanceof ArrayType) {
 			// Expression must be an array (tid 0).
 			writer.instr("mov", "ebx", "[eax]"); // ebx <- expression.tid
 			writer.instr("cmp", "ebx", this.type.getTypeID());
 			writer.instr("jne", "__exception");
 			writer.justUsedGlobal("__exception");
-			writer.instr("mov", "ebx", "[eax + 4]"); // ebx <- expression's inner type's tid
+			writer.instr("mov", "ebx", "[eax + 4]"); // ebx <- expression's inner primitive type's tid, or a pointer to its subtype table
 			
 			if (((ArrayType)this.type).getInnerType() instanceof PrimitiveType) {
-				// Do an exact comparison.
-				writer.instr("mov", "eax", 0);
+				// Do an exact comparison of type ids.
 				writer.instr("cmp", "ebx", ((ArrayType)this.type).getInnerType().getTypeID());
 				writer.instr("jne", "__exception");
 				writer.justUsedGlobal("__exception");
@@ -196,15 +223,18 @@ public class CastExpression extends Expression {
 				// Use the subtype table to compare types.
 				assert(((ArrayType) this.type).getInnerType() instanceof TypeDecl);
 				TypeDecl innerType = (TypeDecl)(((ArrayType) this.type).getInnerType());
+				String innerTypeST = innerType.getSubtypeTableLabel();
 				
+				writer.instr("mov", "ebx", "[ebx-4]"); // ebx <- expression's inner reference type's tid
 				writer.instr("mov", "eax",           // eax <- V_(T, S)
-						"[ebx*4 + " + innerType.getSubtypeTableLabel() + "]");
+						"[ebx*4 + " + innerTypeST + "]");
+				writer.justUsedGlobal(innerTypeST);
 				writer.instr("cmp", "eax", 0);
 				writer.instr("je", "__exception");
 				writer.justUsedGlobal("__exception");
 			}
 		}
 		writer.label(label);
-		writer.instr("pop", "eax");
+		writer.instr("pop", "eax"); // return reference to original
 	}
 }

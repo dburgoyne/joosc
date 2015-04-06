@@ -80,8 +80,8 @@ public class ArrayAccessExpression extends Expression {
 		writer.instr("cmp", "eax", 0); // fail if array is null
 		writer.instr("je",    "__exception");
 		writer.justUsedGlobal("__exception");
-		writer.instr("push", "dword [eax+4]"); // push inner type id
-		writer.instr("push", "eax");     // push the array.
+		writer.instr("push", "dword [eax+4]"); // push inner type's subtype table
+		writer.instr("push", "eax");     // push the array object.
 		
 		this.dimExpr.generateCode(writer, frame); // eax <- index
 		writer.instr("cmp", "eax", 0); // fail if index < 0
@@ -92,8 +92,8 @@ public class ArrayAccessExpression extends Expression {
 		writer.instr("cmp", "eax", "[ebx + 8]"); // fail if index >= array length
 		writer.instr("jge", "__exception");
 		
-		writer.instr(instr, "eax", "[ebx + 4*eax]"); // eax <- ebx[eax]
-		writer.instr("pop", "ebx");  // ebx <- array's inner type id.
+		writer.instr(instr, "eax", "[ebx + 12 + 4*eax]"); // eax <- ebx[eax]
+		writer.instr("pop", "ebx");  // ebx <- array's inner type's subtype table
 	}
 	
 	@Override public void generateCode(AsmWriter writer, Frame frame) throws CodeGenerationException {

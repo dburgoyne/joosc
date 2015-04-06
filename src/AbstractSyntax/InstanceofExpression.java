@@ -87,10 +87,10 @@ public class InstanceofExpression extends Expression {
 			writer.instr("mov", "ebx", "[eax]"); // ebx <- left.tid
 			writer.instr("cmp", "ebx", this.type.getTypeID());
 			writer.instr("jne", label);
-			writer.instr("mov", "ebx", "[eax + 4]"); // ebx <- left's inner type's tid
+			writer.instr("mov", "ebx", "[eax + 4]"); // ebx <- expression's inner primitive type's tid, or a pointer to its subtype table
 			
 			if (((ArrayType)this.type).getInnerType() instanceof PrimitiveType) {
-				// Do an exact comparison.
+				// Do an exact comparison of tids.
 				writer.instr("mov", "eax", 0);
 				writer.instr("cmp", "ebx", ((ArrayType)this.type).getInnerType().getTypeID());
 				writer.instr("jne", label);
@@ -98,10 +98,12 @@ public class InstanceofExpression extends Expression {
 				// Use the subtype table to compare types.
 				assert(((ArrayType) this.type).getInnerType() instanceof TypeDecl);
 				TypeDecl innerType = (TypeDecl)(((ArrayType) this.type).getInnerType());
-				String stLabel = innerType.getSubtypeTableLabel();
+				String innerTypeST = innerType.getSubtypeTableLabel();
+				
+				writer.instr("mov", "ebx", "[ebx-4]"); // ebx <- expression's inner reference type's tid
 				writer.instr("mov", "eax",           // eax <- V_(T, S)
-						"[ebx*4 + " + stLabel + "]");
-				writer.justUsedGlobal(stLabel);
+						"[ebx*4 + " + innerTypeST + "]");
+				writer.justUsedGlobal(innerTypeST);
 				writer.instr("cmp", "eax", 0);
 				writer.instr("je", label);
 			}

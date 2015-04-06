@@ -9,7 +9,7 @@ public enum NullType implements Type {
 	}
 	
 	@Override public int getTypeID() {
-		return -6;
+		return -7;
 	}
 
 	@Override public boolean canBeCastAs(Type t) {

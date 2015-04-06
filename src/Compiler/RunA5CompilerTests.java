@@ -50,42 +50,24 @@ public class RunA5CompilerTests {
         stdout.println("=== TESTING NEGATIVES ===");
         fail_outer: for (List<String> filenames : negatives) {
         	// Clean output directory.
-        	for(File file: new File(OUTPUT_DIR).listFiles()) file.delete();
-        	Runtime.getRuntime().exec(
-    				String.format("cp %s/runtime.s " + OUTPUT_DIR, LIBRARY_DIR)).waitFor();
+        	Assembler.cleanOutputDirectory();
             stdout.printf("%-60s", "-> " + filenames.toString() + ":\n");
             // Include all standard libraries in the build.
             filenames.addAll(libraries);
         	int retval = Compiler.compile(LR1_FILE, filenames.toArray(new String[0]));
         	if (retval == 0) {
-        		// Attempt assembly and linking.
-        		for (String filename : listAssemblyFiles()) {
-        			Process p = Runtime.getRuntime().exec(String.format(ASSEMBLER_CMD, filename));
-        			retval = p.waitFor();
-        			if (retval != 0) {
-        				Utilities.ProcessUtils.drainProcess(p, stderr);
-        				stderr.println("--- ASSEMBLY FAILED ---");
-        				continue fail_outer;
-        			}
-        		}
-        		Process p = Runtime.getRuntime().exec(String.format(LINKER_CMD, listObjectFiles()));
-        		retval = p.waitFor();
+    			// Attempt assembly and linking.
+        		retval = Assembler.assemble(stderr);
     			if (retval != 0) {
-    				Utilities.ProcessUtils.drainProcess(p, stderr);
-    				stderr.println("--- LINKING FAILED ---");
     				continue fail_outer;
     			}
-//    			// Attempt to run the program.
-//    			p = Runtime.getRuntime().exec(OUTPUT_DIR + "/main");
-//    			retval = p.waitFor();
-//    			if (retval != 123) {
-//    				stdout.println("+++ PASS +++");
-//                    negatives_passed++;
-//    			} else {
-//    				stdout.println("+++ FAIL WITH"  + retval + " +++");
-//    			}
-    			stdout.println("--- LINKING PASSED ---");
-        		
+        		retval = Runner.run(stderr);
+        		if (retval == 123) {
+        			stdout.println("--- FAIL ---");
+    				continue fail_outer;
+    			}
+    			stdout.println("+++ PASS +++");
+                negatives_passed++;
         	} else {
         		stderr.println("--- COMPILATION FAILED ---");
             }
@@ -95,43 +77,24 @@ public class RunA5CompilerTests {
         stdout.println("\n=== TESTING POSITIVES ===");
         pass_outer: for (List<String> filenames : positives) {
         	// Clean output directory.
-        	for(File file: new File(OUTPUT_DIR).listFiles()) file.delete();
-    		Runtime.getRuntime().exec(
-    				String.format("cp %s/runtime.s " + OUTPUT_DIR, LIBRARY_DIR)).waitFor();
+        	Assembler.cleanOutputDirectory();
             stdout.printf("%-60s", "-> " + filenames.toString() + ":\n");
             // Include all standard libraries in the build.
             filenames.addAll(libraries);
         	int retval = Compiler.compile(LR1_FILE, filenames.toArray(new String[0]));
         	if (retval == 0) {
         		// Attempt assembly and linking.
-        		for (String filename : listAssemblyFiles()) {
-        			Process p = Runtime.getRuntime().exec(String.format(ASSEMBLER_CMD, filename));
-        			retval = p.waitFor();
-        			if (retval != 0) {
-        				Utilities.ProcessUtils.drainProcess(p, stderr);
-        				stderr.println("--- ASSEMBLY FAILED ---");
-        				continue pass_outer;
-        			}
-        		}
-        		Process p = Runtime.getRuntime().exec(String.format(LINKER_CMD, listObjectFiles()));
-        		retval = p.waitFor();
+        		retval = Assembler.assemble(stderr);
     			if (retval != 0) {
-    				Utilities.ProcessUtils.drainProcess(p, stderr);
-    				stderr.println("--- LINKING FAILED ---");
     				continue pass_outer;
     			}
-    			// Attempt to run the program.
-//    			p = Runtime.getRuntime().exec(OUTPUT_DIR + "/main");
-//    			retval = p.waitFor();
-//    			if (retval == 123) {
-//    				stdout.println("+++ PASS +++");
-//                    negatives_passed++;
-//    			} else {
-//    				stdout.println("+++ FAIL WITH " + retval + " +++");
-//    			}
-
-    			stdout.println("--- LINKING PASSED ---");
-        		
+        		retval = Runner.run(stderr);
+        		if (retval != 123) {
+        			stdout.println("--- FAIL ---");
+    				continue pass_outer;
+    			}
+    			stdout.println("+++ PASS +++");
+                positives_passed++;
         	} else {
         		stderr.println("--- COMPILATION FAILED ---");
             }
