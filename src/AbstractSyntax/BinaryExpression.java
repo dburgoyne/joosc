@@ -89,20 +89,23 @@ public class BinaryExpression extends Expression {
 	}
 	
 	@Override public void checkTypes() throws TypeCheckingException {
-		// No bitwise operations may occur. 
-		switch (this.operator) {
-		  case AND:
-		  case OR:
-		  case XOR:
-			throw new TypeCheckingException.BitwiseOperator(this);
-	      default:
-	    	// Do nothing
-		}
-
 		this.left.checkTypes();
 		this.left.assertNonVoid();
 		this.right.checkTypes();
 		this.right.assertNonVoid();
+		
+		// No bitwise operations may occur. 
+		// It should work for boolean
+		switch (this.operator) {
+		  case AND:
+		  case OR:
+		  case XOR:
+			if (left.getType() != PrimitiveType.BOOLEAN || left.getType() != PrimitiveType.BOOLEAN) {
+				throw new TypeCheckingException.BitwiseOperator(this);
+			}
+	      default:
+	    	// Do nothing
+		}
 		
 		Type leftType = this.left.getType(),
 			 rightType = this.right.getType();
@@ -475,11 +478,16 @@ public class BinaryExpression extends Expression {
 				writer.instr("mov", "eax", "0");
 				writer.label(label);
 				break;
+			  case AND:
 			  case LAND:
 				writer.instr("and", "eax,edx");
 				break;
+			  case OR:
 			  case LOR:
 				writer.instr("or", "eax,edx");
+				break;
+			  case XOR:
+				writer.instr("xor", "eax,edx");
 				break;
 			  case EQ:
 			    label = Utilities.Label.generateLabel("binary_eq");
