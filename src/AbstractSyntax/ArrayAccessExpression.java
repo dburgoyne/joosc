@@ -1,5 +1,8 @@
 package AbstractSyntax;
 
+import CodeGeneration.AsmWriter;
+import CodeGeneration.Frame;
+import Exceptions.CodeGenerationException;
 import Exceptions.ImportException;
 import Exceptions.NameConflictException;
 import Exceptions.NameLinkingException;
@@ -8,14 +11,12 @@ import Exceptions.TypeLinkingException;
 import Parser.ParseTree;
 import Types.ArrayType;
 import Types.PrimitiveType;
-import Types.Type;
 import Utilities.Cons;
 
 public class ArrayAccessExpression extends Expression {
 
 	protected Expression array;
 	protected Expression dimExpr;
-	protected Type type;
 	
 	public ArrayAccessExpression(ParseTree tree) {
 		super(tree);
@@ -71,4 +72,35 @@ public class ArrayAccessExpression extends Expression {
 		
 		this.exprType = ((ArrayType)this.array.getType()).getInnerType();
 	}	
+	
+	// ---------- Code generation ----------
+	
+	private void generateCommon(AsmWriter writer, Frame frame, String instr) throws CodeGenerationException {
+		this.array.generateCode(writer, frame); // eax <- the array
+		writer.instr("cmp", "eax", 0); // fail if array is null
+		writer.instr("je",    "__exception");
+		writer.justUsedGlobal("__exception");
+		writer.instr("push", "dword [eax+4]"); // push inner type id
+		writer.instr("push", "eax");     // push the array.
+		
+		this.dimExpr.generateCode(writer, frame); // eax <- index
+		writer.instr("cmp", "eax", 0); // fail if index < 0
+		writer.instr("jl",    "__exception");
+		writer.justUsedGlobal("__exception");
+		
+		writer.instr("pop", "ebx"); // ebx <- array object
+		writer.instr("cmp", "eax", "[ebx + 8]"); // fail if index >= array length
+		writer.instr("jge", "__exception");
+		
+		writer.instr(instr, "eax", "[ebx + 4*eax]"); // eax <- ebx[eax]
+		writer.instr("pop", "ebx");  // ebx <- array's inner type id.
+	}
+	
+	@Override public void generateCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
+		this.generateCommon(writer, frame, "mov");
+	}
+	
+	@Override public void generateLValueCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
+		this.generateCommon(writer, frame, "lea");
+	}
 }

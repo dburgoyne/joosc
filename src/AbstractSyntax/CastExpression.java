@@ -1,11 +1,15 @@
 package AbstractSyntax;
 
+import CodeGeneration.AsmWriter;
+import CodeGeneration.Frame;
+import Exceptions.CodeGenerationException;
 import Exceptions.ImportException;
 import Exceptions.NameConflictException;
 import Exceptions.NameLinkingException;
 import Exceptions.TypeCheckingException;
 import Exceptions.TypeLinkingException;
 import Parser.ParseTree;
+import Types.ArrayType;
 import Types.PrimitiveType;
 import Types.Type;
 import Utilities.Cons;
@@ -21,7 +25,7 @@ public class CastExpression extends Expression {
 		assert(tree.getSymbol().equals("CastExpression"));
 		
 		this.typeName = new Identifier(tree.getChildren()[1]);
-		this.expression = new UnaryExpression(tree.getChildren()[3]);
+		this.expression = Expression.extractExpression(tree.getChildren()[3]);
 	}
 	
 	public void buildEnvironment(Cons<EnvironmentDecl> parentEnvironment) throws NameConflictException, ImportException {
@@ -152,5 +156,55 @@ public class CastExpression extends Expression {
 		}
 		
 		return null;
+	}
+	
+	// ---------- Code generation ----------
+	
+	@Override public void generateCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
+		
+		String label = Utilities.Label.generateLabel("cast_end");
+		
+		this.expression.generateCode(writer, frame);
+		writer.instr("push", "eax");
+		
+		writer.instr("cmp", "eax", 0);
+		writer.instr("je", label);
+		
+		if (this.type instanceof TypeDecl) {
+			writer.instr("mov", "eax", "[eax]"); // eax <- left.tid
+			writer.instr("mov", "eax",           // eax <- V_(T, S)
+					"[eax*4 + " + ((TypeDecl)this.type).getSubtypeTableLabel() + "]");
+			writer.justUsedGlobal(((TypeDecl)this.type).getSubtypeTableLabel());
+			writer.instr("cmp", "eax", 0);
+			writer.instr("je", "__exception");
+			writer.justUsedGlobal("__exception");
+		} else if (this.type instanceof ArrayType) {
+			// Expression must be an array (tid 0).
+			writer.instr("mov", "ebx", "[eax]"); // ebx <- expression.tid
+			writer.instr("cmp", "ebx", this.type.getTypeID());
+			writer.instr("jne", "__exception");
+			writer.justUsedGlobal("__exception");
+			writer.instr("mov", "ebx", "[eax + 4]"); // ebx <- expression's inner type's tid
+			
+			if (((ArrayType)this.type).getInnerType() instanceof PrimitiveType) {
+				// Do an exact comparison.
+				writer.instr("mov", "eax", 0);
+				writer.instr("cmp", "ebx", ((ArrayType)this.type).getInnerType().getTypeID());
+				writer.instr("jne", "__exception");
+				writer.justUsedGlobal("__exception");
+			} else {
+				// Use the subtype table to compare types.
+				assert(((ArrayType) this.type).getInnerType() instanceof TypeDecl);
+				TypeDecl innerType = (TypeDecl)(((ArrayType) this.type).getInnerType());
+				
+				writer.instr("mov", "eax",           // eax <- V_(T, S)
+						"[ebx*4 + " + innerType.getSubtypeTableLabel() + "]");
+				writer.instr("cmp", "eax", 0);
+				writer.instr("je", "__exception");
+				writer.justUsedGlobal("__exception");
+			}
+		}
+		writer.label(label);
+		writer.instr("pop", "eax");
 	}
 }

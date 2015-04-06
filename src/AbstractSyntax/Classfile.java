@@ -6,6 +6,7 @@ import java.util.List;
 
 import CodeGeneration.AsmWriter;
 import CodeGeneration.Frame;
+import Exceptions.CodeGenerationException;
 import Exceptions.ImportException;
 import Exceptions.NameConflictException;
 import Exceptions.NameLinkingException;
@@ -275,7 +276,7 @@ public class Classfile extends ASTNode {
 	
 	// ---------- Code generation ----------
 
-	@Override public void generateCode(AsmWriter writer, Frame frame) {
+	@Override public void generateCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
 		
 		writer.pushComment("Source file: %s", parseTree.getToken().getFileName());
 		// Special code for java.lang.String

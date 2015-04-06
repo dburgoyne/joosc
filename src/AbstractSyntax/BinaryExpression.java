@@ -1,7 +1,11 @@
 package AbstractSyntax;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import CodeGeneration.AsmWriter;
 import CodeGeneration.Frame;
+import Exceptions.CodeGenerationException;
 import Exceptions.ImportException;
 import Exceptions.NameConflictException;
 import Exceptions.NameLinkingException;
@@ -279,44 +283,129 @@ public class BinaryExpression extends Expression {
 	
 	// ---------- Code generation ----------
 	
-	@Override public void generateCode(AsmWriter writer, Frame frame) {
+	@Override public void generateCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
 		
 		String label;
 		
 		// String appends and assignments are the only special cases
 		if (this.operator == BinaryOperator.PLUS &&
 				(this.left.getType() == Program.javaLangString || this.right.getType() == Program.javaLangString)) {
-			// TODO Call java.lang.String methods to convert primitives to String.
+			// Evaluate and call java.lang.String.valueOf on both arguments, to convert to non-null Strings.
+			this.left.generateCode(writer, frame);
+			writer.instr("push", "eax");
+			List<String> params = new ArrayList<String>();
+			if (this.left.getType() instanceof PrimitiveType || this.left.getType() == Program.javaLangString) {
+				params.add(this.left.getType().getCanonicalName());
+			} else {
+				params.add(Program.javaLangObject.getCanonicalName());
+			}
+			String valueOfLabel = Utilities.Label.generateLabel("sm",
+					Program.javaLangString.getCanonicalName(),
+					"valueOf",
+					params);
+			writer.instr("call", valueOfLabel);
+			writer.justUsedGlobal(valueOfLabel);
+			writer.instr("push", "eax");
+			
+			this.left.generateCode(writer, frame);
+			writer.instr("push", "eax");
+			params.clear();
+			if (this.left.getType() instanceof PrimitiveType || this.left.getType() == Program.javaLangString) {
+				params.add(this.left.getType().getCanonicalName());
+			} else {
+				params.add(Program.javaLangObject.getCanonicalName());
+			}
+			valueOfLabel = Utilities.Label.generateLabel("sm",
+					Program.javaLangString.getCanonicalName(),
+					"valueOf",
+					params);
+			writer.instr("call", valueOfLabel);
+			writer.justUsedGlobal(valueOfLabel);
+			writer.instr("push", "eax");
+			
+			params.clear();
+			params.add(Program.javaLangString.getCanonicalName());
+			String concatLabel = Utilities.Label.generateLabel("im",
+					Program.javaLangString.getCanonicalName(),
+					"concat",
+					null);
+			writer.instr("call", concatLabel);
+			writer.justUsedGlobal(concatLabel);
+
 		} else if (this.operator == BinaryOperator.ASSIGN) {
-			// TODO add ability to get lvalue of assignable expressions. 
+			
+			
+			this.left.generateLValueCode(writer, frame);
+			writer.instr("push", "eax");
+			writer.instr("push", "ebx");
+			
+			this.right.generateCode(writer, frame);
+
+			// implicit widening conversion: 1->2|4, 2->4 bytes.
+			if (this.left.getType() instanceof PrimitiveType) {
+				assert this.right.getType() instanceof PrimitiveType;
+				PrimitiveType tl = (PrimitiveType)this.left.getType();
+				PrimitiveType tr = (PrimitiveType)this.right.getType();
+				String mov = tl.isSigned() && tr.isSigned() ? "movsx" : "movzx";
+				
+				if        (tl.width() == 2 && tr.width() == 1) {
+					writer.instr(mov, "ax", "al");
+				} else if (tl.width() == 4 && tr.width() == 1) {
+					writer.instr(mov, "eax", "al");
+				} else if (tl.width() == 4 && tr.width() == 2) {
+					writer.instr(mov, "eax", "ax");
+				}
+			}
+			
+			writer.instr("pop", "ebx");
+			
+			// Dynamically check type of new insertion into array.
+			if (this.left instanceof ArrayAccessExpression
+					&& this.left.getType() instanceof TypeDecl) {
+				// ebx <- array's inner type's TypeID (> 0).
+				
+				// Use the subtype table to compare types.
+				TypeDecl innerType = (TypeDecl)this.left.getType();
+				
+				writer.instr("mov", "ebx",           // ebx <- V_(T, S)
+						"[ebx*4 + " + innerType.getSubtypeTableLabel() + "]");
+				writer.instr("cmp", "ebx", 0);
+				writer.instr("je", "__exception");
+				writer.justUsedGlobal("__exception");
+			}
+			
+			writer.instr("pop", "ebx"); // ebx <- lhs
+			writer.instr("mov", "[ebx]", "eax");
 		} else {
 			// All other cases start the same way.
-			assert(this.left.getType() instanceof PrimitiveType);
-			assert(this.right.getType() instanceof PrimitiveType);
 			this.left.generateCode(writer, frame);
-			// Sign-extend the LHS by the correct amount, if less than 32 bits.
-			switch (((PrimitiveType)this.left.getType()).width()) {
-			  case 1:
-				writer.line("movsx eax,al  ; Sign extend 1 byte to 4 bytes");
-				break;
-			  case 2:
-				writer.line("movsx eax,ax  ; Sign extend 2 bytes to 4 bytes");
-				break;
-			  default: // 4 bytes; do nothing
-				break;
+			if (this.left.getType() instanceof PrimitiveType) {
+				// Sign-extend the LHS by the correct amount, if less than 32 bits.
+				switch (((PrimitiveType)this.left.getType()).width()) {
+				  case 1:
+					writer.line("movsx eax, al  ; Sign extend 1 byte to 4 bytes");
+					break;
+				  case 2:
+					writer.line("movsx eax, ax  ; Sign extend 2 bytes to 4 bytes");
+					break;
+				  default: // 4 bytes; do nothing
+					break;
+				}
 			}
 			writer.instr("push", "eax");
 			this.right.generateCode(writer, frame);
-			// Sign-extend the RHS by the correct amount, if less than 32 bits.
-			switch (((PrimitiveType)this.right.getType()).width()) {
-			  case 1:
-				writer.line("movsx eax,al  ; Sign extend 1 byte to 4 bytes");
-				break;
-			  case 2:
-				writer.line("movsx eax,ax  ; Sign extend 2 bytes to 4 bytes");
-				break;
-			  default: // 4 bytes; do nothing
-				break;
+			if (this.right.getType() instanceof PrimitiveType) {
+				// Sign-extend the RHS by the correct amount, if less than 32 bits.
+				switch (((PrimitiveType)this.right.getType()).width()) {
+				  case 1:
+					writer.line("movsx eax, al  ; Sign extend 1 byte to 4 bytes");
+					break;
+				  case 2:
+					writer.line("movsx eax, ax  ; Sign extend 2 bytes to 4 bytes");
+					break;
+				  default: // 4 bytes; do nothing
+					break;
+				}
 			}
 			// Convenient to have the left expression in eax
 			writer.instr("mov", "ebx", "eax");
@@ -334,10 +423,20 @@ public class BinaryExpression extends Expression {
 				writer.instr("imul", "ebx");
 				break;
 			  case SLASH:
+				// Throw exception on division by zero.
+				writer.instr("cmp", "ebx", 0);
+				writer.instr("je", "__exception");
+				writer.justUsedGlobal("__exception");
+				
 				writer.instr("cdq");
 				writer.instr("idiv", "ebx");
 				break;
 			  case MOD:
+				// Throw exception on division by zero.
+				writer.instr("cmp", "ebx", 0);
+				writer.instr("je", "__exception");
+				writer.justUsedGlobal("__exception");
+				  
 				writer.instr("cdq");
 				writer.instr("idiv", "ebx");
 				writer.instr("mov", "eax", "edx");

@@ -1,5 +1,8 @@
 package AbstractSyntax;
 
+import CodeGeneration.AsmWriter;
+import CodeGeneration.Frame;
+import Exceptions.CodeGenerationException;
 import Exceptions.ImportException;
 import Exceptions.NameConflictException;
 import Exceptions.NameLinkingException;
@@ -21,6 +24,10 @@ public class Local extends BlockStatement
 	
 	public Identifier getName() {
 		return name;
+	}
+	
+	public String toString() {
+		return type + " " + name;
 	}
 	
 	public Local(ParseTree tree) {
@@ -108,5 +115,16 @@ public class Local extends BlockStatement
 		}
 		this.canLeave = this.canEnter;
 	}
-
+	
+	// ---------- Code generation ----------
+	
+	@Override public void generateCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
+		
+		// Evaluate initializer code and stick result in the reserved dword in the frame.
+		writer.pushComment("Initializer for local %s", this);
+		this.initializer.generateCode(writer, frame);
+		writer.instr("mov", frame.deref(this), "eax");
+		writer.popComment();
+		
+	}
 }

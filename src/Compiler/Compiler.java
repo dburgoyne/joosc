@@ -5,6 +5,7 @@ import java.util.List;
 
 import AbstractSyntax.Program;
 import AbstractSyntax.TypeDecl;
+import Exceptions.CodeGenerationException;
 import Exceptions.ImportException;
 import Exceptions.NameConflictException;
 import Exceptions.NameLinkingException;
@@ -92,6 +93,11 @@ public class Compiler {
     		for (TypeDecl ty : sortedTypes) {
     			ty.buildSchema();
     		}
+    		    		
+    		// Validate existence of entry point.
+    		if (Program.staticIntTest == null || Program.staticIntTest.getDeclaringType() != allTypeDecls.head) {
+    			throw new CodeGenerationException.NoStaticIntTest(allTypeDecls.head);
+    		}
     		
     		// Code generation pass.
     		program.generateCode(null, null);
@@ -105,7 +111,8 @@ public class Compiler {
 			 || e instanceof MemberSet.Exception
 			 || e instanceof NameLinkingException
 			 || e instanceof TypeCheckingException
-			 || e instanceof ReachabilityException) {
+			 || e instanceof ReachabilityException
+			 || e instanceof CodeGenerationException) {
     			System.err.println(e.getMessage());
     			failed = true;
 			} else {

@@ -4,6 +4,7 @@ import java.util.List;
 
 import CodeGeneration.AsmWriter;
 import CodeGeneration.Frame;
+import Exceptions.CodeGenerationException;
 import Exceptions.ImportException;
 import Exceptions.NameConflictException;
 import Exceptions.NameLinkingException;
@@ -45,7 +46,7 @@ public abstract class ASTNode {
 	public abstract void checkReachability(boolean canLeavePrevious) throws ReachabilityException;
 	
 	// ---------- Code generation ----------
-	public void generateCode(AsmWriter writer, Frame frame) {
+	public void generateCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
 		writer.comment("Code generation for %s is not yet implemented.", this.getClass().getName());
 	}
 }

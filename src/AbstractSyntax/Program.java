@@ -164,7 +164,7 @@ public class Program extends ASTNode {
 	public Cons<TypeDecl> getAllTypeDecls() {
 		List<EnvironmentDecl> decls = Cons.toList(this.environment);
 		Cons<TypeDecl> typeDecls = null;
-		for (int i = decls.size() - 1; i >= 0; i--) {
+		for (int i = 0; i < decls.size(); i++) {
 			typeDecls = new Cons<TypeDecl>((TypeDecl)decls.get(i), typeDecls);
 		}
 		return typeDecls;
@@ -206,7 +206,6 @@ public class Program extends ASTNode {
 		writer.verbatimln("section .bss");
 		for (int i = 0; i < Program.allStringLiterals.size(); i++) {
 			Literal str = Program.allStringLiterals.get(i);
-			str.label = "strlit_" + i;
 			writer.verbatimfn("global %s", str.label);
 			writer.line("%s: resb %d",
 					str.label,

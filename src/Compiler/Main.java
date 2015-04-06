@@ -26,6 +26,10 @@ public class Main {
     		filenames[i] = args[i + 1];
     	}
     	
-    	System.exit(Compiler.compile(args[0], filenames));
+    	int retval = Compiler.compile(args[0], filenames);
+    	if (retval != 0) System.exit(retval);
+    	retval = Assembler.assemble();
+    	if (retval != 0) System.exit(retval);
+    	//System.exit(Compiler.compile(args[0], filenames));
     }
 }

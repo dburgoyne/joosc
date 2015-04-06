@@ -3,6 +3,9 @@ package AbstractSyntax;
 import java.util.ArrayList;
 import java.util.List;
 
+import CodeGeneration.AsmWriter;
+import CodeGeneration.Frame;
+import Exceptions.CodeGenerationException;
 import Exceptions.NameConflictException;
 import Exceptions.NameLinkingException;
 import Exceptions.TypeCheckingException;
@@ -583,5 +586,60 @@ public class Identifier extends Expression {
 		}
 		
 		return null;
+	}
+	
+	// ---------- Code generation ----------
+	
+	private void generateCommon(AsmWriter writer, Frame frame, String instr) throws CodeGenerationException {
+		Interpretation interp = this.getInterpretation();
+		
+		if (interp instanceof This) {
+			writer.instr(instr, "eax", frame.derefThis());
+			return;
+			
+		} else if (interp instanceof Formal) {
+			Formal formal = (Formal)interp;
+			writer.instr(instr, "eax", frame.deref(formal));
+			return;
+			
+		} else if (interp instanceof Local) {
+			Local local = (Local)interp;
+			writer.instr(instr, "eax", frame.deref(local));
+			return; 
+			
+		} else if (interp instanceof Field) {
+			Field field = (Field)interp;
+			if (field.isStatic()) {
+				String label = field.getStaticLabel();
+				writer.instr(instr, "eax", "[" + label + "]");
+				writer.justUsedGlobal(label);
+				
+			} else {
+				assert field.byteOffset >= 4;
+				writer.instr("mov", "eax", frame.derefThis());
+				writer.instr(instr, "eax", "[eax + " + field.byteOffset + "]");
+			}
+			return;
+		} 
+		
+		assert false;
+	}
+	
+	@Override public void generateCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
+		Interpretation interp = this.getInterpretation();
+		if (interp instanceof Expression) {
+			((Expression)interp).generateCode(writer, frame);
+		} else {
+			this.generateCommon(writer, frame, "mov");
+		}
+	}
+	
+	@Override public void generateLValueCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
+		Interpretation interp = this.getInterpretation();
+		if (interp instanceof Expression) {
+			((Expression)interp).generateLValueCode(writer, frame);
+		} else {
+			this.generateCommon(writer, frame, "lea");
+		}
 	}
 }

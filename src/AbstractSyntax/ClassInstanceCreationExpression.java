@@ -3,6 +3,9 @@ package AbstractSyntax;
 import java.util.List;
 import java.util.ArrayList;
 
+import CodeGeneration.AsmWriter;
+import CodeGeneration.Frame;
+import Exceptions.CodeGenerationException;
 import Exceptions.ImportException;
 import Exceptions.NameConflictException;
 import Exceptions.NameLinkingException;
@@ -124,4 +127,30 @@ public class ClassInstanceCreationExpression extends Expression {
 		this.exprType = this.type;
 	}
 	
+	// ---------- Code generation ----------
+	
+	@Override public void generateCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
+		// Determine object size.
+		writer.instr("mov", "eax", this.type.sizeOf());
+		// Call __malloc
+		writer.instr("call", "__malloc");
+		writer.justUsedGlobal("__malloc");
+		writer.instr("push", "eax");
+		writer.instr("push", "eax");
+		// Set the type ID in the first dword.
+		writer.instr("mov", "[eax]", "dword " + this.type.getTypeID());
+		// Zero the object
+		for (int i = 4; i < this.type.sizeOf(); i += 4) {
+			writer.instr("mov", "[eax + " + i + "]", "dword 0");
+		}
+		// Call the constructor.
+		for (int i = 0; i < this.arguments.size(); i++) {
+			this.arguments.get(i).generateCode(writer, frame);
+			writer.instr("push", "eax");
+		}
+		writer.instr("call", this.ctorCalled.getLabel());
+		writer.justUsedGlobal(this.ctorCalled.getLabel());
+		// Pop the address of the new object.
+		writer.instr("pop", "eax");
+	}
 }

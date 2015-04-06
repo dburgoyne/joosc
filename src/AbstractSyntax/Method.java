@@ -5,6 +5,7 @@ import java.util.List;
 
 import CodeGeneration.AsmWriter;
 import CodeGeneration.Frame;
+import Exceptions.CodeGenerationException;
 import Exceptions.ImportException;
 import Exceptions.NameConflictException;
 import Exceptions.NameLinkingException;
@@ -28,6 +29,10 @@ public class Method extends Decl {
 	
 	public Identifier getName() {
 		return this.name;
+	}
+	
+	public TypeDecl getDeclaringType() {
+		return this.declaringType;
 	}
 	
 	public boolean isAbstract() {
@@ -302,7 +307,7 @@ public class Method extends Decl {
 				Utilities.Label.typesOfFormals(this.parameters));
 	}
 
-	@Override public void generateCode(AsmWriter writer, Frame frame) {
+	@Override public void generateCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
 		writer.pushComment("Method %s", this);
 
 		String implLbl = this.getImplementationLabel();

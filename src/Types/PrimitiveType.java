@@ -25,6 +25,10 @@ public enum PrimitiveType implements Type {
 			 : 4;
 	}
 	
+	public boolean isSigned() {
+		return this != CHAR && this != BOOLEAN;
+	}
+	
 	@Override public boolean canBeCastAs(Type t) {
 		return t instanceof PrimitiveType
 		    && (this.isIntegral() == ((PrimitiveType)t).isIntegral());

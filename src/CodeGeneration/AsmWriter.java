@@ -130,6 +130,9 @@ public class AsmWriter {
 	// Called after referring to a label defined as global in some module.
 	public void justUsedGlobal(String label) {
 		usedGlobals.add(label);
+		if (label == null) {
+			assert false;
+		}
 	}
 	
 	// Called after defining a label as global.

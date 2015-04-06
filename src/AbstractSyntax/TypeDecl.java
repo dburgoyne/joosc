@@ -8,6 +8,7 @@ import java.util.Map;
 
 import CodeGeneration.AsmWriter;
 import CodeGeneration.Frame;
+import Exceptions.CodeGenerationException;
 import Exceptions.ImportException;
 import Exceptions.NameConflictException;
 import Exceptions.NameLinkingException;
@@ -490,6 +491,7 @@ public class TypeDecl extends ASTNode
 			if (method.isStatic()
 					&& method.type == PrimitiveType.INT
 					&& method.getName().getSingleComponent().equals("test")
+					&& method.parameters.isEmpty()
 					&& Program.staticIntTest == null) {
 				Program.staticIntTest = method;
 			}
@@ -499,7 +501,7 @@ public class TypeDecl extends ASTNode
 	// ---------- Code generation ----------
 	
 	@Override
-	public void generateCode(AsmWriter writer, Frame frame) {
+	public void generateCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
 		
 		writer.pushComment("Type %s", this.getCanonicalName());
 		writer.verbatimln("section .text");
@@ -585,7 +587,7 @@ public class TypeDecl extends ASTNode
 		return Utilities.Label.generateLabel(isStatic ? "si" : "ii", this.getCanonicalName(), null, null);
 	}
 	
-	public void generateFieldInitializers(AsmWriter writer, boolean isStatic) {
+	public void generateFieldInitializers(AsmWriter writer, boolean isStatic) throws CodeGenerationException {
 
 		String label = this.getInitializerLabel(isStatic);
 		if (isStatic) {

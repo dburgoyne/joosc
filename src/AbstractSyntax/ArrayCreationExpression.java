@@ -1,5 +1,8 @@
 package AbstractSyntax;
 
+import CodeGeneration.AsmWriter;
+import CodeGeneration.Frame;
+import Exceptions.CodeGenerationException;
 import Exceptions.ImportException;
 import Exceptions.NameConflictException;
 import Exceptions.NameLinkingException;
@@ -74,4 +77,35 @@ public class ArrayCreationExpression extends Expression {
 		this.exprType = this.type;
 	}
 	
+	// ---------- Code generation ----------
+	
+	@Override public void generateCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
+		// Determine object size.
+		this.dimExpr.generateCode(writer, frame);
+		writer.instr("mov", "ecx", "eax");
+		writer.instr("lea", "eax", "[eax * 4 + 12]");
+		// Call __malloc
+		writer.instr("call", "__malloc");
+		writer.justUsedGlobal("__malloc");
+		writer.instr("push", "eax");
+		// Set the array type ID (0) in the first dword.
+		writer.instr("mov", "[eax]", "dword 0");
+		// Set the inner type ID in the second dword.
+		writer.instr("mov", "[eax + 4]", "dword " + this.type.getTypeID());
+		// Set the array length in the third dword.
+		writer.instr("mov", "[eax + 8]", "ecx");
+		// Zero the object
+		String startLabel = Utilities.Label.generateLabel("loop_start");
+		String endLabel = Utilities.Label.generateLabel("loop_end");
+		writer.instr("add", "eax", "12");
+		writer.instr("cmp", "ecx", "0");
+		writer.instr("je", endLabel);
+		writer.label(startLabel);
+		writer.instr("mov", "[eax]", "dword 0");
+		writer.instr("add", "eax", "4");
+		writer.instr("loop", startLabel);
+		writer.label(endLabel);
+		// Pop the address of the new object.
+		writer.instr("pop", "eax");
+	}
 }

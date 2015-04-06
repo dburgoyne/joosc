@@ -3,6 +3,9 @@ package AbstractSyntax;
 import java.util.ArrayList;
 import java.util.List;
 
+import CodeGeneration.AsmWriter;
+import CodeGeneration.Frame;
+import Exceptions.CodeGenerationException;
 import Exceptions.ImportException;
 import Exceptions.NameConflictException;
 import Exceptions.NameLinkingException;
@@ -86,5 +89,24 @@ public class Block extends Statement {
 			canLeavePreviousStatement = bs.canLeave;
 		}
 		this.canLeave = canLeavePreviousStatement;
+	}
+	
+	// ---------- Code generation ----------
+	
+	@Override public void generateCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
+		
+		frame = new Frame(frame);
+		// Add all top-level locals to frame.
+		for (BlockStatement bs : this.statements) {
+			if (bs instanceof Local) {
+				frame.declare((Local)bs);
+			}
+		}
+		frame.enter(writer);
+		for (BlockStatement bs : this.statements) {
+			bs.generateCode(writer, frame);
+		}
+		frame.leave(writer);
+		
 	}
 }

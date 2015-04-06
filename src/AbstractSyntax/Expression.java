@@ -1,5 +1,8 @@
 package AbstractSyntax;
 
+import CodeGeneration.AsmWriter;
+import CodeGeneration.Frame;
+import Exceptions.CodeGenerationException;
 import Exceptions.ReachabilityException;
 import Exceptions.TypeCheckingException;
 import Parser.ParseTree;
@@ -119,4 +122,8 @@ public abstract class Expression extends Statement {
 	public Object asConstExpr() { return null; }
 	public final boolean isAlwaysTrue() { return Boolean.TRUE.equals(this.asConstExpr()); }
 	public final boolean isAlwaysFalse() { return Boolean.FALSE.equals(this.asConstExpr()); }
+	
+	public void generateLValueCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
+		throw new CodeGenerationException.InvalidLValue(this);
+	}
 }

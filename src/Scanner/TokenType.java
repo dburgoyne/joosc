@@ -105,10 +105,13 @@ public enum TokenType {
 					CharacterClass.NonZeroDigit), Regex.Optional(Digits
 					.getRegex())))),
 
-	IntegerLiteral(DecimalNumeral.getRegex()),
-
 	SignedIntegerLiteral(Regex.Build(Regex.Type.CONCATENATION, new Regex(
 			CharacterClass.Sign), Digits.getRegex())),
+	
+	IntegerLiteral(DecimalNumeral.getRegex()),
+	//IntegerLiteral(Regex.Build(Regex.Type.DISJUNCTION, 
+	//		DecimalNumeral.getRegex(),
+	//		SignedIntegerLiteral.getRegex())),
 
 	ExponentPart(Regex.Build(Regex.Type.CONCATENATION, new Regex(
 			CharacterClass.ExponentIndicator), SignedIntegerLiteral.getRegex())),

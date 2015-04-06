@@ -84,4 +84,17 @@ public class Frame {
 			thisOffset = (2 + formals.size()) * 4;
 		}
 	}
+	
+	public void ret(AsmWriter writer) {
+		Frame localFrame = this;
+		while (localFrame.parent != null) {
+			assert(localFrame.formalOffsets.isEmpty());
+			assert(localFrame.thisOffset == null);
+			writer.instr("leave");
+			localFrame = localFrame.parent;
+		}
+		assert(localFrame.localOffsets.isEmpty());
+		// Return while popping all parameters, and 'this' pointer if it exists.
+		writer.instr("ret", (localFrame.formalOffsets.size() + (localFrame.thisOffset == null ? 0 : 1)) * 4);
+	}
 }

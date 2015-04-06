@@ -1,5 +1,8 @@
 package AbstractSyntax;
 
+import CodeGeneration.AsmWriter;
+import CodeGeneration.Frame;
+import Exceptions.CodeGenerationException;
 import Exceptions.TypeCheckingException;
 import Exceptions.TypeLinkingException;
 import Parser.ParseTree;
@@ -51,6 +54,7 @@ public class Literal extends Expression {
 		// Remember all string literals in the program.
 		if (this.type == LiteralType.STRING) {
 			Program.allStringLiterals.add(this);
+			this.label = "strlit_" + Program.allStringLiterals.size();
 		}
 	}
 	
@@ -96,6 +100,29 @@ public class Literal extends Expression {
 			return escapedValue.substring(1, escapedValue.length() - 1);
 		default:
 			return null;
+		}
+	}
+	
+	// ---------- Code generation ----------
+	
+	@Override public void generateCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
+		switch (this.type) {
+		  case INTEGER:
+			writer.instr("mov", "eax", this.asConstExpr());
+			break;
+		  case BOOLEAN:
+			writer.instr("mov", "eax", (Boolean)(this.asConstExpr()) ? 1 : 0);
+			break;
+		  case CHARACTER:
+			writer.instr("mov", "eax", (int)(((Character)(this.asConstExpr())).charValue()));
+			break;
+		  case STRING:
+			writer.instr("mov", "eax", this.label);
+			writer.justUsedGlobal(this.label);
+			break;
+		  case NULL:
+			writer.instr("mov", "eax", 0);
+			break;
 		}
 	}
 }

@@ -3,6 +3,9 @@ package AbstractSyntax;
 import java.util.ArrayList;
 import java.util.List;
 
+import CodeGeneration.AsmWriter;
+import CodeGeneration.Frame;
+import Exceptions.CodeGenerationException;
 import Exceptions.ImportException;
 import Exceptions.NameConflictException;
 import Exceptions.NameLinkingException;
@@ -204,5 +207,27 @@ public class MethodInvocationExpression extends Expression {
 	
 	public String toString() {
 		return message;
+	}
+	
+
+	// ---------- Code generation ----------
+	
+	@Override public void generateCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
+		
+		if (this.receivingExpr == null && !this.method.isStatic()) {
+			writer.instr("push dword", frame.derefThis());
+		} else if (this.receivingExpr != null) {
+			assert !this.method.isStatic();
+			this.receivingExpr.generateCode(writer, frame);
+			writer.instr("push", "eax");
+		}
+		
+		for (Expression arg : this.arguments) {
+			arg.generateCode(writer, frame);
+			writer.instr("push", "eax");
+		}
+		
+		writer.instr("call", this.method.getDispatcherLabel());
+		writer.justUsedGlobal(this.method.getDispatcherLabel());
 	}
 }

@@ -1,5 +1,7 @@
 package AbstractSyntax;
 
+import CodeGeneration.AsmWriter;
+import CodeGeneration.Frame;
 import Exceptions.ReachabilityException;
 import Exceptions.TypeCheckingException;
 import Parser.ParseTree;
@@ -30,5 +32,14 @@ public class EmptyStatement extends Statement {
 			throw new ReachabilityException.UnreachableStatement(this);
 		}
 		this.canLeave = this.canEnter;
+	}
+	
+	// ---------- Code generation ----------
+	
+	@Override public void generateCode(AsmWriter writer, Frame frame) {
+		
+		// Do nothing.
+		writer.comment("Empty statement");
+		
 	}
 }

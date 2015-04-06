@@ -5,6 +5,7 @@ import java.util.List;
 
 import CodeGeneration.AsmWriter;
 import CodeGeneration.Frame;
+import Exceptions.CodeGenerationException;
 import Exceptions.ImportException;
 import Exceptions.NameConflictException;
 import Exceptions.NameLinkingException;
@@ -126,7 +127,7 @@ public class Constructor extends ASTNode implements EnvironmentDecl {
 	
 	// ---------- Code generation ----------
 
-	@Override public void generateCode(AsmWriter writer, Frame frame) {
+	@Override public void generateCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
 		String ctorLbl = this.getLabel();
 		writer.verbatimfn("global %s", ctorLbl);
 		writer.label(ctorLbl);

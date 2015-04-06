@@ -36,7 +36,7 @@ public enum CharacterClass {
     Separator                               (new Predicate<Character>() { public boolean test(Character c) { return "(){}[];,.".indexOf(c) != -1; }} ),
     IntegerTypeSuffix                       (new Predicate<Character>() { public boolean test(Character c) { return "lL".indexOf(c) != -1; }} ),
     ExponentIndicator                       (new Predicate<Character>() { public boolean test(Character c) { return "eE".indexOf(c) != -1; }} ),
-    Sign                                    (new Predicate<Character>() { public boolean test(Character c) { return "+-".indexOf(c) != -1; }} ),
+    Sign                                    (new Predicate<Character>() { public boolean test(Character c) { return /*+*/ "-".indexOf(c) != -1; }} ),
     FloatTypeSuffix                         (new Predicate<Character>() { public boolean test(Character c) { return "fFdD".indexOf(c) != -1; }} );
 
     private Predicate<Character> m_predicate;

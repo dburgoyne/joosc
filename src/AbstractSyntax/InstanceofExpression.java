@@ -1,11 +1,15 @@
 package AbstractSyntax;
 
+import CodeGeneration.AsmWriter;
+import CodeGeneration.Frame;
+import Exceptions.CodeGenerationException;
 import Exceptions.ImportException;
 import Exceptions.NameConflictException;
 import Exceptions.NameLinkingException;
 import Exceptions.TypeCheckingException;
 import Exceptions.TypeLinkingException;
 import Parser.ParseTree;
+import Types.ArrayType;
 import Types.PrimitiveType;
 import Types.Type;
 import Utilities.Cons;
@@ -57,5 +61,49 @@ public class InstanceofExpression extends Expression {
 		}
 		
 		this.exprType = PrimitiveType.BOOLEAN;
+	}
+	
+	// ---------- Code generation ----------
+	
+	@Override public void generateCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
+		
+		String label = Utilities.Label.generateLabel("instanceof_end");
+		
+		this.left.generateCode(writer, frame);
+		
+		writer.instr("cmp", "eax", 0);
+		writer.instr("je", label);
+		
+		if (this.type instanceof TypeDecl) {
+			writer.instr("mov", "eax", "[eax]"); // eax <- left.tid
+			writer.instr("mov", "eax",           // eax <- V_(T, S)
+					"[eax*4 + " + ((TypeDecl)this.type).getSubtypeTableLabel() + "]");
+			writer.instr("cmp", "eax", 0);
+			writer.instr("je", label);
+		} else if (this.type instanceof ArrayType) {
+			// left must have tid 0.
+			writer.instr("mov", "ebx", "[eax]"); // ebx <- left.tid
+			writer.instr("cmp", "ebx", this.type.getTypeID());
+			writer.instr("jne", label);
+			writer.instr("mov", "ebx", "[eax + 4]"); // ebx <- left's inner type's tid
+			
+			if (((ArrayType)this.type).getInnerType() instanceof PrimitiveType) {
+				// Do an exact comparison.
+				writer.instr("mov", "eax", 0);
+				writer.instr("cmp", "ebx", ((ArrayType)this.type).getInnerType().getTypeID());
+				writer.instr("jne", label);
+			} else {
+				// Use the subtype table to compare types.
+				assert(((ArrayType) this.type).getInnerType() instanceof TypeDecl);
+				TypeDecl innerType = (TypeDecl)(((ArrayType) this.type).getInnerType());
+				
+				writer.instr("mov", "eax",           // eax <- V_(T, S)
+						"[ebx*4 + " + innerType.getSubtypeTableLabel() + "]");
+				writer.instr("cmp", "eax", 0);
+				writer.instr("je", label);
+			}
+		}
+		writer.instr("mov", "eax", 1);
+		writer.label(label);
 	}
 }

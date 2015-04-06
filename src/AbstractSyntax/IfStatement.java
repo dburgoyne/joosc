@@ -1,5 +1,8 @@
 package AbstractSyntax;
 
+import CodeGeneration.AsmWriter;
+import CodeGeneration.Frame;
+import Exceptions.CodeGenerationException;
 import Exceptions.ImportException;
 import Exceptions.NameConflictException;
 import Exceptions.NameLinkingException;
@@ -85,5 +88,27 @@ public class IfStatement extends Statement {
 			this.elseBody.checkReachability(true);
 			this.canLeave = this.body.canLeave || this.elseBody.canLeave;
 		}
+	}
+	
+	// ---------- Code generation ----------
+	
+	@Override public void generateCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
+		
+		String falseLabel = Utilities.Label.generateLabel("if_false");
+		String endLabel = Utilities.Label.generateLabel("if_end");
+
+		this.condition.generateCode(writer, frame);
+		writer.instr("cmp", "eax", 0);
+		writer.instr("je", falseLabel);
+		
+		this.body.generateCode(writer, frame);
+		writer.instr("jmp", endLabel);
+		
+		writer.label(falseLabel);
+		if (this.elseBody != null) {
+			this.elseBody.generateCode(writer, frame);
+		}
+		
+		writer.label(endLabel);
 	}
 }

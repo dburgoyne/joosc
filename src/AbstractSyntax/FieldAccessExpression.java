@@ -1,6 +1,9 @@
 package AbstractSyntax;
 
 import AbstractSyntax.Identifier.Interpretation;
+import CodeGeneration.AsmWriter;
+import CodeGeneration.Frame;
+import Exceptions.CodeGenerationException;
 import Exceptions.ImportException;
 import Exceptions.NameConflictException;
 import Exceptions.NameLinkingException;
@@ -108,5 +111,35 @@ public class FieldAccessExpression extends Expression implements Interpretation 
 			this.field = matches.head;
 			this.exprType = this.field.type;
 		}
+	}
+	
+	// ---------- Code generation ----------
+	
+	private void generateCommon(AsmWriter writer, Frame frame, String instr) throws CodeGenerationException {
+		this.primary.generateCode(writer, frame); // eax <- the object
+		
+		int byteOffset;
+		
+		if (this.field == null) {
+			byteOffset = 8; // array .length is in third dword
+		} else {
+			byteOffset = this.field.byteOffset;
+		}
+		
+		assert byteOffset >= 4;
+		
+		writer.instr("cmp", "eax", 0); // fail if object is null
+		writer.instr("je",    "__exception");
+		writer.justUsedGlobal("__exception");
+		
+		writer.instr(instr, "eax", "[eax + " + byteOffset + "]"); // eax <- *?(eax + byteOffset)
+	}
+	
+	@Override public void generateCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
+		this.generateCommon(writer, frame, "mov");
+	}
+	
+	@Override public void generateLValueCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
+		this.generateCommon(writer, frame, "lea");
 	}
 }

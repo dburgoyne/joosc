@@ -1,5 +1,8 @@
 package AbstractSyntax;
 
+import CodeGeneration.AsmWriter;
+import CodeGeneration.Frame;
+import Exceptions.CodeGenerationException;
 import Exceptions.ImportException;
 import Exceptions.NameConflictException;
 import Exceptions.NameLinkingException;
@@ -65,5 +68,23 @@ public class WhileStatement extends Statement {
 		
 		// Can leave the loop only if the condition is not always true.
 		this.canLeave = !this.condition.isAlwaysTrue();
+	}
+	
+	// ---------- Code generation ----------
+	
+	@Override public void generateCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
+		
+		String startLabel = Utilities.Label.generateLabel("while_start");
+		String endLabel = Utilities.Label.generateLabel("while_end");
+
+		writer.label(startLabel);
+		this.condition.generateCode(writer, frame);
+		writer.instr("cmp", "eax", 0);
+		writer.instr("je", endLabel);
+		
+		this.body.generateCode(writer, frame);
+
+		writer.instr("jmp", startLabel);
+		writer.label(endLabel);
 	}
 }

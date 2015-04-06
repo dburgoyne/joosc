@@ -1,5 +1,8 @@
 package AbstractSyntax;
 
+import CodeGeneration.AsmWriter;
+import CodeGeneration.Frame;
+import Exceptions.CodeGenerationException;
 import Exceptions.ImportException;
 import Exceptions.NameConflictException;
 import Exceptions.NameLinkingException;
@@ -26,16 +29,22 @@ public class UnaryExpression extends Expression {
 	protected UnaryOperator operator;
 	protected Expression expression;
 	
+	private boolean isMinInt = false;
+	public boolean isMinInt() { return this.isMinInt; }
+	
 	public UnaryExpression(ParseTree tree) {
 		super(tree);
+		assert(tree.numChildren() == 2);
 		assert(tree.getSymbol().equals("UnaryExpression")
 			|| tree.getSymbol().equals("UnaryExpressionNotPlusMinus"));
+
+		this.operator = UnaryOperator.fromString(tree.getChildren()[0].getSymbol());
+		this.expression = Expression.extractExpression(tree.getChildren()[1]);
 		
-		if (tree.numChildren() == 1) {
-			this.expression = Expression.extractExpression(tree.getChildren()[0]);
-		} else if (tree.numChildren() == 2) {
-			this.operator = UnaryOperator.fromString(tree.getChildren()[0].getSymbol());
-			this.expression = Expression.extractExpression(tree.getChildren()[1]);
+		if (this.expression instanceof Literal
+				&& ((Literal)this.expression).value.equals("2147483648")
+				&& this.operator == UnaryOperator.MINUS) {
+			this.isMinInt = true;
 		}
 	}
 	
@@ -71,6 +80,10 @@ public class UnaryExpression extends Expression {
 	}
 	
 	@Override public Object asConstExpr() {
+		if (this.isMinInt()) {
+			return Integer.MIN_VALUE;
+		}
+		
 		Object subExpr = this.expression.asConstExpr();
 		if (subExpr == null)
 			return null;
@@ -82,5 +95,37 @@ public class UnaryExpression extends Expression {
 			return -((Short)subExpr);
 		assert (subExpr instanceof Integer);
 		return -((Integer)subExpr);
+	}
+	
+	// ---------- Code generation ----------
+	
+	@Override public void generateCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
+		
+		if (this.isMinInt()) {
+			writer.instr("mov", "eax", Integer.MIN_VALUE);
+			return;
+		}
+		
+		switch (this.operator) {
+		  case NOT:
+			this.expression.generateCode(writer, frame);
+			writer.instr("xor", "eax", 1);
+			break;
+		  case MINUS:
+			this.expression.generateCode(writer, frame);
+			// Sign-extend by the correct amount, if less than 32 bits.
+			switch (((PrimitiveType)this.expression.getType()).width()) {
+			  case 1:
+				writer.line("movsx eax, al  ; Sign extend 1 byte to 4 bytes");
+				break;
+			  case 2:
+				writer.line("movsx eax, ax  ; Sign extend 2 bytes to 4 bytes");
+				break;
+			  default: // 4 bytes; do nothing
+				break;
+			}
+			writer.instr("imul", "eax", -1);
+			break;
+		}
 	}
 }

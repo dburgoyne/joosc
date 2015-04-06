@@ -1,5 +1,8 @@
 package AbstractSyntax;
 
+import CodeGeneration.AsmWriter;
+import CodeGeneration.Frame;
+import Exceptions.CodeGenerationException;
 import Exceptions.ImportException;
 import Exceptions.NameConflictException;
 import Exceptions.NameLinkingException;
@@ -83,5 +86,19 @@ public class ReturnStatement extends Statement {
 			throw new ReachabilityException.UnreachableStatement(this);
 		}
 		this.canLeave = false;
+	}
+	
+	// ---------- Code generation ----------
+	
+	@Override public void generateCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
+		
+		// Evaluate the return expression, if any.
+		if (this.expression != null) {
+			this.expression.generateCode(writer, frame);
+		}
+		
+		// Leave all frames we're in, and return while popping the correct number of arguments from the stack.
+		frame.ret(writer);
+		
 	}
 }

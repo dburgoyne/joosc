@@ -1,5 +1,8 @@
 package AbstractSyntax;
 
+import CodeGeneration.AsmWriter;
+import CodeGeneration.Frame;
+import Exceptions.CodeGenerationException;
 import Exceptions.ImportException;
 import Exceptions.NameConflictException;
 import Exceptions.NameLinkingException;
@@ -124,5 +127,38 @@ public class ForStatement extends Statement {
 		
 		// Can leave the loop only if we can leave the body and the condition is not always true.
 		this.canLeave = this.body.canLeave && !(this.condition == null || this.condition.isAlwaysTrue());
+	}
+	
+	// ---------- Code generation ----------
+	
+	@Override public void generateCode(AsmWriter writer, Frame frame) throws CodeGenerationException {
+		
+		String startLabel = Utilities.Label.generateLabel("for_start");
+		String endLabel = Utilities.Label.generateLabel("for_end");
+		
+		frame = new Frame(frame);
+		if (this.initializer != null && this.initializer instanceof Local) {
+			frame.declare((Local)this.initializer);
+		}
+		frame.enter(writer);
+		
+		if (this.initializer != null) {
+			this.initializer.generateCode(writer, frame);
+		}
+		writer.label(startLabel);
+		if (this.condition != null) {
+			this.condition.generateCode(writer, frame);
+			writer.instr("cmp", "eax", 0);
+			writer.instr("je", endLabel);
+		}
+		
+		this.body.generateCode(writer, frame);
+		
+		if (this.postExpression != null) {
+			this.postExpression.generateCode(writer, frame);
+		}
+		writer.instr("jmp", startLabel);
+		writer.label(endLabel);
+		frame.leave(writer);
 	}
 }
