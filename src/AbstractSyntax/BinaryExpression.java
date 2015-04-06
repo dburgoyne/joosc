@@ -94,19 +94,6 @@ public class BinaryExpression extends Expression {
 		this.right.checkTypes();
 		this.right.assertNonVoid();
 		
-		// No bitwise operations may occur. 
-		// It should work for boolean
-		switch (this.operator) {
-		  case AND:
-		  case OR:
-		  case XOR:
-			if (left.getType() != PrimitiveType.BOOLEAN || left.getType() != PrimitiveType.BOOLEAN) {
-				throw new TypeCheckingException.BitwiseOperator(this);
-			}
-	      default:
-	    	// Do nothing
-		}
-		
 		Type leftType = this.left.getType(),
 			 rightType = this.right.getType();
 
@@ -133,6 +120,9 @@ public class BinaryExpression extends Expression {
 
 		  case LAND:
 		  case LOR:
+		  case AND:
+		  case OR:
+		  case XOR:
 			if (leftType != PrimitiveType.BOOLEAN)
 				throw new TypeCheckingException.TypeMismatch(this.left, "boolean");
 			if (rightType != PrimitiveType.BOOLEAN)
@@ -257,9 +247,11 @@ public class BinaryExpression extends Expression {
 			return (int)intLeft <= (int)intRight;	
 
 		  case LAND:
+		  case AND:
 		    assert boolLeft != null && boolRight != null;
 		    return (boolean)boolLeft && (boolean)boolRight;
 		  case LOR:
+		  case OR:
 		    assert boolLeft != null && boolRight != null;
 		    return (boolean)boolLeft || (boolean)boolRight;
 		    
@@ -381,40 +373,30 @@ public class BinaryExpression extends Expression {
 			
 			writer.instr("pop", "ebx"); // ebx <- lhs
 			writer.instr("mov", "[ebx]", "eax");
-		} else {
-			// All other cases start the same way.
+		} else if (this.operator == BinaryOperator.LAND
+				|| this.operator == BinaryOperator.LOR) {
+			// Short-circuit operators.
+			
+			String shortCircuitLbl = Utilities.Label.generateLabel("binary_short_");
+			
+			// false && rhs = false, true || rhs = true
 			this.left.generateCode(writer, frame);
-			if (this.left.getType() instanceof PrimitiveType) {
-				// Sign-extend the LHS by the correct amount, if less than 32 bits.
-				switch (((PrimitiveType)this.left.getType()).width()) {
-				  case 1:
-					writer.line("movsx eax, al  ; Sign extend 1 byte to 4 bytes");
-					break;
-				  case 2:
-					writer.line("movsx eax, ax  ; Sign extend 2 bytes to 4 bytes");
-					break;
-				  default: // 4 bytes; do nothing
-					break;
-				}
-			}
-			writer.instr("push", "eax");
+			writer.instr("cmp", "al", this.operator == BinaryOperator.LAND ? 0 : 1);
+			writer.instr("je", shortCircuitLbl);
+			
+			// true && rhs = false || rhs = rhs:
 			this.right.generateCode(writer, frame);
-			if (this.right.getType() instanceof PrimitiveType) {
-				// Sign-extend the RHS by the correct amount, if less than 32 bits.
-				switch (((PrimitiveType)this.right.getType()).width()) {
-				  case 1:
-					writer.line("movsx eax, al  ; Sign extend 1 byte to 4 bytes");
-					break;
-				  case 2:
-					writer.line("movsx eax, ax  ; Sign extend 2 bytes to 4 bytes");
-					break;
-				  default: // 4 bytes; do nothing
-					break;
-				}
-			}
+			writer.label(shortCircuitLbl);
+			
+		} else {
+			// All other cases (with eager evaluation) start the same way.
+			
+			generateSignExtend(writer, frame, this.left);
+			writer.instr("push", "eax");
+			generateSignExtend(writer, frame, this.right);
 			// Convenient to have the left expression in eax
-			writer.instr("mov", "ebx", "eax");
-			writer.instr("pop", "eax");
+			writer.instr("mov", "ebx", "eax"); // ebx <- rhs
+			writer.instr("pop", "eax");        // eax <- lhs
 			
 			switch (this.operator) {
 			  case PLUS:
@@ -479,15 +461,13 @@ public class BinaryExpression extends Expression {
 				writer.label(label);
 				break;
 			  case AND:
-			  case LAND:
-				writer.instr("and", "eax,edx");
+				writer.instr("and", "eax,ebx");
 				break;
 			  case OR:
-			  case LOR:
-				writer.instr("or", "eax,edx");
+				writer.instr("or", "eax,ebx");
 				break;
 			  case XOR:
-				writer.instr("xor", "eax,edx");
+				writer.instr("xor", "eax,ebx");
 				break;
 			  case EQ:
 			    label = Utilities.Label.generateLabel("binary_eq");
@@ -507,6 +487,26 @@ public class BinaryExpression extends Expression {
 				break;
 
 			  default: break;
+			}
+		}
+	}
+
+	private void generateSignExtend(AsmWriter writer, Frame frame, Expression e)
+			throws CodeGenerationException {
+		e.generateCode(writer, frame);
+		if (e.getType() instanceof PrimitiveType) {
+			PrimitiveType pt = (PrimitiveType)e.getType();
+			String mov = pt.isSigned() ? "movsx" : "movzx";
+			// Sign-extend the LHS by the correct amount, if less than 32 bits.
+			switch (pt.width()) {
+			  case 1:
+				writer.line("%s eax, al  ; Sign extend 1 byte to 4 bytes", mov);
+				break;
+			  case 2:
+				writer.line("%s eax, ax  ; Sign extend 2 bytes to 4 bytes", mov);
+				break;
+			  default: // 4 bytes; do nothing
+				break;
 			}
 		}
 	}
