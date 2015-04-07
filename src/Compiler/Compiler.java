@@ -89,7 +89,7 @@ public class Compiler {
     		// Reachability analysis pass.
     		program.checkReachability(true);
     		
-    		// Build Vtable schemas and field indices.
+    		/*// Build Vtable schemas and field indices.
     		for (TypeDecl ty : sortedTypes) {
     			ty.buildSchema();
     		}
@@ -100,7 +100,7 @@ public class Compiler {
     		}
     		
     		// Code generation pass.
-    		program.generateCode(null, null);
+    		program.generateCode(null, null);*/
     		
     		
     	} catch (Exception e) {

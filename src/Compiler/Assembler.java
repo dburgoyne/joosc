@@ -28,7 +28,6 @@ public class Assembler {
 			Process p = Runtime.getRuntime().exec(String.format(ASSEMBLER_CMD, filename));
 			int retval = p.waitFor();
 			if (retval != 0) {
-				Utilities.ProcessUtils.drainProcess(p);
 				success = false;
 			}
 		}
@@ -41,7 +40,6 @@ public class Assembler {
 		Process p = Runtime.getRuntime().exec(String.format(LINKER_CMD, Utilities.StringUtils.join(listObjectFiles(), " ")));
 		int retval = p.waitFor();
 		if (retval != 0) {
-			Utilities.ProcessUtils.drainProcess(p);
 			stream.println("--- LINKING FAILED ---");
 			return retval;
 		}

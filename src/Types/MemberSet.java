@@ -217,6 +217,9 @@ public class MemberSet {
 				               Cons.union(this.inheritedConcreteMethods,
 						       Cons.union(this.declaredAbstractMethods,
 								          this.declaredConcreteMethods)));
+		// Remember the original list for illegal replacement checking.
+		Cons<Method> allToCheck = toCheck;
+
 		while (toCheck != null) {
 			final Method method = toCheck.head;
 			toCheck = toCheck.tail;
@@ -226,7 +229,7 @@ public class MemberSet {
 				throw new Exception.MethodSignatureClash(method);
 			}
 			// A protected method must not replace a public method.
-			if (Cons.contains(toCheck, method,
+			if (Cons.contains(allToCheck, method,
 					new Method.SameSignatureNarrowerVisibilityThanDifferentAbstractnessPredicate())) {
 				throw new Exception.InvalidReplacement(method);
 			}
@@ -234,8 +237,9 @@ public class MemberSet {
 			// Remove hidden methods
 			Predicate<Method> hiddenByMethod = new Predicate<Method>() {
 				public boolean test(Method otherMethod) {
-					return method == otherMethod || 
-							!new Method.SameSignaturePredicate().test(method, otherMethod);
+					return method == otherMethod
+							|| !new Method.SameSignaturePredicate().test(method, otherMethod)
+							|| new Method.SameSignatureNarrowerVisibilityThanDifferentAbstractnessPredicate().test(otherMethod, method);
 				}};
 			this.inheritedAbstractMethods = Cons.filter(this.inheritedAbstractMethods, hiddenByMethod);
 			this.inheritedConcreteMethods = Cons.filter(this.inheritedConcreteMethods, hiddenByMethod);

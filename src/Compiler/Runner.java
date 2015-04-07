@@ -14,7 +14,6 @@ public class Runner {
     public static int run(PrintStream stream) throws InterruptedException, IOException {
 		// Attempt to run the program
 		Process p = Runtime.getRuntime().exec(RUN_CMD);
-		Utilities.ProcessUtils.drainProcess(p);
 		int retval = p.waitFor();
 		stream.println("Execution completed with exit status " + retval);
 		return retval;

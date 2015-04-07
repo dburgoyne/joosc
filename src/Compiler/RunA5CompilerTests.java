@@ -6,9 +6,6 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import Utilities.StringUtils;
-
-
 public class RunA5CompilerTests {
 
     final static String LR1_FILE = "src/Parser/joos1w.lr1"; 
@@ -106,17 +103,6 @@ public class RunA5CompilerTests {
 
     }
     
-    private static List<String> listAssemblyFiles() {
-    	File dir = new File(OUTPUT_DIR);
-    	List<String> sfiles = new ArrayList<String>();
-    	for (File child : dir.listFiles()) {
-    		if (child.getName().endsWith(".s")) {
-                sfiles.add(OUTPUT_DIR + child.getName());
-        	}
-    	}
-    	return sfiles;
-    }
-    
     private static List<String> findTests(File f) {
     	List<String> tests = new ArrayList<String>();
     	if (f.getName().endsWith(".java")) {
@@ -127,16 +113,5 @@ public class RunA5CompilerTests {
     		}
     	}
     	return tests;
-    }
-    
-    private static String listObjectFiles() {
-    	File dir = new File(OUTPUT_DIR);
-    	List<String> sfiles = new ArrayList<String>();
-    	for (File child : dir.listFiles()) {
-    		if (child.getName().endsWith(".o")) {
-                sfiles.add(OUTPUT_DIR + child.getName());
-        	}
-    	}
-    	return StringUtils.join(sfiles, " ");
     }
 }

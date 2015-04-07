@@ -9,8 +9,8 @@ import java.util.List;
 public class RunCompilerTests {
 
     final static String LR1_FILE = "src/Parser/joos1w.lr1"; 
-    final static String POSITIVES_DIR = "test/marmoset/a4/positive/";
-    final static String NEGATIVES_DIR = "test/marmoset/a4/negative/";
+    final static String POSITIVES_DIR = "test/marmoset/a2/positive/";
+    final static String NEGATIVES_DIR = "test/marmoset/a2/negative/";
     final static String LIBRARY_DIR = "lib/5.0/";
     
     public static void main(String[] args) {
